@@ -157,6 +157,7 @@ export default function App() {
         coach={appData.coach}
         onSwitchUser={handleSwitchUser}
         onAddArcher={handleAddArcher}
+        onUpdateArcher={handleUpdateArcher}
       />
 
       {/* Main App Container */}
