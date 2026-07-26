@@ -41,12 +41,15 @@ export const defaultData = {
 
 // Helper function to load data from LocalStorage or initialize default
 export const loadAppData = () => {
-  const saved = localStorage.getItem("heritage_archery_data_v1");
+  // Purge legacy demo data cache if present
+  try {
+    localStorage.removeItem("heritage_archery_data_v1");
+  } catch (e) {}
+
+  const saved = localStorage.getItem("heritage_archery_clean_v2");
   if (saved) {
     try {
-      const parsed = JSON.parse(saved);
-      // Return parsed if valid
-      return parsed;
+      return JSON.parse(saved);
     } catch (e) {
       console.error("Error loading saved archery data", e);
     }
@@ -56,7 +59,7 @@ export const loadAppData = () => {
 
 export const saveAppData = (data) => {
   try {
-    localStorage.setItem("heritage_archery_data_v1", JSON.stringify(data));
+    localStorage.setItem("heritage_archery_clean_v2", JSON.stringify(data));
   } catch (e) {
     console.error("Error saving archery data to localStorage", e);
   }
