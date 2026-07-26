@@ -1,0 +1,189 @@
+import React, { useState } from 'react';
+import { Camera, ExternalLink, Plus, Heart, Image as ImageIcon } from 'lucide-react';
+
+const InstagramIcon = ({ size = 20, color = "currentColor" }) => (
+  <svg width={size} height={size} viewBox="0 0 24 24" fill="none" stroke={color} strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+    <rect x="2" y="2" width="20" height="20" rx="5" ry="5"></rect>
+    <path d="M16 11.37A4 4 0 1 1 12.63 8 4 4 0 0 1 16 11.37z"></path>
+    <line x1="17.5" y1="6.5" x2="17.51" y2="6.5"></line>
+  </svg>
+);
+
+export default function GalleryInstagram({ archers, currentUser, onAddPhoto }) {
+  const [showUploadModal, setShowUploadModal] = useState(false);
+  const [photoUrl, setPhotoUrl] = useState('');
+  const [caption, setCaption] = useState('');
+
+  // Collect all photos from all archers
+  const allTeamPhotos = archers.flatMap(a => (a.photos || []).map(p => ({
+    url: p,
+    uploader: a.name,
+    uploaderCategory: a.category
+  })));
+
+  const handleUploadSubmit = (e) => {
+    e.preventDefault();
+    if (!photoUrl.trim()) return;
+
+    onAddPhoto(currentUser.id, photoUrl.trim());
+    setShowUploadModal(false);
+    setPhotoUrl('');
+    setCaption('');
+  };
+
+  return (
+    <div style={{ marginBottom: '32px' }}>
+      
+      {/* Header */}
+      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '20px', flexWrap: 'wrap', gap: '12px' }}>
+        <div>
+          <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+            <span className="badge-gold">
+              <InstagramIcon size={13} /> Official Social & Team Media
+            </span>
+          </div>
+          <h2 style={{ fontSize: '1.75rem', fontWeight: 800, color: '#f8fafc', margin: '4px 0' }}>
+            Instagram & Team Gallery Showcase 📷
+          </h2>
+          <p style={{ color: '#94a3b8', fontSize: '0.9rem' }}>
+            Follow <strong style={{ color: '#fbbf24' }}>@theheritage_archery</strong> on Instagram and share practice & competition photos!
+          </p>
+        </div>
+
+        <div style={{ display: 'flex', gap: '12px' }}>
+          <a
+            href="https://www.instagram.com/theheritage_archery?utm_source=ig_web_button_share_sheet&igsh=ZDNlZDc0MzIxNw=="
+            target="_blank"
+            rel="noopener noreferrer"
+            className="btn-gold"
+            style={{ textDecoration: 'none', padding: '12px 20px' }}
+          >
+            <InstagramIcon size={18} color="#090d16" /> Visit Official Instagram <ExternalLink size={14} />
+          </a>
+
+          <button onClick={() => setShowUploadModal(true)} className="btn-emerald" style={{ padding: '12px 20px' }}>
+            <Plus size={18} /> Upload Photo
+          </button>
+        </div>
+      </div>
+
+      {/* Official Instagram Embed Hero Card */}
+      <div className="glass-card glass-card-gold" style={{ padding: '24px', marginBottom: '32px', border: '1px solid rgba(217, 119, 6, 0.4)' }}>
+        <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', flexWrap: 'wrap', gap: '16px' }}>
+          <div style={{ display: 'flex', alignItems: 'center', gap: '16px' }}>
+            <div style={{
+              width: '64px',
+              height: '64px',
+              borderRadius: '50%',
+              background: 'linear-gradient(45deg, #f09433 0%, #e6683c 25%, #dc2743 50%, #cc2366 75%, #bc1888 100%)',
+              padding: '3px',
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'center',
+              boxShadow: '0 8px 25px rgba(220,39,67,0.4)'
+            }}>
+              <div style={{ width: '100%', height: '100%', borderRadius: '50%', background: '#0f172a', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+                <InstagramIcon size={30} color="#fbbf24" />
+              </div>
+            </div>
+
+            <div>
+              <h3 style={{ fontSize: '1.25rem', fontWeight: 800, color: '#f8fafc' }}>
+                @theheritage_archery
+              </h3>
+              <p style={{ color: '#94a3b8', fontSize: '0.88rem' }}>
+                Official Instagram handle of The Heritage Archery Team • State Tournaments & Daily Practice Highlights
+              </p>
+            </div>
+          </div>
+
+          <a
+            href="https://www.instagram.com/theheritage_archery?utm_source=ig_web_button_share_sheet&igsh=ZDNlZDc0MzIxNw=="
+            target="_blank"
+            rel="noopener noreferrer"
+            className="btn-ghost"
+            style={{ border: '1px solid #fbbf24', color: '#fbbf24' }}
+          >
+            Follow on Instagram
+          </a>
+        </div>
+      </div>
+
+      {/* Team Photos Showcase Grid */}
+      <h3 style={{ fontSize: '1.25rem', fontWeight: 700, color: '#f8fafc', marginBottom: '16px', display: 'flex', alignItems: 'center', gap: '8px' }}>
+        <Camera size={20} color="#34d399" /> Team Archer Uploads Gallery ({allTeamPhotos.length})
+      </h3>
+
+      {allTeamPhotos.length === 0 ? (
+        <div className="glass-card" style={{ padding: '40px', textAlign: 'center', color: '#64748b' }}>
+          No team photos uploaded yet. Click "Upload Photo" above to share your practice moments!
+        </div>
+      ) : (
+        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(280px, 1fr))', gap: '20px' }}>
+          {allTeamPhotos.map((item, idx) => (
+            <div key={idx} className="glass-card glass-card-hover" style={{ overflow: 'hidden', display: 'flex', flexDirection: 'column' }}>
+              <div style={{ width: '100%', height: '220px', overflow: 'hidden', position: 'relative' }}>
+                <img
+                  src={item.url}
+                  alt="Heritage Archery Moment"
+                  style={{ width: '100%', height: '100%', objectFit: 'cover', transition: 'transform 0.4s ease' }}
+                  onMouseEnter={(e) => e.currentTarget.style.transform = 'scale(1.05)'}
+                  onMouseLeave={(e) => e.currentTarget.style.transform = 'scale(1)'}
+                />
+              </div>
+
+              <div style={{ padding: '14px', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                <div>
+                  <span style={{ fontSize: '0.85rem', fontWeight: 700, color: '#f8fafc', display: 'block' }}>
+                    Uploaded by {item.uploader}
+                  </span>
+                  <span style={{ fontSize: '0.72rem', color: '#34d399', fontWeight: 600 }}>
+                    {item.uploaderCategory} Archer
+                  </span>
+                </div>
+
+                <div style={{ display: 'flex', alignItems: 'center', gap: '4px', color: '#ef4444', fontSize: '0.82rem', fontWeight: 700 }}>
+                  <Heart size={14} fill="#ef4444" /> Team Shot
+                </div>
+              </div>
+            </div>
+          ))}
+        </div>
+      )}
+
+      {/* Upload Photo Modal */}
+      {showUploadModal && (
+        <div className="modal-overlay" onClick={() => setShowUploadModal(false)}>
+          <div className="modal-content" onClick={e => e.stopPropagation()} style={{ maxWidth: '440px' }}>
+            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '20px' }}>
+              <h3 style={{ fontSize: '1.2rem', fontWeight: 700, color: '#f8fafc', display: 'flex', alignItems: 'center', gap: '8px' }}>
+                <Camera size={20} color="#34d399" /> Upload Photo to Team Gallery
+              </h3>
+              <button onClick={() => setShowUploadModal(false)} className="btn-ghost" style={{ padding: '4px 8px' }}>✕</button>
+            </div>
+
+            <form onSubmit={handleUploadSubmit} style={{ display: 'flex', flexDirection: 'column', gap: '14px' }}>
+              <div>
+                <label style={{ fontSize: '0.8rem', color: '#94a3b8', fontWeight: 600 }}>Photo Image URL</label>
+                <input
+                  type="text"
+                  className="input-glass"
+                  placeholder="https://images.unsplash.com/..."
+                  value={photoUrl}
+                  onChange={(e) => setPhotoUrl(e.target.value)}
+                  required
+                />
+              </div>
+
+              <div style={{ display: 'flex', justifyContent: 'flex-end', gap: '10px', marginTop: '10px' }}>
+                <button type="button" onClick={() => setShowUploadModal(false)} className="btn-ghost">Cancel</button>
+                <button type="submit" className="btn-emerald">Add to Gallery</button>
+              </div>
+            </form>
+          </div>
+        </div>
+      )}
+
+    </div>
+  );
+}
