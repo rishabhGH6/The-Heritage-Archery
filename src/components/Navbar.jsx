@@ -124,12 +124,12 @@ export default function Navbar({ activeTab, setActiveTab, currentUser, archers, 
         setPasswordError('No archer selected. Switch to "New Archer" to register!');
         return;
       }
-      if (inputPassword === archer.password || inputPassword === 'archer' || inputPassword === '') {
+      if (inputPassword && inputPassword === archer.password) {
         onSwitchUser({ role: 'archer', id: archer.id, name: archer.name });
         setShowRoleModal(false);
         setInputPassword('');
       } else {
-        setPasswordError('Incorrect password for selected archer.');
+        setPasswordError('Incorrect password. Please enter the password set for your account.');
       }
     }
   };
@@ -531,7 +531,7 @@ export default function Navbar({ activeTab, setActiveTab, currentUser, archers, 
                 <div>
                   <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '6px' }}>
                     <label style={{ fontSize: '0.85rem', color: '#94a3b8', fontWeight: 600 }}>
-                      Enter Password {selectedRole === 'coach' ? '(Default: STAR@Archery)' : '(Default: archer)'}
+                      Enter Account Password
                     </label>
 
                     {selectedRole === 'archer' && archers.length > 0 && (
@@ -548,7 +548,7 @@ export default function Navbar({ activeTab, setActiveTab, currentUser, archers, 
                   <input
                     type="password"
                     className="input-glass"
-                    placeholder="Enter password..."
+                    placeholder="Enter your account password..."
                     value={inputPassword}
                     onChange={(e) => setInputPassword(e.target.value)}
                   />

@@ -9,7 +9,7 @@ export default function ArcherDirectory({ archers, currentUser, coach, onUpdateA
 
   // New archer registration state
   const [newArcherName, setNewArcherName] = useState('');
-  const [newArcherPass, setNewArcherPass] = useState('archer');
+  const [newArcherPass, setNewArcherPass] = useState('');
   const [newArcherCategory, setNewArcherCategory] = useState('Junior');
   const [newArcherOccupation, setNewArcherOccupation] = useState('Student');
   const [newArcherPracticing, setNewArcherPracticing] = useState('Yes');
@@ -265,7 +265,7 @@ export default function ArcherDirectory({ archers, currentUser, coach, onUpdateA
                   <input
                     type="password"
                     className="input-glass"
-                    placeholder="Set password (default: archer)"
+                    placeholder="Create account password..."
                     value={newArcherPass}
                     onChange={(e) => setNewArcherPass(e.target.value)}
                     required
