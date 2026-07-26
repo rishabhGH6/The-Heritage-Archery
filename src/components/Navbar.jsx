@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { Target, Award, Calendar, MessageSquare, Shield, User, MapPin, Camera, Wrench, LogIn, ChevronDown, UserPlus } from 'lucide-react';
+import { Target, Award, Calendar, MessageSquare, Shield, User, MapPin, Camera, Wrench, LogIn, ChevronDown, UserPlus, Upload } from 'lucide-react';
 
 export default function Navbar({ activeTab, setActiveTab, currentUser, archers, coach, onSwitchUser, onAddArcher }) {
   const [showRoleModal, setShowRoleModal] = useState(false);
@@ -11,6 +11,7 @@ export default function Navbar({ activeTab, setActiveTab, currentUser, archers, 
   // New archer sign up form state
   const [regName, setRegName] = useState('');
   const [regPass, setRegPass] = useState('');
+  const [regPhoto, setRegPhoto] = useState('');
   const [regCategory, setRegCategory] = useState('Junior');
   const [regOccupation, setRegOccupation] = useState('Student');
   const [regPracticing, setRegPracticing] = useState('Yes');
@@ -39,7 +40,7 @@ export default function Navbar({ activeTab, setActiveTab, currentUser, archers, 
         id: "archer_" + Date.now(),
         name: regName.trim(),
         password: regPass.trim(),
-        photo: "https://images.unsplash.com/photo-1534528741775-53994a69daeb?auto=format&fit=crop&w=400&q=80",
+        photo: regPhoto || "https://images.unsplash.com/photo-1534528741775-53994a69daeb?auto=format&fit=crop&w=400&q=80",
         category: regCategory,
         occupation: regOccupation,
         currentlyPracticing: regPracticing,
@@ -318,6 +319,30 @@ export default function Navbar({ activeTab, setActiveTab, currentUser, archers, 
                       onChange={(e) => setRegPass(e.target.value)}
                       required
                     />
+                  </div>
+
+                  <div>
+                    <label style={{ fontSize: '0.78rem', color: '#38bdf8', fontWeight: 700, display: 'block', marginBottom: '4px' }}>Profile Photo (Optional)</label>
+                    <div style={{ display: 'flex', gap: '8px', alignItems: 'center' }}>
+                      <input
+                        type="file"
+                        accept="image/*"
+                        id="reg-photo-file-picker"
+                        style={{ display: 'none' }}
+                        onChange={(e) => {
+                          const file = e.target.files[0];
+                          if (file) {
+                            const reader = new FileReader();
+                            reader.onloadend = () => setRegPhoto(reader.result);
+                            reader.readAsDataURL(file);
+                          }
+                        }}
+                      />
+                      <label htmlFor="reg-photo-file-picker" className="btn-emerald" style={{ cursor: 'pointer', fontSize: '0.75rem', padding: '6px 12px' }}>
+                        <Upload size={13} /> Choose from Device
+                      </label>
+                      {regPhoto && <span style={{ fontSize: '0.72rem', color: '#34d399' }}>✓ Selected</span>}
+                    </div>
                   </div>
 
                   <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '8px' }}>

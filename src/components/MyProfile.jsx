@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { User, Edit3, Lock, Plus, Trash2, Award, Calendar, Briefcase, Camera, Save, CheckCircle2, Shield, Eye, EyeOff } from 'lucide-react';
+import { User, Edit3, Lock, Plus, Trash2, Award, Calendar, Briefcase, Camera, Save, CheckCircle2, Shield, Eye, EyeOff, Upload } from 'lucide-react';
 
 export default function MyProfile({ currentUser, archers, onUpdateArcher }) {
   const currentArcher = archers.find(a => a.id === currentUser.id) || {
@@ -23,6 +23,32 @@ export default function MyProfile({ currentUser, archers, onUpdateArcher }) {
   const [showPassword, setShowPassword] = useState(false);
   const [saveSuccess, setSaveSuccess] = useState(false);
 
+  // Read image from user device as Base64 Data URL
+  const handleProfileImageFile = (e) => {
+    const file = e.target.files[0];
+    if (file) {
+      const reader = new FileReader();
+      reader.onloadend = () => {
+        setFormData(prev => ({ ...prev, photo: reader.result }));
+      };
+      reader.readAsDataURL(file);
+    }
+  };
+
+  const handleGalleryImageFile = (e) => {
+    const file = e.target.files[0];
+    if (file) {
+      const reader = new FileReader();
+      reader.onloadend = () => {
+        setFormData(prev => ({
+          ...prev,
+          photos: [...(prev.photos || []), reader.result]
+        }));
+      };
+      reader.readAsDataURL(file);
+    }
+  };
+
   const handleAddState = (stateName) => {
     if (!stateName.trim()) return;
     setFormData(prev => ({
@@ -39,7 +65,7 @@ export default function MyProfile({ currentUser, archers, onUpdateArcher }) {
     }));
   };
 
-  const handleAddPhoto = () => {
+  const handleAddPhotoUrl = () => {
     if (!newPhotoUrl.trim()) return;
     setFormData(prev => ({
       ...prev,
@@ -92,21 +118,36 @@ export default function MyProfile({ currentUser, archers, onUpdateArcher }) {
 
           <div style={{ display: 'flex', flexDirection: 'column', gap: '14px' }}>
             
-            {/* Photo Preview & URL */}
+            {/* Profile Photo Uploader from Device or URL */}
             <div style={{ display: 'flex', alignItems: 'center', gap: '16px' }}>
               <img
                 src={formData.photo || "https://images.unsplash.com/photo-1534528741775-53994a69daeb?auto=format&fit=crop&w=400&q=80"}
                 alt={formData.name}
-                style={{ width: '70px', height: '70px', borderRadius: '18px', objectFit: 'cover', border: '2px solid #059669' }}
+                style={{ width: '76px', height: '76px', borderRadius: '18px', objectFit: 'cover', border: '2px solid #059669' }}
               />
-              <div style={{ flex: 1 }}>
-                <label style={{ fontSize: '0.8rem', color: '#94a3b8', fontWeight: 600 }}>Profile Photo URL</label>
+              <div style={{ flex: 1, display: 'flex', flexDirection: 'column', gap: '6px' }}>
+                <label style={{ fontSize: '0.8rem', color: '#94a3b8', fontWeight: 600 }}>Profile Photo</label>
+                
+                <div style={{ display: 'flex', gap: '8px' }}>
+                  <input
+                    type="file"
+                    accept="image/*"
+                    id="profile-device-picker"
+                    style={{ display: 'none' }}
+                    onChange={handleProfileImageFile}
+                  />
+                  <label htmlFor="profile-device-picker" className="btn-emerald" style={{ cursor: 'pointer', fontSize: '0.78rem', padding: '6px 12px' }}>
+                    <Upload size={14} /> Choose from Device
+                  </label>
+                </div>
+
                 <input
                   type="text"
                   className="input-glass"
-                  placeholder="https://..."
+                  placeholder="Or paste image URL (https://...)"
                   value={formData.photo || ''}
                   onChange={(e) => setFormData({ ...formData, photo: e.target.value })}
+                  style={{ fontSize: '0.8rem' }}
                 />
               </div>
             </div>
@@ -281,30 +322,45 @@ export default function MyProfile({ currentUser, archers, onUpdateArcher }) {
               <Camera size={18} /> My Personal Photos Gallery
             </h3>
 
-            <div style={{ display: 'flex', gap: '8px', marginBottom: '14px' }}>
-              <input
-                type="text"
-                className="input-glass"
-                placeholder="Add photo URL (https://...)"
-                value={newPhotoUrl}
-                onChange={(e) => setNewPhotoUrl(e.target.value)}
-              />
-              <button type="button" onClick={handleAddPhoto} className="btn-emerald" style={{ padding: '0 14px' }}>
-                <Plus size={16} /> Add Photo
-              </button>
+            <div style={{ display: 'flex', flexDirection: 'column', gap: '10px', marginBottom: '16px' }}>
+              <div style={{ display: 'flex', gap: '10px', alignItems: 'center' }}>
+                <input
+                  type="file"
+                  accept="image/*"
+                  id="gallery-device-picker"
+                  style={{ display: 'none' }}
+                  onChange={handleGalleryImageFile}
+                />
+                <label htmlFor="gallery-device-picker" className="btn-emerald" style={{ cursor: 'pointer', padding: '8px 16px', fontSize: '0.85rem' }}>
+                  <Upload size={16} /> Choose Photo from Device
+                </label>
+              </div>
+
+              <div style={{ display: 'flex', gap: '8px' }}>
+                <input
+                  type="text"
+                  className="input-glass"
+                  placeholder="Or paste photo URL (https://...)"
+                  value={newPhotoUrl}
+                  onChange={(e) => setNewPhotoUrl(e.target.value)}
+                />
+                <button type="button" onClick={handleAddPhotoUrl} className="btn-ghost">
+                  <Plus size={16} /> Add URL
+                </button>
+              </div>
             </div>
 
             {/* Photo Grid */}
-            <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(80px, 1fr))', gap: '10px' }}>
+            <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(90px, 1fr))', gap: '10px' }}>
               {formData.photos && formData.photos.map((pUrl, index) => (
-                <div key={index} style={{ position: 'relative', width: '100%', height: '80px', borderRadius: '10px', overflow: 'hidden' }}>
+                <div key={index} style={{ position: 'relative', width: '100%', height: '90px', borderRadius: '10px', overflow: 'hidden' }}>
                   <img src={pUrl} alt="Archer gallery" style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
                   <button
                     type="button"
                     onClick={() => handleRemovePhoto(index)}
-                    style={{ position: 'absolute', top: '4px', right: '4px', background: 'rgba(0,0,0,0.7)', border: 'none', color: '#ef4444', borderRadius: '50%', padding: '2px', cursor: 'pointer' }}
+                    style={{ position: 'absolute', top: '4px', right: '4px', background: 'rgba(0,0,0,0.85)', border: 'none', color: '#ef4444', borderRadius: '50%', padding: '4px', cursor: 'pointer' }}
                   >
-                    <Trash2 size={12} />
+                    <Trash2 size={13} />
                   </button>
                 </div>
               ))}

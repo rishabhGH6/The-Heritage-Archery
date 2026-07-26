@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { Camera, ExternalLink, Plus, Heart, Image as ImageIcon } from 'lucide-react';
+import { Camera, ExternalLink, Plus, Heart, Image as ImageIcon, Upload } from 'lucide-react';
 
 const InstagramIcon = ({ size = 20, color = "currentColor" }) => (
   <svg width={size} height={size} viewBox="0 0 24 24" fill="none" stroke={color} strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
@@ -163,17 +163,45 @@ export default function GalleryInstagram({ archers, currentUser, onAddPhoto }) {
             </div>
 
             <form onSubmit={handleUploadSubmit} style={{ display: 'flex', flexDirection: 'column', gap: '14px' }}>
+              
               <div>
-                <label style={{ fontSize: '0.8rem', color: '#94a3b8', fontWeight: 600 }}>Photo Image URL</label>
+                <label style={{ fontSize: '0.8rem', color: '#94a3b8', fontWeight: 600, display: 'block', marginBottom: '6px' }}>Select Photo from Device</label>
+                <input
+                  type="file"
+                  accept="image/*"
+                  id="gallery-modal-picker"
+                  style={{ display: 'none' }}
+                  onChange={(e) => {
+                    const file = e.target.files[0];
+                    if (file) {
+                      const reader = new FileReader();
+                      reader.onloadend = () => setPhotoUrl(reader.result);
+                      reader.readAsDataURL(file);
+                    }
+                  }}
+                />
+                <label htmlFor="gallery-modal-picker" className="btn-emerald" style={{ cursor: 'pointer', display: 'inline-flex', alignItems: 'center', gap: '8px', padding: '10px 16px' }}>
+                  <Upload size={16} /> Choose Photo from Device
+                </label>
+              </div>
+
+              <div>
+                <label style={{ fontSize: '0.8rem', color: '#94a3b8', fontWeight: 600 }}>Or Paste Image URL</label>
                 <input
                   type="text"
                   className="input-glass"
-                  placeholder="https://images.unsplash.com/..."
+                  placeholder="https://..."
                   value={photoUrl}
                   onChange={(e) => setPhotoUrl(e.target.value)}
-                  required
                 />
               </div>
+
+              {photoUrl && (
+                <div style={{ marginTop: '6px' }}>
+                  <span style={{ fontSize: '0.75rem', color: '#34d399', fontWeight: 600 }}>Preview:</span>
+                  <img src={photoUrl} alt="Preview" style={{ width: '100%', height: '140px', objectFit: 'cover', borderRadius: '10px', marginTop: '4px' }} />
+                </div>
+              )}
 
               <div style={{ display: 'flex', justifyContent: 'flex-end', gap: '10px', marginTop: '10px' }}>
                 <button type="button" onClick={() => setShowUploadModal(false)} className="btn-ghost">Cancel</button>
