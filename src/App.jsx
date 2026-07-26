@@ -51,6 +51,13 @@ export default function App() {
     }));
   };
 
+  const handleAddArcher = (newArcherObj) => {
+    setAppData(prev => ({
+      ...prev,
+      archers: [...prev.archers, newArcherObj]
+    }));
+  };
+
   const handleCheckInStreak = (archerId) => {
     const todayStr = new Date().toISOString().split('T')[0];
     setAppData(prev => {
@@ -251,6 +258,7 @@ export default function App() {
             currentUser={appData.currentUser}
             coach={appData.coach}
             onUpdateArcher={handleUpdateArcher}
+            onAddArcher={handleAddArcher}
           />
         )}
 
