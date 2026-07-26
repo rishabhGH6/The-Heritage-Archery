@@ -9,6 +9,7 @@ import VenueTracker from './components/VenueTracker';
 import ChatHub from './components/ChatHub';
 import GalleryInstagram from './components/GalleryInstagram';
 import CoachPortal from './components/CoachPortal';
+import MyProfile from './components/MyProfile';
 
 import { loadAppData, saveAppData } from './data/initialData';
 import { Target, Megaphone, Trophy, Shield, Heart } from 'lucide-react';
@@ -286,6 +287,14 @@ export default function App() {
             archers={appData.archers}
             currentUser={appData.currentUser}
             onAddPhoto={handleAddPhoto}
+          />
+        )}
+
+        {activeTab === 'profile' && (
+          <MyProfile
+            currentUser={appData.currentUser}
+            archers={appData.archers}
+            onUpdateArcher={handleUpdateArcher}
           />
         )}
 

@@ -128,6 +128,11 @@ export default function Navbar({ activeTab, setActiveTab, currentUser, archers, 
           <button className={`nav-tab ${activeTab === 'gallery' ? 'active' : ''}`} onClick={() => setActiveTab('gallery')}>
             <Camera size={17} /> Gallery
           </button>
+          {currentUser.role === 'archer' && (
+            <button className={`nav-tab ${activeTab === 'profile' ? 'active' : ''}`} onClick={() => setActiveTab('profile')}>
+              <User size={17} /> My Profile
+            </button>
+          )}
           {currentUser.role === 'coach' && (
             <button className={`nav-tab ${activeTab === 'coach' ? 'active' : ''}`} onClick={() => setActiveTab('coach')}>
               <Shield size={17} /> Coach Dashboard
