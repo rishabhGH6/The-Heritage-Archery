@@ -2,7 +2,7 @@ export const defaultData = {
   coach: {
     name: "Coach Jayanta Chakraborty",
     role: "Head Archery Coach",
-    photo: "https://images.unsplash.com/photo-1534528741775-53994a69daeb?auto=format&fit=crop&w=400&q=80",
+    photo: "",
     tagline: "Precision, Discipline, and Unshakable Focus.",
     motivatingLines: "Welcome to The Heritage Archery official team portal. Keep your eyes on the gold target!",
     password: "STAR@Archery"
@@ -23,8 +23,8 @@ export const defaultData = {
     date: "Today",
     time: "4:30 PM - 7:00 PM",
     distance: "70m & 50m Target Line",
-    equipmentNotes: "Bring your archery equipment and water bottles.",
-    updatedBy: "Coach Jayanta Chakraborty",
+    equipmentNotes: "Bring 70m Target Faces, Bow Stand, Arm Guard, Chest Guard, Arrow Puller & Finger Tab.",
+    updatedBy: "Coach Jayanta",
     updatedAt: new Date().toLocaleDateString()
   },
 
@@ -44,9 +44,10 @@ export const loadAppData = () => {
   // Purge legacy demo data cache if present
   try {
     localStorage.removeItem("heritage_archery_data_v1");
+    localStorage.removeItem("heritage_archery_clean_v2");
   } catch (e) {}
 
-  const saved = localStorage.getItem("heritage_archery_clean_v2");
+  const saved = localStorage.getItem("heritage_archery_clean_v3");
   if (saved) {
     try {
       return JSON.parse(saved);
@@ -59,7 +60,7 @@ export const loadAppData = () => {
 
 export const saveAppData = (data) => {
   try {
-    localStorage.setItem("heritage_archery_clean_v2", JSON.stringify(data));
+    localStorage.setItem("heritage_archery_clean_v3", JSON.stringify(data));
   } catch (e) {
     console.error("Error saving archery data to localStorage", e);
   }

@@ -1,12 +1,12 @@
 import React, { useState } from 'react';
-import { Shield, Award, Edit3, Flame, MapPin, Calendar, ArrowRight, Quote, CheckCircle2 } from 'lucide-react';
+import { Shield, Award, Edit3, Flame, MapPin, Calendar, ArrowRight, Quote, CheckCircle2, Upload, Trash2 } from 'lucide-react';
 import confetti from 'canvas-confetti';
 
 export default function HeroCoach({ coach, venueSchedule, currentUser, onCheckInStreak, userStreak, onUpdateCoach }) {
   const [showEditModal, setShowEditModal] = useState(false);
   const [tagline, setTagline] = useState(coach.tagline);
   const [motivatingLines, setMotivatingLines] = useState(coach.motivatingLines);
-  const [photoUrl, setPhotoUrl] = useState(coach.photo);
+  const [photoUrl, setPhotoUrl] = useState(coach.photo || '');
 
   const handleSaveCoachInfo = (e) => {
     e.preventDefault();
@@ -17,6 +17,17 @@ export default function HeroCoach({ coach, venueSchedule, currentUser, onCheckIn
       photo: photoUrl
     });
     setShowEditModal(false);
+  };
+
+  const handleCoachFilePicker = (e) => {
+    const file = e.target.files[0];
+    if (file) {
+      const reader = new FileReader();
+      reader.onloadend = () => {
+        setPhotoUrl(reader.result);
+      };
+      reader.readAsDataURL(file);
+    }
   };
 
   const triggerStreakCheckIn = () => {
@@ -59,13 +70,24 @@ export default function HeroCoach({ coach, venueSchedule, currentUser, onCheckIn
               overflow: 'hidden',
               border: '3px solid #d97706',
               boxShadow: '0 10px 30px rgba(217, 119, 6, 0.3)',
-              position: 'relative'
+              position: 'relative',
+              background: 'rgba(15, 23, 42, 0.8)',
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'center'
             }}>
-              <img 
-                src={coach.photo} 
-                alt={coach.name}
-                style={{ width: '100%', height: '100%', objectFit: 'cover' }}
-              />
+              {coach.photo ? (
+                <img 
+                  src={coach.photo} 
+                  alt={coach.name}
+                  style={{ width: '100%', height: '100%', objectFit: 'cover' }}
+                />
+              ) : (
+                <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '4px' }}>
+                  <Shield size={52} color="#fbbf24" />
+                  <span style={{ fontSize: '0.68rem', color: '#fbbf24', fontWeight: 700 }}>COACH</span>
+                </div>
+              )}
             </div>
             <div style={{
               position: 'absolute',
@@ -89,104 +111,135 @@ export default function HeroCoach({ coach, venueSchedule, currentUser, onCheckIn
 
           {/* Coach Quotes & Hero Content */}
           <div>
-            <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', flexWrap: 'wrap', gap: '12px' }}>
-              <div>
-                <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
-                  <span className="badge-gold">
-                    <Shield size={13} /> Official Coach Guidance
-                  </span>
-                </div>
-                <h2 style={{ fontSize: '2rem', fontWeight: 800, color: '#f8fafc', margin: '6px 0 2px 0' }}>
-                  {coach.name}
-                </h2>
-                <p style={{ fontSize: '1rem', color: '#fbbf24', fontWeight: 600, fontStyle: 'italic' }}>
-                  "{coach.tagline}"
-                </p>
-              </div>
-
-              {currentUser.role === 'coach' && (
-                <button onClick={() => setShowEditModal(true)} className="btn-ghost" style={{ border: '1px solid rgba(217,119,6,0.5)', color: '#fbbf24' }}>
-                  <Edit3 size={16} /> Edit Tagline & Quote
-                </button>
-              )}
+            <div style={{ display: 'flex', alignItems: 'center', gap: '10px', flexWrap: 'wrap', marginBottom: '8px' }}>
+              <span className="badge-gold">
+                <Award size={13} /> {coach.role}
+              </span>
+              <span style={{ fontSize: '0.8rem', color: '#94a3b8', fontWeight: 600 }}>
+                The Heritage College Archery Team
+              </span>
             </div>
 
-            {/* Motivating Line Box */}
+            <h2 style={{ fontSize: '1.9rem', fontWeight: 800, color: '#f8fafc', margin: '4px 0 8px 0', lineHeight: 1.2 }}>
+              {coach.name}
+            </h2>
+
+            <p style={{ fontSize: '1.05rem', color: '#fbbf24', fontStyle: 'italic', fontWeight: 600, marginBottom: '14px', display: 'flex', alignItems: 'center', gap: '6px' }}>
+              <Quote size={16} /> "{coach.tagline}"
+            </p>
+
             <div style={{
               background: 'rgba(15, 23, 42, 0.6)',
               borderLeft: '4px solid #d97706',
-              padding: '14px 18px',
+              padding: '12px 16px',
               borderRadius: '0 12px 12px 0',
-              marginTop: '16px',
-              position: 'relative'
+              fontSize: '0.92rem',
+              color: '#cbd5e1',
+              lineHeight: 1.5,
+              marginBottom: '16px'
             }}>
-              <Quote size={20} color="#d97706" style={{ position: 'absolute', top: '10px', right: '12px', opacity: 0.3 }} />
-              <p style={{ color: '#cbd5e1', fontSize: '0.95rem', lineHeight: 1.6, fontStyle: 'italic' }}>
-                {coach.motivatingLines}
-              </p>
+              {coach.motivatingLines}
             </div>
-          </div>
 
-        </div>
+            {/* Action Buttons */}
+            <div style={{ display: 'flex', alignItems: 'center', gap: '14px', flexWrap: 'wrap' }}>
+              {currentUser.role === 'coach' && (
+                <button 
+                  onClick={() => {
+                    setTagline(coach.tagline);
+                    setMotivatingLines(coach.motivatingLines);
+                    setPhotoUrl(coach.photo || '');
+                    setShowEditModal(true);
+                  }}
+                  className="btn-gold"
+                >
+                  <Edit3 size={16} /> Edit Profile & Photo
+                </button>
+              )}
 
-        {/* Live Practice Check-in & Schedule Bar */}
-        <div style={{
-          marginTop: '28px',
-          paddingTop: '20px',
-          borderTop: '1px solid var(--border-glass)',
-          display: 'grid',
-          gridTemplateColumns: '1fr auto',
-          gap: '20px',
-          alignItems: 'center'
-        }} className="hero-action-grid">
-          
-          <div style={{ display: 'flex', alignItems: 'center', gap: '16px', flexWrap: 'wrap' }}>
-            <div style={{ display: 'flex', alignItems: 'center', gap: '8px', color: '#34d399', fontSize: '0.9rem', fontWeight: 600 }}>
-              <MapPin size={18} />
-              <span>Practice: <strong style={{ color: '#f8fafc' }}>{venueSchedule.time}</strong> at {venueSchedule.venue}</span>
-            </div>
-          </div>
-
-          {/* Daily Streak Check-in Action */}
-          <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
-            {userStreak?.hasCheckedToday ? (
-              <div style={{
-                background: 'rgba(5, 150, 105, 0.2)',
-                border: '1px solid rgba(5, 150, 105, 0.5)',
-                color: '#34d399',
-                padding: '10px 18px',
-                borderRadius: '12px',
-                fontWeight: 700,
-                fontSize: '0.9rem',
-                display: 'flex',
-                alignItems: 'center',
-                gap: '8px'
-              }}>
-                <CheckCircle2 size={18} color="#34d399" /> Practiced Today! ({userStreak?.count || 0} Day Streak 🔥)
-              </div>
-            ) : (
-              <button onClick={triggerStreakCheckIn} className="btn-gold" style={{ padding: '12px 22px', fontSize: '0.95rem' }}>
-                <Flame size={20} color="#090d16" /> Mark Practiced Today (+1 Streak)
+              {/* Streak Check-in Button */}
+              <button 
+                onClick={triggerStreakCheckIn}
+                className={userStreak.lastChecked === new Date().toISOString().split('T')[0] ? "btn-ghost" : "btn-emerald"}
+                style={{ display: 'flex', alignItems: 'center', gap: '8px' }}
+              >
+                <Flame size={18} color="#f59e0b" fill={userStreak.count > 0 ? "#f59e0b" : "none"} />
+                {userStreak.lastChecked === new Date().toISOString().split('T')[0] ? (
+                  <span>Practiced Today! ({userStreak.count} 🔥)</span>
+                ) : (
+                  <span>Mark Practiced Today (+1 Streak)</span>
+                )}
               </button>
-            )}
+            </div>
+
           </div>
 
         </div>
 
       </div>
 
-      {/* Edit Coach Profile Modal */}
+      {/* Edit Coach Info Modal */}
       {showEditModal && (
         <div className="modal-overlay" onClick={() => setShowEditModal(false)}>
-          <div className="modal-content" onClick={e => e.stopPropagation()}>
+          <div className="modal-content" onClick={e => e.stopPropagation()} style={{ maxWidth: '480px' }}>
             <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '20px' }}>
               <h3 style={{ fontSize: '1.25rem', fontWeight: 700, color: '#f8fafc', display: 'flex', alignItems: 'center', gap: '8px' }}>
-                <Edit3 size={20} color="#fbbf24" /> Edit Coach Jayanta's Profile
+                <Edit3 size={20} color="#fbbf24" /> Edit Coach Jayanta's Profile & Photo
               </h3>
               <button onClick={() => setShowEditModal(false)} className="btn-ghost" style={{ padding: '4px 8px' }}>✕</button>
             </div>
 
             <form onSubmit={handleSaveCoachInfo} style={{ display: 'flex', flexDirection: 'column', gap: '16px' }}>
+              
+              {/* Photo Upload Section */}
+              <div style={{ background: 'rgba(15,23,42,0.5)', padding: '14px', borderRadius: '12px', border: '1px solid rgba(251,191,36,0.3)' }}>
+                <label style={{ fontSize: '0.85rem', color: '#fbbf24', fontWeight: 700, display: 'block', marginBottom: '8px' }}>
+                  Coach Profile Photo
+                </label>
+
+                <div style={{ display: 'flex', alignItems: 'center', gap: '14px', marginBottom: '10px' }}>
+                  <div style={{ width: '60px', height: '60px', borderRadius: '14px', overflow: 'hidden', border: '2px solid #d97706', background: 'rgba(15,23,42,0.8)', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+                    {photoUrl ? (
+                      <img src={photoUrl} alt="Preview" style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
+                    ) : (
+                      <Shield size={28} color="#fbbf24" />
+                    )}
+                  </div>
+
+                  <div style={{ display: 'flex', flexDirection: 'column', gap: '6px' }}>
+                    <input
+                      type="file"
+                      accept="image/*"
+                      id="coach-photo-picker"
+                      style={{ display: 'none' }}
+                      onChange={handleCoachFilePicker}
+                    />
+                    <label htmlFor="coach-photo-picker" className="btn-gold" style={{ cursor: 'pointer', fontSize: '0.78rem', padding: '6px 12px', display: 'inline-flex', alignItems: 'center', gap: '6px' }}>
+                      <Upload size={14} /> Choose from Device
+                    </label>
+
+                    {photoUrl && (
+                      <button
+                        type="button"
+                        onClick={() => setPhotoUrl('')}
+                        style={{ background: 'none', border: 'none', color: '#ef4444', fontSize: '0.75rem', cursor: 'pointer', textAlign: 'left', display: 'flex', alignItems: 'center', gap: '4px' }}
+                      >
+                        <Trash2 size={12} /> Remove Current Photo
+                      </button>
+                    )}
+                  </div>
+                </div>
+
+                <label style={{ fontSize: '0.78rem', color: '#94a3b8', fontWeight: 600 }}>Or Paste Photo URL</label>
+                <input
+                  type="text"
+                  className="input-glass"
+                  placeholder="https://..."
+                  value={photoUrl}
+                  onChange={(e) => setPhotoUrl(e.target.value)}
+                />
+              </div>
+
               <div>
                 <label style={{ fontSize: '0.85rem', color: '#94a3b8', display: 'block', marginBottom: '6px', fontWeight: 600 }}>
                   Team Tagline
@@ -209,19 +262,6 @@ export default function HeroCoach({ coach, venueSchedule, currentUser, onCheckIn
                   rows={4}
                   value={motivatingLines}
                   onChange={(e) => setMotivatingLines(e.target.value)}
-                  required
-                />
-              </div>
-
-              <div>
-                <label style={{ fontSize: '0.85rem', color: '#94a3b8', display: 'block', marginBottom: '6px', fontWeight: 600 }}>
-                  Coach Photo Image URL
-                </label>
-                <input
-                  type="text"
-                  className="input-glass"
-                  value={photoUrl}
-                  onChange={(e) => setPhotoUrl(e.target.value)}
                   required
                 />
               </div>
