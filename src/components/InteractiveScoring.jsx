@@ -32,20 +32,36 @@ export default function InteractiveScoring({ currentUser, archers = [], scoreLog
   const CENTER = TARGET_SIZE / 2;
   const MAX_RADIUS = 175; // Boundary of ring 1 (or 5 for 6-ring center)
 
-  // 6-Ring Spot Target Face Radius Fractions (Rings 5 to 10: Blue, Red, Yellow only)
-  // X: 0.083, 10: 0.167, 9: 0.333, 8: 0.500, 7: 0.667, 6: 0.833, 5: 1.000
+  // Target Ring Scoring Formula (30m: 6-ring spot; 50m/60m/70m: Full 10-ring face)
   const getScoreFromRadius = (rRatio) => {
-    if (rRatio <= 0.083) return { score: 10, isX: true, ringName: 'X' };
-    if (rRatio <= 0.167) return { score: 10, isX: false, ringName: '10' };
-    if (rRatio <= 0.333) return { score: 9, isX: false, ringName: '9' };
-    if (rRatio <= 0.500) return { score: 8, isX: false, ringName: '8' };
-    if (rRatio <= 0.667) return { score: 7, isX: false, ringName: '7' };
-    if (rRatio <= 0.833) return { score: 6, isX: false, ringName: '6' };
-    if (rRatio <= 1.000) return { score: 5, isX: false, ringName: '5' };
-    return { score: 0, isX: false, ringName: 'M' };
+    if (distance === "30m") {
+      // 6-Ring Spot Target Face (Rings 5 to 10 + X: Blue, Red, Yellow only)
+      if (rRatio <= 0.083) return { score: 10, isX: true, ringName: 'X' };
+      if (rRatio <= 0.167) return { score: 10, isX: false, ringName: '10' };
+      if (rRatio <= 0.333) return { score: 9, isX: false, ringName: '9' };
+      if (rRatio <= 0.500) return { score: 8, isX: false, ringName: '8' };
+      if (rRatio <= 0.667) return { score: 7, isX: false, ringName: '7' };
+      if (rRatio <= 0.833) return { score: 6, isX: false, ringName: '6' };
+      if (rRatio <= 1.000) return { score: 5, isX: false, ringName: '5' };
+      return { score: 0, isX: false, ringName: 'M' };
+    } else {
+      // Full 10-Ring Target Face (Rings 1 to 10 + X) for 50m, 60m, 70m
+      if (rRatio <= 0.050) return { score: 10, isX: true, ringName: 'X' };
+      if (rRatio <= 0.100) return { score: 10, isX: false, ringName: '10' };
+      if (rRatio <= 0.200) return { score: 9, isX: false, ringName: '9' };
+      if (rRatio <= 0.300) return { score: 8, isX: false, ringName: '8' };
+      if (rRatio <= 0.400) return { score: 7, isX: false, ringName: '7' };
+      if (rRatio <= 0.500) return { score: 6, isX: false, ringName: '6' };
+      if (rRatio <= 0.600) return { score: 5, isX: false, ringName: '5' };
+      if (rRatio <= 0.700) return { score: 4, isX: false, ringName: '4' };
+      if (rRatio <= 0.800) return { score: 3, isX: false, ringName: '3' };
+      if (rRatio <= 0.900) return { score: 2, isX: false, ringName: '2' };
+      if (rRatio <= 1.000) return { score: 1, isX: false, ringName: '1' };
+      return { score: 0, isX: false, ringName: 'M' };
+    }
   };
 
-  // Handle clicking on SVG target face
+  // Handle clicking on SVG target face (Instant plot without popup)
   const handleTargetClick = (e) => {
     if (!svgRef.current) return;
     const rect = svgRef.current.getBoundingClientRect();
@@ -79,10 +95,8 @@ export default function InteractiveScoring({ currentUser, archers = [], scoreLog
     updatedRounds[currentRound - 1].arrows.push(newArrow);
     setRoundsData(updatedRounds);
 
-    // Open bullet tag modal for this newly placed arrow
-    setActiveArrowIndex(updatedRounds[currentRound - 1].arrows.length - 1);
-    setTempTags([]);
-    setTempComment("");
+    // Instant plot without opening tag modal automatically
+    setActiveArrowIndex(null);
   };
 
   // Remove last arrow from current round
@@ -365,35 +379,70 @@ export default function InteractiveScoring({ currentUser, archers = [], scoreLog
               <line x1={TARGET_SIZE - 16} y1={CENTER} x2={TARGET_SIZE - 4} y2={CENTER} stroke="#000000" strokeWidth="1" />
               <line x1={TARGET_SIZE - 10} y1={CENTER - 6} x2={TARGET_SIZE - 10} y2={CENTER + 6} stroke="#000000" strokeWidth="1" />
 
-              {/* 6 Concentric Scoring Rings (5 to 10: Blue, Red, Yellow ONLY) */}
-              {/* Ring 5: Outer Blue */}
-              <circle cx={CENTER} cy={CENTER} r={MAX_RADIUS * 1.000} fill="#0072ce" stroke="#111111" strokeWidth="1.2" />
-              {/* Ring 6: Inner Blue */}
-              <circle cx={CENTER} cy={CENTER} r={MAX_RADIUS * 0.833} fill="#0072ce" stroke="#111111" strokeWidth="1.2" />
-              
-              {/* Ring 7: Outer Red */}
-              <circle cx={CENTER} cy={CENTER} r={MAX_RADIUS * 0.667} fill="#e4002b" stroke="#111111" strokeWidth="1.2" />
-              {/* Ring 8: Inner Red */}
-              <circle cx={CENTER} cy={CENTER} r={MAX_RADIUS * 0.500} fill="#e4002b" stroke="#111111" strokeWidth="1.2" />
-              
-              {/* Ring 9: Outer Yellow */}
-              <circle cx={CENTER} cy={CENTER} r={MAX_RADIUS * 0.333} fill="#ffd100" stroke="#111111" strokeWidth="1.2" />
-              {/* Ring 10: Inner Yellow */}
-              <circle cx={CENTER} cy={CENTER} r={MAX_RADIUS * 0.167} fill="#ffd100" stroke="#111111" strokeWidth="1.2" />
-              {/* Ring X: Center Yellow */}
-              <circle cx={CENTER} cy={CENTER} r={MAX_RADIUS * 0.083} fill="#ffd100" stroke="#111111" strokeWidth="1.2" />
+              {distance === "30m" ? (
+                /* 6-Ring Spot Target Face (30m: Blue, Red, Yellow ONLY) */
+                <g>
+                  <circle cx={CENTER} cy={CENTER} r={MAX_RADIUS * 1.000} fill="#0072ce" stroke="#111111" strokeWidth="1.2" />
+                  <circle cx={CENTER} cy={CENTER} r={MAX_RADIUS * 0.833} fill="#0072ce" stroke="#111111" strokeWidth="1.2" />
+                  <circle cx={CENTER} cy={CENTER} r={MAX_RADIUS * 0.667} fill="#e4002b" stroke="#111111" strokeWidth="1.2" />
+                  <circle cx={CENTER} cy={CENTER} r={MAX_RADIUS * 0.500} fill="#e4002b" stroke="#111111" strokeWidth="1.2" />
+                  <circle cx={CENTER} cy={CENTER} r={MAX_RADIUS * 0.333} fill="#ffd100" stroke="#111111" strokeWidth="1.2" />
+                  <circle cx={CENTER} cy={CENTER} r={MAX_RADIUS * 0.167} fill="#ffd100" stroke="#111111" strokeWidth="1.2" />
+                  <circle cx={CENTER} cy={CENTER} r={MAX_RADIUS * 0.083} fill="#ffd100" stroke="#111111" strokeWidth="1.2" />
 
-              {/* Center Crosshair + */}
-              <line x1={CENTER - 8} y1={CENTER} x2={CENTER + 8} y2={CENTER} stroke="#111111" strokeWidth="1.5" />
-              <line x1={CENTER} y1={CENTER - 8} x2={CENTER} y2={CENTER + 8} stroke="#111111" strokeWidth="1.5" />
+                  {/* Center Crosshair + */}
+                  <line x1={CENTER - 8} y1={CENTER} x2={CENTER + 8} y2={CENTER} stroke="#111111" strokeWidth="1.5" />
+                  <line x1={CENTER} y1={CENTER - 8} x2={CENTER} y2={CENTER + 8} stroke="#111111" strokeWidth="1.5" />
 
-              {/* Printed Ring Number Labels across horizontal axis */}
-              <text x={CENTER + MAX_RADIUS * 0.11} y={CENTER + 4} fill="#111111" fontSize="11" fontWeight="bold" fontFamily="sans-serif">10</text>
-              <text x={CENTER + MAX_RADIUS * 0.23} y={CENTER + 4} fill="#111111" fontSize="12" fontWeight="bold" fontFamily="sans-serif">9</text>
-              <text x={CENTER + MAX_RADIUS * 0.40} y={CENTER + 4} fill="#111111" fontSize="12" fontWeight="bold" fontFamily="sans-serif">8</text>
-              <text x={CENTER + MAX_RADIUS * 0.57} y={CENTER + 4} fill="#111111" fontSize="12" fontWeight="bold" fontFamily="sans-serif">7</text>
-              <text x={CENTER + MAX_RADIUS * 0.73} y={CENTER + 4} fill="#111111" fontSize="12" fontWeight="bold" fontFamily="sans-serif">6</text>
-              <text x={CENTER + MAX_RADIUS * 0.90} y={CENTER + 4} fill="#111111" fontSize="12" fontWeight="bold" fontFamily="sans-serif">5</text>
+                  {/* Printed Ring Labels for 30m Spot Target */}
+                  <text x={CENTER + MAX_RADIUS * 0.11} y={CENTER + 4} fill="#111111" fontSize="11" fontWeight="bold" fontFamily="sans-serif">10</text>
+                  <text x={CENTER + MAX_RADIUS * 0.23} y={CENTER + 4} fill="#111111" fontSize="12" fontWeight="bold" fontFamily="sans-serif">9</text>
+                  <text x={CENTER + MAX_RADIUS * 0.40} y={CENTER + 4} fill="#111111" fontSize="12" fontWeight="bold" fontFamily="sans-serif">8</text>
+                  <text x={CENTER + MAX_RADIUS * 0.57} y={CENTER + 4} fill="#111111" fontSize="12" fontWeight="bold" fontFamily="sans-serif">7</text>
+                  <text x={CENTER + MAX_RADIUS * 0.73} y={CENTER + 4} fill="#111111" fontSize="12" fontWeight="bold" fontFamily="sans-serif">6</text>
+                  <text x={CENTER + MAX_RADIUS * 0.90} y={CENTER + 4} fill="#111111" fontSize="12" fontWeight="bold" fontFamily="sans-serif">5</text>
+                </g>
+              ) : (
+                /* Full 10-Ring Target Face (70m, 60m, 50m: White 1-2, Black 3-4, Blue 5-6, Red 7-8, Yellow 9-10-X) */
+                <g>
+                  {/* Rings 1 & 2: White */}
+                  <circle cx={CENTER} cy={CENTER} r={MAX_RADIUS * 1.000} fill="#ffffff" stroke="#111111" strokeWidth="1.2" />
+                  <circle cx={CENTER} cy={CENTER} r={MAX_RADIUS * 0.900} fill="#ffffff" stroke="#111111" strokeWidth="1.2" />
+                  
+                  {/* Rings 3 & 4: Black */}
+                  <circle cx={CENTER} cy={CENTER} r={MAX_RADIUS * 0.800} fill="#111111" stroke="#333333" strokeWidth="1.2" />
+                  <circle cx={CENTER} cy={CENTER} r={MAX_RADIUS * 0.700} fill="#111111" stroke="#333333" strokeWidth="1.2" />
+                  
+                  {/* Rings 5 & 6: Blue */}
+                  <circle cx={CENTER} cy={CENTER} r={MAX_RADIUS * 0.600} fill="#0072ce" stroke="#111111" strokeWidth="1.2" />
+                  <circle cx={CENTER} cy={CENTER} r={MAX_RADIUS * 0.500} fill="#0072ce" stroke="#111111" strokeWidth="1.2" />
+                  
+                  {/* Rings 7 & 8: Red */}
+                  <circle cx={CENTER} cy={CENTER} r={MAX_RADIUS * 0.400} fill="#e4002b" stroke="#111111" strokeWidth="1.2" />
+                  <circle cx={CENTER} cy={CENTER} r={MAX_RADIUS * 0.300} fill="#e4002b" stroke="#111111" strokeWidth="1.2" />
+                  
+                  {/* Rings 9, 10, X: Yellow */}
+                  <circle cx={CENTER} cy={CENTER} r={MAX_RADIUS * 0.200} fill="#ffd100" stroke="#111111" strokeWidth="1.2" />
+                  <circle cx={CENTER} cy={CENTER} r={MAX_RADIUS * 0.100} fill="#ffd100" stroke="#111111" strokeWidth="1.2" />
+                  <circle cx={CENTER} cy={CENTER} r={MAX_RADIUS * 0.050} fill="#ffd100" stroke="#111111" strokeWidth="1.2" />
+
+                  {/* Center Crosshair + */}
+                  <line x1={CENTER - 6} y1={CENTER} x2={CENTER + 6} y2={CENTER} stroke="#111111" strokeWidth="1.5" />
+                  <line x1={CENTER} y1={CENTER - 6} x2={CENTER} y2={CENTER + 6} stroke="#111111" strokeWidth="1.5" />
+
+                  {/* Printed Ring Labels for Full 10-Ring Target */}
+                  <text x={CENTER + MAX_RADIUS * 0.06} y={CENTER + 3} fill="#111111" fontSize="9" fontWeight="bold" fontFamily="sans-serif">10</text>
+                  <text x={CENTER + MAX_RADIUS * 0.14} y={CENTER + 4} fill="#111111" fontSize="10" fontWeight="bold" fontFamily="sans-serif">9</text>
+                  <text x={CENTER + MAX_RADIUS * 0.24} y={CENTER + 4} fill="#111111" fontSize="10" fontWeight="bold" fontFamily="sans-serif">8</text>
+                  <text x={CENTER + MAX_RADIUS * 0.34} y={CENTER + 4} fill="#111111" fontSize="10" fontWeight="bold" fontFamily="sans-serif">7</text>
+                  <text x={CENTER + MAX_RADIUS * 0.44} y={CENTER + 4} fill="#111111" fontSize="10" fontWeight="bold" fontFamily="sans-serif">6</text>
+                  <text x={CENTER + MAX_RADIUS * 0.54} y={CENTER + 4} fill="#111111" fontSize="10" fontWeight="bold" fontFamily="sans-serif">5</text>
+                  <text x={CENTER + MAX_RADIUS * 0.64} y={CENTER + 4} fill="#ffffff" fontSize="10" fontWeight="bold" fontFamily="sans-serif">4</text>
+                  <text x={CENTER + MAX_RADIUS * 0.74} y={CENTER + 4} fill="#ffffff" fontSize="10" fontWeight="bold" fontFamily="sans-serif">3</text>
+                  <text x={CENTER + MAX_RADIUS * 0.84} y={CENTER + 4} fill="#111111" fontSize="10" fontWeight="bold" fontFamily="sans-serif">2</text>
+                  <text x={CENTER + MAX_RADIUS * 0.94} y={CENTER + 4} fill="#111111" fontSize="10" fontWeight="bold" fontFamily="sans-serif">1</text>
+                </g>
+              )}
 
               {/* Plotted Arrow Markers */}
               {activeRoundArrows.map((arr, idx) => {
