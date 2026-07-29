@@ -21,6 +21,15 @@ export default function ArcherDirectory({ archers, currentUser, coach, onUpdateA
     e.preventDefault();
     if (!newArcherName.trim()) return;
 
+    // Check for duplicate account name (case-insensitive)
+    const targetNameLower = newArcherName.trim().toLowerCase();
+    const duplicateExists = archers.some(a => a.name.trim().toLowerCase() === targetNameLower) || 
+                            (coach && coach.name && coach.name.trim().toLowerCase() === targetNameLower);
+    if (duplicateExists) {
+      alert(`⚠️ An account with the name "${newArcherName.trim()}" already exists! Please enter a unique name for the archer profile.`);
+      return;
+    }
+
     const newObj = {
       id: "archer_" + Date.now(),
       name: newArcherName.trim(),

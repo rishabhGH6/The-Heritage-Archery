@@ -47,6 +47,15 @@ export default function Navbar({ activeTab, setActiveTab, currentUser, archers, 
         return;
       }
 
+      // Check for duplicate account name (case-insensitive)
+      const targetNameLower = regName.trim().toLowerCase();
+      const duplicateExists = archers.some(a => a.name.trim().toLowerCase() === targetNameLower) || 
+                              (coach && coach.name && coach.name.trim().toLowerCase() === targetNameLower);
+      if (duplicateExists) {
+        setPasswordError(`⚠️ An account with the name "${regName.trim()}" already exists! Please use a unique name.`);
+        return;
+      }
+
       const newArcher = {
         id: "archer_" + Date.now(),
         name: regName.trim(),
