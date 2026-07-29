@@ -30,13 +30,17 @@ export default function EquipmentTuner({ currentUser, archers, equipmentData, on
 
   const handleSave = (e) => {
     e.preventDefault();
+    if (currentUser.role === 'guest') {
+      alert("🔒 Guest Mode: Please log in or register your archer account to save equipment tuning specs!");
+      return;
+    }
     onSaveEquipment(selectedArcherId, {
       poundage,
       braceHeight,
       sightMarks,
       goodArrows
     });
-    alert(`Equipment tuning profile saved for ${selectedArcher?.name}!`);
+    alert(`Equipment tuning profile saved for ${selectedArcher?.name || 'Archer'}!`);
   };
 
   return (

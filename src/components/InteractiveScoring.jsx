@@ -160,6 +160,10 @@ export default function InteractiveScoring({ currentUser, archers, scoreLogs, on
 
   // Save whole scorecard
   const handleSaveSession = () => {
+    if (currentUser.role === 'guest') {
+      alert("🔒 Guest Mode: Please log in or register your archer account to save scorecards!");
+      return;
+    }
     const grandTotal = getGrandTotal();
     const allArrows = roundsData.flatMap(r => r.arrows);
     const sessionGrouping = calculateGrouping(allArrows);

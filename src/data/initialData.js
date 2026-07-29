@@ -9,9 +9,9 @@ export const defaultData = {
   },
 
   currentUser: {
-    id: "coach",
-    role: "coach",
-    name: "Coach Jayanta Chakraborty"
+    id: "guest",
+    role: "guest",
+    name: "Guest"
   },
 
   archers: [],

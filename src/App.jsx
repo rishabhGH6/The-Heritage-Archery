@@ -10,6 +10,7 @@ import ChatHub from './components/ChatHub';
 import GalleryInstagram from './components/GalleryInstagram';
 import CoachPortal from './components/CoachPortal';
 import MyProfile from './components/MyProfile';
+import CinematicIntro from './components/CinematicIntro';
 
 import { defaultData, loadAppData, saveAppData } from './data/initialData';
 import {
@@ -29,6 +30,7 @@ import { Target, Megaphone, Trophy, Shield, Heart } from 'lucide-react';
 export default function App() {
   const [appData, setAppData] = useState(loadAppData());
   const [activeTab, setActiveTab] = useState('home');
+  const [showIntro, setShowIntro] = useState(true);
 
   // Load from Supabase on mount
   useEffect(() => {
@@ -196,6 +198,9 @@ export default function App() {
   return (
     <div style={{ minHeight: '100vh', display: 'flex', flexDirection: 'column' }}>
       
+      {/* Cinematic Splash Screen */}
+      {showIntro && <CinematicIntro onComplete={() => setShowIntro(false)} />}
+
       {/* Top Navbar */}
       <Navbar
         activeTab={activeTab}
