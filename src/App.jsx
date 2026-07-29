@@ -313,6 +313,7 @@ export default function App() {
           <InteractiveScoring
             currentUser={appData.currentUser}
             archers={appData.archers}
+            scoreLogs={appData.scoreLogs || []}
             onSaveScorecard={handleSaveScorecard}
           />
         )}

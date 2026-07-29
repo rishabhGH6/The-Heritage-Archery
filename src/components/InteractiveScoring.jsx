@@ -3,7 +3,7 @@ import { Target, Save, Download, RefreshCw, CheckCircle, AlertCircle, FileText, 
 import jsPDF from 'jspdf';
 import html2canvas from 'html2canvas';
 
-export default function InteractiveScoring({ currentUser, archers, scoreLogs, onSaveScorecard }) {
+export default function InteractiveScoring({ currentUser, archers = [], scoreLogs = [], onSaveScorecard }) {
   const [selectedArcherId, setSelectedArcherId] = useState(
     currentUser.role === 'archer' ? currentUser.id : (archers[0]?.id || '')
   );
@@ -92,6 +92,8 @@ export default function InteractiveScoring({ currentUser, archers, scoreLogs, on
     setRoundsData(updatedRounds);
     setActiveArrowIndex(null);
   };
+
+
 
   // Calculate totals
   const getRoundTotal = (roundObj) => {
@@ -247,9 +249,13 @@ export default function InteractiveScoring({ currentUser, archers, scoreLogs, on
               disabled={currentUser.role === 'archer'}
               style={{ minWidth: '180px' }}
             >
-              {archers.map(a => (
-                <option key={a.id} value={a.id}>{a.name}</option>
-              ))}
+              {archers.length === 0 ? (
+                <option value="">Guest Archer (Register to save)</option>
+              ) : (
+                archers.map(a => (
+                  <option key={a.id} value={a.id}>{a.name}</option>
+                ))
+              )}
             </select>
           </div>
 
