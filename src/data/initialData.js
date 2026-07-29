@@ -45,22 +45,30 @@ export const loadAppData = () => {
   try {
     localStorage.removeItem("heritage_archery_data_v1");
     localStorage.removeItem("heritage_archery_clean_v2");
+    localStorage.removeItem("heritage_archery_clean_v3");
   } catch (e) {}
 
-  const saved = localStorage.getItem("heritage_archery_clean_v3");
+  const saved = localStorage.getItem("heritage_archery_clean_v4");
   if (saved) {
     try {
-      return JSON.parse(saved);
+      const parsed = JSON.parse(saved);
+      return {
+        ...parsed,
+        currentUser: { id: "guest", role: "guest", name: "Guest" } // Always start website in Guest mode
+      };
     } catch (e) {
       console.error("Error loading saved archery data", e);
     }
   }
-  return defaultData;
+  return {
+    ...defaultData,
+    currentUser: { id: "guest", role: "guest", name: "Guest" }
+  };
 };
 
 export const saveAppData = (data) => {
   try {
-    localStorage.setItem("heritage_archery_clean_v3", JSON.stringify(data));
+    localStorage.setItem("heritage_archery_clean_v4", JSON.stringify(data));
   } catch (e) {
     console.error("Error saving archery data to localStorage", e);
   }

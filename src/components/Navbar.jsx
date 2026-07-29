@@ -201,44 +201,63 @@ export default function Navbar({ activeTab, setActiveTab, currentUser, archers, 
 
         {/* Login / Active User Profile Badge */}
         <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
-          <div 
-            onClick={() => setShowRoleModal(true)}
-            style={{
-              display: 'flex',
-              alignItems: 'center',
-              gap: '10px',
-              padding: '6px 14px',
-              borderRadius: '9999px',
-              background: currentUser.role === 'coach' ? 'rgba(217, 119, 6, 0.15)' : currentUser.role === 'guest' ? 'rgba(56, 189, 248, 0.15)' : 'rgba(5, 150, 105, 0.15)',
-              border: `1px solid ${currentUser.role === 'coach' ? 'rgba(217, 119, 6, 0.4)' : currentUser.role === 'guest' ? 'rgba(56, 189, 248, 0.4)' : 'rgba(5, 150, 105, 0.4)'}`,
-              cursor: 'pointer',
-              transition: 'all 0.2s ease'
-            }}
-          >
-            <div style={{
-              width: '28px',
-              height: '28px',
-              borderRadius: '50%',
-              background: currentUser.role === 'coach' ? '#d97706' : currentUser.role === 'guest' ? '#0284c7' : '#059669',
-              display: 'flex',
-              alignItems: 'center',
-              justifyContent: 'center',
-              fontWeight: 'bold',
-              fontSize: '0.8rem',
-              color: '#ffffff'
-            }}>
-              {currentUser.role === 'coach' ? 'C' : currentUser.role === 'guest' ? 'G' : 'A'}
-            </div>
-            <div>
-              <div style={{ fontSize: '0.82rem', fontWeight: 700, color: '#f8fafc', lineHeight: 1.1 }}>
-                {currentUser.name}
+          {currentUser.role === 'guest' ? (
+            <button 
+              onClick={() => setShowRoleModal(true)}
+              className="btn-gold"
+              style={{
+                display: 'flex',
+                alignItems: 'center',
+                gap: '8px',
+                padding: '8px 18px',
+                borderRadius: '9999px',
+                fontSize: '0.85rem',
+                fontWeight: 700,
+                boxShadow: '0 4px 15px rgba(217, 119, 6, 0.4)'
+              }}
+            >
+              <LogIn size={16} /> Login / Sign Up
+            </button>
+          ) : (
+            <div 
+              onClick={() => setShowRoleModal(true)}
+              style={{
+                display: 'flex',
+                alignItems: 'center',
+                gap: '10px',
+                padding: '6px 14px',
+                borderRadius: '9999px',
+                background: currentUser.role === 'coach' ? 'rgba(217, 119, 6, 0.15)' : 'rgba(5, 150, 105, 0.15)',
+                border: `1px solid ${currentUser.role === 'coach' ? 'rgba(217, 119, 6, 0.4)' : 'rgba(5, 150, 105, 0.4)'}`,
+                cursor: 'pointer',
+                transition: 'all 0.2s ease'
+              }}
+            >
+              <div style={{
+                width: '28px',
+                height: '28px',
+                borderRadius: '50%',
+                background: currentUser.role === 'coach' ? '#d97706' : '#059669',
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'center',
+                fontWeight: 'bold',
+                fontSize: '0.8rem',
+                color: '#ffffff'
+              }}>
+                {currentUser.role === 'coach' ? 'C' : 'A'}
               </div>
-              <div style={{ fontSize: '0.68rem', color: currentUser.role === 'coach' ? '#fbbf24' : currentUser.role === 'guest' ? '#38bdf8' : '#34d399', fontWeight: 600 }}>
-                {currentUser.role === 'coach' ? 'Coach Jayanta' : currentUser.role === 'guest' ? 'Guest Visitor (Click to Login)' : 'Archer Account (Switch)'}
+              <div>
+                <div style={{ fontSize: '0.82rem', fontWeight: 700, color: '#f8fafc', lineHeight: 1.1 }}>
+                  {currentUser.name}
+                </div>
+                <div style={{ fontSize: '0.68rem', color: currentUser.role === 'coach' ? '#fbbf24' : '#34d399', fontWeight: 600 }}>
+                  {currentUser.role === 'coach' ? 'Coach Jayanta' : 'Archer Account'} (Switch)
+                </div>
               </div>
+              <ChevronDown size={14} color="#94a3b8" />
             </div>
-            <ChevronDown size={14} color="#94a3b8" />
-          </div>
+          )}
         </div>
 
       </div>
