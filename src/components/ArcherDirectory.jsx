@@ -1,11 +1,9 @@
 import React, { useState } from 'react';
-import { User, Edit3, Lock, Plus, Trash2, Award, Calendar, Briefcase, Camera, Check, Shield, UserPlus } from 'lucide-react';
+import { User, Edit3, Lock, Plus, Trash2, Award, Calendar, Briefcase, Camera, Check, Shield, UserPlus, TrendingUp, BarChart2, FileText, ChevronRight } from 'lucide-react';
 
-export default function ArcherDirectory({ archers, currentUser, coach, onUpdateArcher, onAddArcher }) {
-  const [editingArcher, setEditingArcher] = useState(null);
+export default function ArcherDirectory({ archers, currentUser, coach, onUpdateArcher, onAddArcher, scoreLogs = [] }) {
+  const [selectedGraphArcher, setSelectedGraphArcher] = useState(null);
   const [showAddModal, setShowAddModal] = useState(false);
-  const [newState, setNewState] = useState('');
-  const [newPhotoUrl, setNewPhotoUrl] = useState('');
 
   // New archer registration state
   const [newArcherName, setNewArcherName] = useState('');
@@ -18,13 +16,6 @@ export default function ArcherDirectory({ archers, currentUser, coach, onUpdateA
   const [newArcherSummary, setNewArcherSummary] = useState('');
 
   const isCoach = currentUser.role === 'coach';
-
-  const handleSaveProfile = (e) => {
-    e.preventDefault();
-    if (!editingArcher) return;
-    onUpdateArcher(editingArcher);
-    setEditingArcher(null);
-  };
 
   const handleCreateArcher = (e) => {
     e.preventDefault();
@@ -54,30 +45,16 @@ export default function ArcherDirectory({ archers, currentUser, coach, onUpdateA
     alert(`Archer profile created for ${newObj.name}!`);
   };
 
-  const handleAddState = (tournamentName) => {
-    if (!tournamentName.trim()) return;
-    setEditingArcher(prev => ({
-      ...prev,
-      statesPlayed: [...(prev.statesPlayed || []), tournamentName.trim()]
-    }));
-    setNewState('');
-  };
+  // Extract last 10 scores for selected graph archer
+  const graphLogs = selectedGraphArcher ? (
+    scoreLogs
+      .filter(log => log.archerId === selectedGraphArcher.id || log.archerName === selectedGraphArcher.name)
+      .slice(0, 10)
+      .reverse()
+  ) : [];
 
-  const handleRemoveState = (index) => {
-    setEditingArcher(prev => ({
-      ...prev,
-      statesPlayed: prev.statesPlayed.filter((_, i) => i !== index)
-    }));
-  };
-
-  const handleAddPhoto = () => {
-    if (!newPhotoUrl.trim()) return;
-    setEditingArcher(prev => ({
-      ...prev,
-      photos: [...(prev.photos || []), newPhotoUrl.trim()]
-    }));
-    setNewPhotoUrl('');
-  };
+  const maxScore = graphLogs.length > 0 ? Math.max(...graphLogs.map(l => l.totalScore)) : 0;
+  const avgScore = graphLogs.length > 0 ? (graphLogs.reduce((a, b) => a + b.totalScore, 0) / graphLogs.length).toFixed(1) : 0;
 
   return (
     <div style={{ marginBottom: '32px' }}>
@@ -91,10 +68,10 @@ export default function ArcherDirectory({ archers, currentUser, coach, onUpdateA
             </span>
           </div>
           <h2 style={{ fontSize: '1.75rem', fontWeight: 800, color: '#f8fafc', margin: '4px 0' }}>
-            Archer Profiles & Tournaments Directory 🎯
+            Archer Profiles & Performance Directory 🎯
           </h2>
           <p style={{ color: '#94a3b8', fontSize: '0.9rem' }}>
-            Explore team archer profiles, category, occupation, state tournaments played, and personal photo showcases.
+            Tap any archer to view their <strong>previous 10 scorecard trends & performance graph</strong>.
           </p>
         </div>
 
@@ -120,17 +97,24 @@ export default function ArcherDirectory({ archers, currentUser, coach, onUpdateA
           {archers.map(archer => {
             const isOwnProfile = currentUser.id === archer.id;
             const canViewDob = isCoach || isOwnProfile;
-            const canEdit = isCoach || isOwnProfile;
+
+            // Get count of saved score logs for this archer
+            const archerScoreCount = scoreLogs.filter(l => l.archerId === archer.id || l.archerName === archer.name).length;
 
             return (
-              <div key={archer.id} className="glass-card glass-card-hover" style={{ padding: '24px', display: 'flex', flexDirection: 'column', justifyContent: 'space-between' }}>
+              <div 
+                key={archer.id} 
+                className="glass-card glass-card-hover" 
+                style={{ padding: '24px', display: 'flex', flexDirection: 'column', justifyContent: 'space-between', cursor: 'pointer' }}
+                onClick={() => setSelectedGraphArcher(archer)}
+              >
                 
                 <div>
-                  {/* Header: Photo + Name + Edit Button */}
+                  {/* Header: Photo + Name + View Graph Button */}
                   <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: '16px' }}>
                     <div style={{ display: 'flex', alignItems: 'center', gap: '14px' }}>
                       <img 
-                        src={archer.photo} 
+                        src={archer.photo || "https://images.unsplash.com/photo-1534528741775-53994a69daeb?auto=format&fit=crop&w=400&q=80"} 
                         alt={archer.name} 
                         style={{ width: '64px', height: '64px', borderRadius: '16px', objectFit: 'cover', border: '2px solid #059669' }}
                       />
@@ -147,11 +131,13 @@ export default function ArcherDirectory({ archers, currentUser, coach, onUpdateA
                       </div>
                     </div>
 
-                    {canEdit && (
-                      <button onClick={() => setEditingArcher(JSON.parse(JSON.stringify(archer)))} className="btn-ghost" style={{ padding: '6px' }}>
-                        <Edit3 size={16} color="#fbbf24" />
-                      </button>
-                    )}
+                    <button 
+                      onClick={(e) => { e.stopPropagation(); setSelectedGraphArcher(archer); }} 
+                      className="btn-gold" 
+                      style={{ padding: '6px 12px', fontSize: '0.75rem', display: 'flex', alignItems: 'center', gap: '4px' }}
+                    >
+                      <TrendingUp size={14} /> View Graph
+                    </button>
                   </div>
 
                   {/* Practicing & Private DOB Row */}
@@ -160,7 +146,7 @@ export default function ArcherDirectory({ archers, currentUser, coach, onUpdateA
                     padding: '10px 14px',
                     borderRadius: '12px',
                     display: 'flex',
-                    justify: 'space-between',
+                    justifyContent: 'space-between',
                     alignItems: 'center',
                     marginBottom: '16px',
                     fontSize: '0.82rem'
@@ -178,25 +164,29 @@ export default function ArcherDirectory({ archers, currentUser, coach, onUpdateA
                     </div>
                   </div>
 
-                  {/* Aim / Goal */}
-                  <div style={{ marginBottom: '14px' }}>
-                    <span style={{ fontSize: '0.75rem', color: '#94a3b8', fontWeight: 700, textTransform: 'uppercase' }}>Aim / Target Goal</span>
-                    <p style={{ fontSize: '0.88rem', color: '#f8fafc', fontWeight: 600, marginTop: '2px' }}>
-                      🎯 "{archer.aim || 'Focusing on consistent release'}"
-                    </p>
-                  </div>
+                  {/* Aim & Target Goal */}
+                  {archer.aim && (
+                    <div style={{ marginBottom: '12px' }}>
+                      <span style={{ fontSize: '0.75rem', color: '#fbbf24', fontWeight: 700, textTransform: 'uppercase' }}>Aim / Target Goal</span>
+                      <p style={{ fontSize: '0.85rem', color: '#cbd5e1', margin: '2px 0 0 0', fontStyle: 'italic' }}>
+                        "{archer.aim}"
+                      </p>
+                    </div>
+                  )}
 
-                  {/* Summary */}
-                  <div style={{ marginBottom: '16px' }}>
-                    <span style={{ fontSize: '0.75rem', color: '#94a3b8', fontWeight: 700, textTransform: 'uppercase' }}>Archer Bio & Summary</span>
-                    <p style={{ fontSize: '0.82rem', color: '#cbd5e1', lineHeight: 1.5, marginTop: '2px' }}>
-                      {archer.summary}
-                    </p>
-                  </div>
+                  {/* Summary / Bio */}
+                  {archer.summary && (
+                    <div style={{ marginBottom: '14px' }}>
+                      <span style={{ fontSize: '0.75rem', color: '#94a3b8', fontWeight: 700, textTransform: 'uppercase' }}>Summary</span>
+                      <p style={{ fontSize: '0.82rem', color: '#94a3b8', margin: '2px 0 0 0', lineHeight: 1.4 }}>
+                        {archer.summary}
+                      </p>
+                    </div>
+                  )}
 
-                  {/* State Tournaments Played */}
-                  <div style={{ marginBottom: '16px' }}>
-                    <span style={{ fontSize: '0.75rem', color: '#fbbf24', fontWeight: 700, textTransform: 'uppercase', display: 'flex', alignItems: 'center', gap: '4px' }}>
+                  {/* Tournaments Played List */}
+                  <div style={{ borderTop: '1px solid var(--border-glass)', paddingTop: '12px' }}>
+                    <span style={{ fontSize: '0.72rem', color: '#94a3b8', fontWeight: 700, display: 'flex', alignItems: 'center', gap: '4px' }}>
                       <Award size={13} /> State Tournaments Played ({archer.statesPlayed ? archer.statesPlayed.length : 0})
                     </span>
                     <div style={{ display: 'flex', flexWrap: 'wrap', gap: '6px', marginTop: '6px' }}>
@@ -214,19 +204,15 @@ export default function ArcherDirectory({ archers, currentUser, coach, onUpdateA
 
                 </div>
 
-                {/* Photos Showcase Thumbnail Bar */}
-                {archer.photos && archer.photos.length > 0 && (
-                  <div style={{ borderTop: '1px solid var(--border-glass)', paddingTop: '12px', marginTop: '10px' }}>
-                    <span style={{ fontSize: '0.72rem', color: '#94a3b8', fontWeight: 700, display: 'flex', alignItems: 'center', gap: '4px', marginBottom: '8px' }}>
-                      <Camera size={12} /> Personal Photos ({archer.photos.length})
-                    </span>
-                    <div style={{ display: 'flex', gap: '8px', overflowX: 'auto' }}>
-                      {archer.photos.map((pUrl, pIdx) => (
-                        <img key={pIdx} src={pUrl} alt="Archer photo" style={{ width: '48px', height: '48px', borderRadius: '8px', objectFit: 'cover' }} />
-                      ))}
-                    </div>
-                  </div>
-                )}
+                {/* Score Graph Quick Trigger Bar */}
+                <div style={{ borderTop: '1px solid var(--border-glass)', paddingTop: '12px', marginTop: '16px', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                  <span style={{ fontSize: '0.75rem', color: '#34d399', fontWeight: 700, display: 'flex', alignItems: 'center', gap: '4px' }}>
+                    <BarChart2 size={14} /> {archerScoreCount} Scorecards Logged
+                  </span>
+                  <span style={{ fontSize: '0.78rem', color: '#fbbf24', fontWeight: 700, display: 'flex', alignItems: 'center', gap: '2px' }}>
+                    Tap to view 10-score graph <ChevronRight size={14} />
+                  </span>
+                </div>
 
               </div>
             );
@@ -234,10 +220,151 @@ export default function ArcherDirectory({ archers, currentUser, coach, onUpdateA
         </div>
       )}
 
-      {/* Register New Archer Modal */}
+      {/* MODAL 1: Archer Performance & Last 10 Score Trend Graph */}
+      {selectedGraphArcher && (
+        <div className="modal-overlay" onClick={() => setSelectedGraphArcher(null)}>
+          <div className="modal-content" onClick={e => e.stopPropagation()} style={{ maxWidth: '540px' }}>
+            
+            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '16px' }}>
+              <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
+                <img 
+                  src={selectedGraphArcher.photo || "https://images.unsplash.com/photo-1534528741775-53994a69daeb?auto=format&fit=crop&w=400&q=80"} 
+                  alt={selectedGraphArcher.name}
+                  style={{ width: '48px', height: '48px', borderRadius: '12px', objectFit: 'cover', border: '2px solid #34d399' }}
+                />
+                <div>
+                  <h3 style={{ fontSize: '1.2rem', fontWeight: 800, color: '#f8fafc', margin: 0 }}>
+                    {selectedGraphArcher.name}'s Score Trend Graph 📈
+                  </h3>
+                  <span style={{ fontSize: '0.75rem', color: '#34d399', fontWeight: 600 }}>
+                    Previous 10 Practice Scorecard Data
+                  </span>
+                </div>
+              </div>
+              <button onClick={() => setSelectedGraphArcher(null)} className="btn-ghost" style={{ padding: '4px 8px' }}>✕</button>
+            </div>
+
+            {/* Performance Stats Cards */}
+            <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr 1fr', gap: '10px', marginBottom: '20px' }}>
+              <div style={{ background: 'rgba(15,23,42,0.6)', padding: '10px', borderRadius: '10px', textAlign: 'center', border: '1px solid rgba(251,191,36,0.3)' }}>
+                <div style={{ fontSize: '0.7rem', color: '#94a3b8' }}>Peak Score</div>
+                <div style={{ fontSize: '1.1rem', fontWeight: 800, color: '#fbbf24' }}>
+                  {maxScore} <span style={{ fontSize: '0.7rem' }}>/ 360</span>
+                </div>
+              </div>
+
+              <div style={{ background: 'rgba(15,23,42,0.6)', padding: '10px', borderRadius: '10px', textAlign: 'center', border: '1px solid rgba(52,211,153,0.3)' }}>
+                <div style={{ fontSize: '0.7rem', color: '#94a3b8' }}>10-Session Avg</div>
+                <div style={{ fontSize: '1.1rem', fontWeight: 800, color: '#34d399' }}>
+                  {avgScore} <span style={{ fontSize: '0.7rem' }}>pts</span>
+                </div>
+              </div>
+
+              <div style={{ background: 'rgba(15,23,42,0.6)', padding: '10px', borderRadius: '10px', textAlign: 'center', border: '1px solid rgba(255,255,255,0.1)' }}>
+                <div style={{ fontSize: '0.7rem', color: '#94a3b8' }}>Total Logged</div>
+                <div style={{ fontSize: '1.1rem', fontWeight: 800, color: '#f8fafc' }}>
+                  {graphLogs.length} <span style={{ fontSize: '0.7rem' }}>sessions</span>
+                </div>
+              </div>
+            </div>
+
+            {/* SVG Interactive Line Chart Graph */}
+            {graphLogs.length === 0 ? (
+              <div style={{ padding: '30px', textAlign: 'center', color: '#64748b', background: 'rgba(15,23,42,0.4)', borderRadius: '12px' }}>
+                No scorecards logged yet for {selectedGraphArcher.name}. Record target practice in the <strong>Scoring Tab</strong> to populate graph data!
+              </div>
+            ) : (
+              <div style={{ background: 'rgba(15,23,42,0.8)', padding: '16px', borderRadius: '14px', border: '1px solid var(--border-glass)' }}>
+                <span style={{ fontSize: '0.75rem', color: '#94a3b8', fontWeight: 700, display: 'block', marginBottom: '8px' }}>
+                  Score Trend Line (Last {graphLogs.length} Sessions)
+                </span>
+
+                <svg width="100%" height="220" viewBox="0 0 460 220" style={{ overflow: 'visible' }}>
+                  {/* Grid Lines */}
+                  <line x1="40" y1="30" x2="440" y2="30" stroke="rgba(255,255,255,0.06)" strokeDasharray="4 4" />
+                  <line x1="40" y1="80" x2="440" y2="80" stroke="rgba(255,255,255,0.06)" strokeDasharray="4 4" />
+                  <line x1="40" y1="130" x2="440" y2="130" stroke="rgba(255,255,255,0.06)" strokeDasharray="4 4" />
+                  <line x1="40" y1="180" x2="440" y2="180" stroke="rgba(255,255,255,0.1)" />
+
+                  {/* Y Axis Labels */}
+                  <text x="32" y="34" fill="#94a3b8" fontSize="10" textAnchor="end">360</text>
+                  <text x="32" y="84" fill="#94a3b8" fontSize="10" textAnchor="end">300</text>
+                  <text x="32" y="134" fill="#94a3b8" fontSize="10" textAnchor="end">240</text>
+                  <text x="32" y="184" fill="#94a3b8" fontSize="10" textAnchor="end">180</text>
+
+                  {/* Graph Line & Points */}
+                  {(() => {
+                    const totalPoints = graphLogs.length;
+                    const stepX = totalPoints > 1 ? (400 / (totalPoints - 1)) : 0;
+                    
+                    const pointsCoords = graphLogs.map((log, idx) => {
+                      const x = totalPoints === 1 ? 240 : 40 + idx * stepX;
+                      // Scale y: 180 pts -> y=180, 360 pts -> y=30
+                      const scoreClamped = Math.max(180, Math.min(360, log.totalScore));
+                      const y = 180 - ((scoreClamped - 180) / 180) * 150;
+                      return { x, y, score: log.totalScore, date: log.date, distance: log.distance };
+                    });
+
+                    const polylinePoints = pointsCoords.map(pt => `${pt.x},${pt.y}`).join(' ');
+
+                    return (
+                      <g>
+                        {/* Connecting Trend Line */}
+                        <polyline
+                          fill="none"
+                          stroke="#34d399"
+                          strokeWidth="3"
+                          points={polylinePoints}
+                          filter="drop-shadow(0 4px 8px rgba(52, 211, 153, 0.4))"
+                        />
+
+                        {/* Data Points */}
+                        {pointsCoords.map((pt, pIdx) => (
+                          <g key={pIdx}>
+                            <circle cx={pt.x} cy={pt.y} r="6" fill="#059669" stroke="#ffffff" strokeWidth="2" />
+                            <text
+                              x={pt.x}
+                              y={pt.y - 10}
+                              fill="#fbbf24"
+                              fontSize="11"
+                              fontWeight="800"
+                              textAnchor="middle"
+                            >
+                              {pt.score}
+                            </text>
+                            <text
+                              x={pt.x}
+                              y="198"
+                              fill="#64748b"
+                              fontSize="9"
+                              textAnchor="middle"
+                            >
+                              {pt.date.slice(5)}
+                            </text>
+                          </g>
+                        ))}
+                      </g>
+                    );
+                  })()}
+                </svg>
+
+              </div>
+            )}
+
+            <div style={{ display: 'flex', justifyContent: 'flex-end', marginTop: '16px' }}>
+              <button onClick={() => setSelectedGraphArcher(null)} className="btn-emerald">
+                Close Graph
+              </button>
+            </div>
+
+          </div>
+        </div>
+      )}
+
+      {/* MODAL 2: Register New Archer */}
       {showAddModal && (
         <div className="modal-overlay" onClick={() => setShowAddModal(false)}>
-          <div className="modal-content" onClick={e => e.stopPropagation()}>
+          <div className="modal-content" onClick={e => e.stopPropagation()} style={{ maxWidth: '440px' }}>
             <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '20px' }}>
               <h3 style={{ fontSize: '1.2rem', fontWeight: 700, color: '#f8fafc', display: 'flex', alignItems: 'center', gap: '8px' }}>
                 <UserPlus size={20} color="#34d399" /> Register New Archer Profile
@@ -246,41 +373,34 @@ export default function ArcherDirectory({ archers, currentUser, coach, onUpdateA
             </div>
 
             <form onSubmit={handleCreateArcher} style={{ display: 'flex', flexDirection: 'column', gap: '14px' }}>
-              
-              <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '12px' }}>
-                <div>
-                  <label style={{ fontSize: '0.8rem', color: '#94a3b8', fontWeight: 600 }}>Archer Full Name</label>
-                  <input
-                    type="text"
-                    className="input-glass"
-                    placeholder="e.g. Rahul Sharma"
-                    value={newArcherName}
-                    onChange={(e) => setNewArcherName(e.target.value)}
-                    required
-                  />
-                </div>
-
-                <div>
-                  <label style={{ fontSize: '0.8rem', color: '#94a3b8', fontWeight: 600 }}>Login Password</label>
-                  <input
-                    type="password"
-                    className="input-glass"
-                    placeholder="Create account password..."
-                    value={newArcherPass}
-                    onChange={(e) => setNewArcherPass(e.target.value)}
-                    required
-                  />
-                </div>
+              <div>
+                <label style={{ fontSize: '0.8rem', color: '#94a3b8', fontWeight: 600 }}>Full Name</label>
+                <input
+                  type="text"
+                  className="input-glass"
+                  placeholder="e.g. Rahul Sharma"
+                  value={newArcherName}
+                  onChange={(e) => setNewArcherName(e.target.value)}
+                  required
+                />
               </div>
 
-              <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '12px' }}>
+              <div>
+                <label style={{ fontSize: '0.8rem', color: '#94a3b8', fontWeight: 600 }}>Login Password</label>
+                <input
+                  type="password"
+                  className="input-glass"
+                  placeholder="Create account password..."
+                  value={newArcherPass}
+                  onChange={(e) => setNewArcherPass(e.target.value)}
+                  required
+                />
+              </div>
+
+              <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '10px' }}>
                 <div>
                   <label style={{ fontSize: '0.8rem', color: '#94a3b8', fontWeight: 600 }}>Category</label>
-                  <select
-                    className="select-glass"
-                    value={newArcherCategory}
-                    onChange={(e) => setNewArcherCategory(e.target.value)}
-                  >
+                  <select className="select-glass" value={newArcherCategory} onChange={(e) => setNewArcherCategory(e.target.value)}>
                     <option value="Junior">Junior Archer</option>
                     <option value="Senior">Senior Archer</option>
                   </select>
@@ -288,11 +408,7 @@ export default function ArcherDirectory({ archers, currentUser, coach, onUpdateA
 
                 <div>
                   <label style={{ fontSize: '0.8rem', color: '#94a3b8', fontWeight: 600 }}>Occupation</label>
-                  <select
-                    className="select-glass"
-                    value={newArcherOccupation}
-                    onChange={(e) => setNewArcherOccupation(e.target.value)}
-                  >
+                  <select className="select-glass" value={newArcherOccupation} onChange={(e) => setNewArcherOccupation(e.target.value)}>
                     <option value="Student">Student</option>
                     <option value="Higher Studies">Higher Studies</option>
                     <option value="Working Professional">Working Professional</option>
@@ -300,21 +416,17 @@ export default function ArcherDirectory({ archers, currentUser, coach, onUpdateA
                 </div>
               </div>
 
-              <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '12px' }}>
+              <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '10px' }}>
                 <div>
-                  <label style={{ fontSize: '0.8rem', color: '#94a3b8', fontWeight: 600 }}>Currently Practicing?</label>
-                  <select
-                    className="select-glass"
-                    value={newArcherPracticing}
-                    onChange={(e) => setNewArcherPracticing(e.target.value)}
-                  >
+                  <label style={{ fontSize: '0.8rem', color: '#94a3b8', fontWeight: 600 }}>Practicing Now?</label>
+                  <select className="select-glass" value={newArcherPracticing} onChange={(e) => setNewArcherPracticing(e.target.value)}>
                     <option value="Yes">Yes</option>
                     <option value="No">No</option>
                   </select>
                 </div>
 
                 <div>
-                  <label style={{ fontSize: '0.8rem', color: '#94a3b8', fontWeight: 600 }}>Date of Birth (Private) 🔒</label>
+                  <label style={{ fontSize: '0.8rem', color: '#fbbf24', fontWeight: 600 }}>DOB (Private) 🔒</label>
                   <input
                     type="date"
                     className="input-glass"
@@ -329,186 +441,27 @@ export default function ArcherDirectory({ archers, currentUser, coach, onUpdateA
                 <input
                   type="text"
                   className="input-glass"
-                  placeholder="e.g. Represent Heritage Archery in State Championship"
+                  placeholder="e.g., Gold Medal 70m Target"
                   value={newArcherAim}
                   onChange={(e) => setNewArcherAim(e.target.value)}
                 />
               </div>
 
               <div>
-                <label style={{ fontSize: '0.8rem', color: '#94a3b8', fontWeight: 600 }}>Archer Bio / Summary</label>
+                <label style={{ fontSize: '0.8rem', color: '#94a3b8', fontWeight: 600 }}>Summary / Bio</label>
                 <textarea
                   className="input-glass"
-                  rows={3}
-                  placeholder="Short bio about archery experience..."
+                  rows={2}
+                  placeholder="Short archery bio..."
                   value={newArcherSummary}
                   onChange={(e) => setNewArcherSummary(e.target.value)}
                 />
               </div>
 
-              <div style={{ display: 'flex', justifyContent: 'flex-end', gap: '10px', marginTop: '12px' }}>
+              <div style={{ display: 'flex', justifyContent: 'flex-end', gap: '10px', marginTop: '10px' }}>
                 <button type="button" onClick={() => setShowAddModal(false)} className="btn-ghost">Cancel</button>
-                <button type="submit" className="btn-emerald">Create Archer Profile</button>
+                <button type="submit" className="btn-emerald">Create Profile</button>
               </div>
-
-            </form>
-          </div>
-        </div>
-      )}
-
-      {/* Edit Archer Profile Modal */}
-      {editingArcher && (
-        <div className="modal-overlay" onClick={() => setEditingArcher(null)}>
-          <div className="modal-content" onClick={e => e.stopPropagation()}>
-            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '20px' }}>
-              <h3 style={{ fontSize: '1.2rem', fontWeight: 700, color: '#f8fafc', display: 'flex', alignItems: 'center', gap: '8px' }}>
-                <Edit3 size={20} color="#34d399" /> Edit Profile: {editingArcher.name}
-              </h3>
-              <button onClick={() => setEditingArcher(null)} className="btn-ghost" style={{ padding: '4px 8px' }}>✕</button>
-            </div>
-
-            <form onSubmit={handleSaveProfile} style={{ display: 'flex', flexDirection: 'column', gap: '14px' }}>
-              
-              <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '12px' }}>
-                <div>
-                  <label style={{ fontSize: '0.8rem', color: '#94a3b8', fontWeight: 600 }}>Category</label>
-                  <select
-                    className="select-glass"
-                    value={editingArcher.category}
-                    onChange={(e) => setEditingArcher({ ...editingArcher, category: e.target.value })}
-                  >
-                    <option value="Junior">Junior Archer</option>
-                    <option value="Senior">Senior Archer</option>
-                  </select>
-                </div>
-
-                <div>
-                  <label style={{ fontSize: '0.8rem', color: '#94a3b8', fontWeight: 600 }}>Occupation</label>
-                  <select
-                    className="select-glass"
-                    value={editingArcher.occupation}
-                    onChange={(e) => setEditingArcher({ ...editingArcher, occupation: e.target.value })}
-                  >
-                    <option value="Student">Student</option>
-                    <option value="Higher Studies">Higher Studies</option>
-                    <option value="Working Professional">Working Professional</option>
-                  </select>
-                </div>
-              </div>
-
-              <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '12px' }}>
-                <div>
-                  <label style={{ fontSize: '0.8rem', color: '#94a3b8', fontWeight: 600 }}>Currently Practicing?</label>
-                  <select
-                    className="select-glass"
-                    value={editingArcher.currentlyPracticing}
-                    onChange={(e) => setEditingArcher({ ...editingArcher, currentlyPracticing: e.target.value })}
-                  >
-                    <option value="Yes">Yes</option>
-                    <option value="No">No</option>
-                  </select>
-                </div>
-
-                <div>
-                  <label style={{ fontSize: '0.8rem', color: '#94a3b8', fontWeight: 600 }}>
-                    Date of Birth (Private) 🔒
-                  </label>
-                  <input
-                    type="date"
-                    className="input-glass"
-                    value={editingArcher.dob || ''}
-                    onChange={(e) => setEditingArcher({ ...editingArcher, dob: e.target.value })}
-                  />
-                </div>
-              </div>
-
-              <div>
-                <label style={{ fontSize: '0.8rem', color: '#94a3b8', fontWeight: 600 }}>Profile Photo URL</label>
-                <input
-                  type="text"
-                  className="input-glass"
-                  value={editingArcher.photo}
-                  onChange={(e) => setEditingArcher({ ...editingArcher, photo: e.target.value })}
-                />
-              </div>
-
-              <div>
-                <label style={{ fontSize: '0.8rem', color: '#94a3b8', fontWeight: 600 }}>Aim / Goal</label>
-                <input
-                  type="text"
-                  className="input-glass"
-                  value={editingArcher.aim}
-                  onChange={(e) => setEditingArcher({ ...editingArcher, aim: e.target.value })}
-                />
-              </div>
-
-              <div>
-                <label style={{ fontSize: '0.8rem', color: '#94a3b8', fontWeight: 600 }}>Bio / Summary</label>
-                <textarea
-                  className="input-glass"
-                  rows={3}
-                  value={editingArcher.summary}
-                  onChange={(e) => setEditingArcher({ ...editingArcher, summary: e.target.value })}
-                />
-              </div>
-
-              {/* State Tournaments Played Add/Remove Section */}
-              <div>
-                <label style={{ fontSize: '0.8rem', color: '#fbbf24', fontWeight: 700 }}>
-                  State Tournaments Played (Bolpur, Rajgunj, Kalimpong, etc.)
-                </label>
-                
-                <div style={{ display: 'flex', gap: '8px', margin: '8px 0' }}>
-                  <button type="button" onClick={() => handleAddState("Bolpur State Championship")} className="btn-ghost" style={{ fontSize: '0.75rem', padding: '4px 8px' }}>+ Bolpur</button>
-                  <button type="button" onClick={() => handleAddState("Rajgunj Archery Meet")} className="btn-ghost" style={{ fontSize: '0.75rem', padding: '4px 8px' }}>+ Rajgunj</button>
-                  <button type="button" onClick={() => handleAddState("Kalimpong Open")} className="btn-ghost" style={{ fontSize: '0.75rem', padding: '4px 8px' }}>+ Kalimpong</button>
-                </div>
-
-                <div style={{ display: 'flex', gap: '8px' }}>
-                  <input
-                    type="text"
-                    className="input-glass"
-                    placeholder="Mention custom tournament name..."
-                    value={newState}
-                    onChange={(e) => setNewState(e.target.value)}
-                  />
-                  <button type="button" onClick={() => handleAddState(newState)} className="btn-ghost" style={{ padding: '0 12px' }}>
-                    <Plus size={16} /> Add
-                  </button>
-                </div>
-
-                <div style={{ display: 'flex', flexWrap: 'wrap', gap: '6px', marginTop: '8px' }}>
-                  {editingArcher.statesPlayed?.map((st, index) => (
-                    <span key={index} style={{ background: 'rgba(217,119,6,0.2)', color: '#fbbf24', padding: '4px 10px', borderRadius: '6px', fontSize: '0.75rem', display: 'flex', alignItems: 'center', gap: '6px' }}>
-                      {st}
-                      <Trash2 size={12} style={{ cursor: 'pointer' }} onClick={() => handleRemoveState(index)} />
-                    </span>
-                  ))}
-                </div>
-              </div>
-
-              {/* Photos Gallery Add Section */}
-              <div>
-                <label style={{ fontSize: '0.8rem', color: '#34d399', fontWeight: 700 }}>
-                  Add Personal Photo URL
-                </label>
-                <div style={{ display: 'flex', gap: '8px', marginTop: '6px' }}>
-                  <input
-                    type="text"
-                    className="input-glass"
-                    placeholder="https://..."
-                    value={newPhotoUrl}
-                    onChange={(e) => setNewPhotoUrl(e.target.value)}
-                  />
-                  <button type="button" onClick={handleAddPhoto} className="btn-ghost">Add Photo</button>
-                </div>
-              </div>
-
-              <div style={{ display: 'flex', justifyContent: 'flex-end', gap: '10px', marginTop: '12px' }}>
-                <button type="button" onClick={() => setEditingArcher(null)} className="btn-ghost">Cancel</button>
-                <button type="submit" className="btn-emerald">Save Profile Updates</button>
-              </div>
-
             </form>
           </div>
         </div>

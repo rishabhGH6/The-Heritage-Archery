@@ -9,6 +9,11 @@ export default function ChatHub({ currentUser, archers, coach, chatMessages, onS
     e.preventDefault();
     if (!inputText.trim()) return;
 
+    if (currentUser.role === 'guest') {
+      alert("🔒 Guest Mode: Please log in or register your archer account to send messages!");
+      return;
+    }
+
     const now = new Date();
     const timestampStr = now.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
 
@@ -17,6 +22,7 @@ export default function ChatHub({ currentUser, archers, coach, chatMessages, onS
       senderId: currentUser.id,
       senderName: currentUser.name,
       senderRole: currentUser.role,
+      recipientId: activeChannel === 'general' ? 'all' : activeChannel,
       text: inputText.trim(),
       timestamp: timestampStr,
       channel: activeChannel
@@ -25,11 +31,18 @@ export default function ChatHub({ currentUser, archers, coach, chatMessages, onS
     setInputText('');
   };
 
-  // Filter messages for current selected channel/DM
+  // Filter messages for current selected channel/DM with strict privacy
   const filteredMessages = chatMessages.filter(m => {
-    if (activeChannel === 'general') return m.channel === 'general';
-    // DM logic: channel is target id or sender/recipient combo
-    return m.channel === activeChannel || (m.senderId === activeChannel && m.channel === currentUser.id);
+    if (activeChannel === 'general') {
+      return m.channel === 'general' || m.recipientId === 'all';
+    }
+
+    // Private DM Filtering:
+    // Message MUST be between currentUser.id and activeChannel
+    const isSentByMeToContact = (m.senderId === currentUser.id) && (m.channel === activeChannel || m.recipientId === activeChannel);
+    const isSentByContactToMe = (m.senderId === activeChannel) && (m.channel === currentUser.id || m.recipientId === currentUser.id);
+
+    return isSentByMeToContact || isSentByContactToMe;
   });
 
   return (

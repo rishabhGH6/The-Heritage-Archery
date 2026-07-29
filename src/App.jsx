@@ -53,6 +53,7 @@ export default function App() {
       ...prev,
       currentUser: userObj
     }));
+    setActiveTab('home'); // Requirement 3: Account switch resets to home section!
   };
 
   const handleUpdateCoach = (updatedCoach) => {
@@ -323,6 +324,7 @@ export default function App() {
             archers={appData.archers}
             currentUser={appData.currentUser}
             coach={appData.coach}
+            scoreLogs={appData.scoreLogs || []}
             onUpdateArcher={handleUpdateArcher}
             onAddArcher={handleAddArcher}
           />
