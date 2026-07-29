@@ -56,6 +56,19 @@ export default function ArcherDirectory({ archers, currentUser, coach, onUpdateA
   const maxScore = graphLogs.length > 0 ? Math.max(...graphLogs.map(l => l.totalScore)) : 0;
   const avgScore = graphLogs.length > 0 ? (graphLogs.reduce((a, b) => a + b.totalScore, 0) / graphLogs.length).toFixed(1) : 0;
 
+  // Requirement 1: Graph visibility permissions
+  const handleOpenGraph = (targetArcher) => {
+    if (currentUser.role === 'coach') {
+      setSelectedGraphArcher(targetArcher);
+    } else if (currentUser.role === 'archer' && currentUser.id === targetArcher.id) {
+      setSelectedGraphArcher(targetArcher);
+    } else if (currentUser.role === 'archer') {
+      alert("🔒 You can only view your own score graph. Coach Jayanta can view all team score graphs.");
+    } else {
+      alert("🔒 Please log in to view score graphs!");
+    }
+  };
+
   return (
     <div style={{ marginBottom: '32px' }}>
       
@@ -106,7 +119,7 @@ export default function ArcherDirectory({ archers, currentUser, coach, onUpdateA
                 key={archer.id} 
                 className="glass-card glass-card-hover" 
                 style={{ padding: '24px', display: 'flex', flexDirection: 'column', justifyContent: 'space-between', cursor: 'pointer' }}
-                onClick={() => setSelectedGraphArcher(archer)}
+                onClick={() => handleOpenGraph(archer)}
               >
                 
                 <div>
@@ -132,7 +145,7 @@ export default function ArcherDirectory({ archers, currentUser, coach, onUpdateA
                     </div>
 
                     <button 
-                      onClick={(e) => { e.stopPropagation(); setSelectedGraphArcher(archer); }} 
+                      onClick={(e) => { e.stopPropagation(); handleOpenGraph(archer); }} 
                       className="btn-gold" 
                       style={{ padding: '6px 12px', fontSize: '0.75rem', display: 'flex', alignItems: 'center', gap: '4px' }}
                     >
@@ -241,7 +254,6 @@ export default function ArcherDirectory({ archers, currentUser, coach, onUpdateA
                   </span>
                 </div>
               </div>
-              <button onClick={() => setSelectedGraphArcher(null)} className="btn-ghost" style={{ padding: '4px 8px' }}>✕</button>
             </div>
 
             {/* Performance Stats Cards */}

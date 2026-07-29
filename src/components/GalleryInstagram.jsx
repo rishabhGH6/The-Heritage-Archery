@@ -11,6 +11,7 @@ const InstagramIcon = ({ size = 20, color = "currentColor" }) => (
 
 export default function GalleryInstagram({ archers, currentUser, onAddPhoto }) {
   const [showUploadModal, setShowUploadModal] = useState(false);
+  const [maximizedPhoto, setMaximizedPhoto] = useState(null);
   const [photoUrl, setPhotoUrl] = useState('');
   const [caption, setCaption] = useState('');
 
@@ -121,7 +122,12 @@ export default function GalleryInstagram({ archers, currentUser, onAddPhoto }) {
       ) : (
         <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(280px, 1fr))', gap: '20px' }}>
           {allTeamPhotos.map((item, idx) => (
-            <div key={idx} className="glass-card glass-card-hover" style={{ overflow: 'hidden', display: 'flex', flexDirection: 'column' }}>
+            <div 
+              key={idx} 
+              className="glass-card glass-card-hover" 
+              style={{ overflow: 'hidden', display: 'flex', flexDirection: 'column', cursor: 'pointer' }}
+              onClick={() => setMaximizedPhoto(item)}
+            >
               <div style={{ width: '100%', height: '220px', overflow: 'hidden', position: 'relative' }}>
                 <img
                   src={item.url}
@@ -143,11 +149,40 @@ export default function GalleryInstagram({ archers, currentUser, onAddPhoto }) {
                 </div>
 
                 <div style={{ display: 'flex', alignItems: 'center', gap: '4px', color: '#ef4444', fontSize: '0.82rem', fontWeight: 700 }}>
-                  <Heart size={14} fill="#ef4444" /> Team Shot
+                  <Heart size={14} fill="#ef4444" /> Maximize 🔍
                 </div>
               </div>
             </div>
           ))}
+        </div>
+      )}
+
+      {/* FULLSCREEN PHOTO LIGHTBOX MODAL */}
+      {maximizedPhoto && (
+        <div className="modal-overlay" onClick={() => setMaximizedPhoto(null)} style={{ background: 'rgba(0, 0, 0, 0.88)', backdropFilter: 'blur(10px)' }}>
+          <div 
+            className="modal-content" 
+            onClick={e => e.stopPropagation()} 
+            style={{ maxWidth: '880px', width: '94%', padding: '20px', background: '#090d16', border: '1px solid rgba(255,255,255,0.15)', borderRadius: '24px', display: 'flex', flexDirection: 'column', alignItems: 'center' }}
+          >
+            <div style={{ display: 'flex', justifyContent: 'space-between', width: '100%', alignItems: 'center', marginBottom: '14px' }}>
+              <div>
+                <span style={{ fontSize: '1rem', fontWeight: 800, color: '#f8fafc' }}>
+                  📷 Photo by {maximizedPhoto.uploader}
+                </span>
+                <span style={{ fontSize: '0.78rem', color: '#34d399', fontWeight: 600, marginLeft: '8px' }}>
+                  ({maximizedPhoto.uploaderCategory} Archer)
+                </span>
+              </div>
+              <button onClick={() => setMaximizedPhoto(null)} className="btn-ghost" style={{ padding: '6px 12px', fontSize: '1.2rem', color: '#f8fafc' }}>✕</button>
+            </div>
+
+            <img 
+              src={maximizedPhoto.url} 
+              alt="Maximized Heritage Gallery" 
+              style={{ maxWidth: '100%', maxHeight: '78vh', borderRadius: '16px', objectFit: 'contain', boxShadow: '0 25px 60px rgba(0,0,0,0.9)' }}
+            />
+          </div>
         </div>
       )}
 

@@ -203,19 +203,136 @@ export default function InteractiveScoring({ currentUser, archers = [], scoreLog
     alert(`Scorecard saved successfully! Grand Total: ${grandTotal}/360 points.`);
   };
 
-  // PDF Export
-  const handleExportPDF = async () => {
-    if (!scorecardRef.current) return;
+  // Requirement 5: PDF Export containing 6 rounds arrow-by-arrow data in a presentable format
+  const handleExportPDF = () => {
     try {
-      const canvas = await html2canvas(scorecardRef.current, { scale: 2 });
-      const imgData = canvas.toDataURL('image/png');
-      const pdf = new jsPDF('p', 'mm', 'a4');
-      const pdfWidth = pdf.internal.pageSize.getWidth();
-      const pdfHeight = (canvas.height * pdfWidth) / canvas.width;
-      pdf.addImage(imgData, 'PNG', 0, 0, pdfWidth, pdfHeight);
-      pdf.save(`Heritage_Archery_Scorecard_${selectedArcher?.name}_${new Date().toISOString().split('T')[0]}.pdf`);
+      const doc = new jsPDF('p', 'pt', 'a4');
+      const archerName = selectedArcher?.name || "Archer";
+      const todayDate = new Date().toLocaleDateString('en-US', { year: 'numeric', month: 'short', day: 'numeric' });
+      const grandTotal = getGrandTotal();
+      const totalX = getTotalXCount();
+
+      // 1. Dark Header Banner
+      doc.setFillColor(15, 23, 42); // #0f172a
+      doc.rect(0, 0, 595, 80, 'F');
+
+      // Title
+      doc.setTextColor(251, 191, 36); // #fbbf24
+      doc.setFont('helvetica', 'bold');
+      doc.setFontSize(20);
+      doc.text("THE HERITAGE ARCHERY", 40, 42);
+
+      doc.setFontSize(10);
+      doc.setTextColor(52, 211, 153); // #34d399
+      doc.text("OFFICIAL WORLD ARCHERY SCORECARD", 40, 60);
+
+      // 2. Session Info Card Box
+      doc.setFillColor(241, 245, 249); // #f1f5f9
+      doc.roundedRect(40, 95, 515, 60, 8, 8, 'F');
+
+      doc.setFontSize(11);
+      doc.setTextColor(15, 23, 42);
+      doc.text(`Archer: ${archerName}`, 55, 120);
+      doc.text(`Target Distance: ${distance}`, 55, 140);
+
+      doc.text(`Date: ${todayDate}`, 240, 120);
+      doc.text(`X Counts: ${totalX}`, 240, 140);
+
+      doc.setFontSize(14);
+      doc.setTextColor(217, 119, 6); // #d97706
+      doc.text(`Grand Total: ${grandTotal} / 360`, 390, 130);
+
+      // 3. 6 Rounds Per-Arrow Scoring Table Header
+      let startY = 175;
+      doc.setFillColor(5, 150, 105); // #059669
+      doc.rect(40, startY, 515, 26, 'F');
+
+      doc.setTextColor(255, 255, 255);
+      doc.setFontSize(10);
+      doc.setFont('helvetica', 'bold');
+      doc.text("Round", 50, startY + 17);
+      doc.text("Arrow 1", 110, startY + 17);
+      doc.text("Arrow 2", 160, startY + 17);
+      doc.text("Arrow 3", 210, startY + 17);
+      doc.text("Arrow 4", 260, startY + 17);
+      doc.text("Arrow 5", 310, startY + 17);
+      doc.text("Arrow 6", 360, startY + 17);
+      doc.text("Round Pts", 415, startY + 17);
+      doc.text("Running Total", 475, startY + 17);
+
+      // 4. Rows for Rounds 1 to 6
+      let runningSum = 0;
+      doc.setFont('helvetica', 'normal');
+
+      roundsData.forEach((r, idx) => {
+        const rowY = startY + 26 + idx * 28;
+        const rTotal = getRoundTotal(r);
+        runningSum += rTotal;
+
+        // Alternate row background
+        if (idx % 2 === 1) {
+          doc.setFillColor(248, 250, 252);
+          doc.rect(40, rowY, 515, 28, 'F');
+        }
+
+        // Draw Row Border
+        doc.setDrawColor(226, 232, 240);
+        doc.rect(40, rowY, 515, 28, 'S');
+
+        doc.setTextColor(15, 23, 42);
+        doc.setFont('helvetica', 'bold');
+        doc.text(`Round ${idx + 1}`, 50, rowY + 18);
+
+        // 6 Arrows per round
+        doc.setFont('helvetica', 'normal');
+        for (let aIdx = 0; aIdx < 6; aIdx++) {
+          const arr = r.arrows[aIdx];
+          const valStr = arr ? (arr.isX ? 'X' : String(arr.score)) : '-';
+          const posX = 115 + aIdx * 50;
+
+          if (arr && (arr.isX || arr.score >= 9)) {
+            doc.setTextColor(217, 119, 6);
+          } else if (arr && arr.score >= 7) {
+            doc.setTextColor(228, 0, 43);
+          } else {
+            doc.setTextColor(15, 23, 42);
+          }
+
+          doc.text(valStr, posX, rowY + 18);
+        }
+
+        // Round Total & Running Total
+        doc.setTextColor(5, 150, 105);
+        doc.setFont('helvetica', 'bold');
+        doc.text(String(rTotal), 425, rowY + 18);
+
+        doc.setTextColor(217, 119, 6);
+        doc.text(String(runningSum), 490, rowY + 18);
+      });
+
+      // 5. Total Summary Box
+      const summaryY = startY + 26 + 6 * 28 + 15;
+      doc.setFillColor(15, 23, 42);
+      doc.roundedRect(40, summaryY, 515, 45, 6, 6, 'F');
+
+      doc.setTextColor(251, 191, 36);
+      doc.setFontSize(12);
+      doc.setFont('helvetica', 'bold');
+      doc.text(`CUMULATIVE SCORE: ${grandTotal} / 360  |  TOTAL X COUNTS: ${totalX}`, 60, summaryY + 28);
+
+      // 6. Grouping Analytics Footer
+      const allArrows = roundsData.flatMap(r => r.arrows);
+      const grouping = calculateGrouping(allArrows);
+      if (grouping) {
+        doc.setFontSize(9);
+        doc.setTextColor(100, 116, 139);
+        doc.text(`Shot Grouping Pattern: ${grouping.tightness} (${grouping.bias})`, 40, summaryY + 70);
+      }
+
+      doc.save(`Heritage_Archery_Scorecard_${archerName.replace(/\s+/g, '_')}_${new Date().toISOString().split('T')[0]}.pdf`);
     } catch (err) {
       console.error("PDF Export error:", err);
+      alert("Error generating PDF. Please try again.");
     }
   };
 

@@ -233,20 +233,40 @@ export default function Navbar({ activeTab, setActiveTab, currentUser, archers, 
                 transition: 'all 0.2s ease'
               }}
             >
-              <div style={{
-                width: '28px',
-                height: '28px',
-                borderRadius: '50%',
-                background: currentUser.role === 'coach' ? '#d97706' : '#059669',
-                display: 'flex',
-                alignItems: 'center',
-                justifyContent: 'center',
-                fontWeight: 'bold',
-                fontSize: '0.8rem',
-                color: '#ffffff'
-              }}>
-                {currentUser.role === 'coach' ? 'C' : 'A'}
-              </div>
+              {(() => {
+                const userPhoto = currentUser.role === 'coach' 
+                  ? coach?.photo 
+                  : (archers.find(a => a.id === currentUser.id)?.photo || currentUser.photo);
+                
+                return userPhoto ? (
+                  <img 
+                    src={userPhoto} 
+                    alt={currentUser.name} 
+                    style={{
+                      width: '30px',
+                      height: '30px',
+                      borderRadius: '50%',
+                      objectFit: 'cover',
+                      border: `2px solid ${currentUser.role === 'coach' ? '#d97706' : '#059669'}`
+                    }}
+                  />
+                ) : (
+                  <div style={{
+                    width: '28px',
+                    height: '28px',
+                    borderRadius: '50%',
+                    background: currentUser.role === 'coach' ? '#d97706' : '#059669',
+                    display: 'flex',
+                    alignItems: 'center',
+                    justifyContent: 'center',
+                    fontWeight: 'bold',
+                    fontSize: '0.8rem',
+                    color: '#ffffff'
+                  }}>
+                    {currentUser.role === 'coach' ? 'C' : 'A'}
+                  </div>
+                );
+              })()}
               <div>
                 <div style={{ fontSize: '0.82rem', fontWeight: 700, color: '#f8fafc', lineHeight: 1.1 }}>
                   {currentUser.name}
