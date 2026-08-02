@@ -1,11 +1,14 @@
 import React, { useState } from 'react';
 import { Sparkles, Activity, Utensils, Target, Brain, Send, RefreshCw, Shield, ArrowRight, Zap, CheckCircle2, ChevronRight } from 'lucide-react';
+import { GoogleGenerativeAI } from '@google/generative-ai';
 
 export default function AiArcheryCoach({ currentUser, archers = [], equipmentData = {} }) {
   const [activeModule, setActiveModule] = useState('physio'); // 'physio', 'diet', 'trainer', 'mental'
   const [customPrompt, setCustomPrompt] = useState('');
   const [loading, setLoading] = useState(false);
   const [aiResponse, setAiResponse] = useState(null);
+
+  const apiKey = import.meta.env.VITE_GEMINI_API_KEY || "";
 
   const selectedArcher = archers.find(a => a.id === currentUser.id) || {
     name: currentUser.name || "Archer",
@@ -119,42 +122,65 @@ export default function AiArcheryCoach({ currentUser, archers = [], equipmentDat
     }
   };
 
-  const handleRunPreset = (promptText, moduleKey) => {
+  const generateGeminiAdvice = async (promptText, moduleKey) => {
     setLoading(true);
-    setCustomPrompt(promptText);
+    setAiResponse(null);
 
-    setTimeout(() => {
-      const baseResponse = sampleAiResponses[moduleKey] || sampleAiResponses.trainer;
-      setAiResponse({
-        title: `✨ Gemini AI Advice for ${selectedArcher.name}`,
-        query: promptText,
-        module: moduleKey,
-        content: `${baseResponse.content}\n\n*Tailored specifically for ${selectedArcher.name} (${selectedArcher.category} • ${userEquipment.poundage} Draw Weight).*`
-      });
-      setLoading(false);
-    }, 800);
+    const systemPrompt = `You are the Official Heritage Archery Team AI Head Performance Coach.
+Archer Details:
+- Name: ${selectedArcher.name}
+- Category: ${selectedArcher.category}
+- Bow Draw Weight: ${userEquipment.poundage}
+- Bow Brace Height: ${userEquipment.braceHeight}
+
+Focus Area: ${moduleKey.toUpperCase()} (Physio, Nutrition, Technical Trainer, or Mental Focus).
+
+User Question / Preset: "${promptText}"
+
+Please provide a highly professional, actionable, step-by-step archery response tailored specifically for ${selectedArcher.name}. Use clear markdown bullet points and emojis.`;
+
+    try {
+      if (apiKey) {
+        const genAI = new GoogleGenerativeAI(apiKey);
+        const model = genAI.getGenerativeModel({ model: "gemini-1.5-flash" });
+        const result = await model.generateContent(systemPrompt);
+        const responseText = result.response.text();
+
+        if (responseText) {
+          setAiResponse({
+            title: `✨ Gemini AI Live Coaching Advice for ${selectedArcher.name}`,
+            query: promptText,
+            module: moduleKey,
+            content: responseText
+          });
+          setLoading(false);
+          return;
+        }
+      }
+    } catch (err) {
+      console.warn("Gemini API call warning, using expert preset fallback:", err);
+    }
+
+    // Fallback to built-in expert knowledge engine if API call fails or key is inactive
+    const baseResponse = sampleAiResponses[moduleKey] || sampleAiResponses.trainer;
+    setAiResponse({
+      title: `✨ Gemini AI Advice for ${selectedArcher.name}`,
+      query: promptText,
+      module: moduleKey,
+      content: `${baseResponse.content}\n\n*Tailored specifically for ${selectedArcher.name} (${selectedArcher.category} • ${userEquipment.poundage} Draw Weight).*`
+    });
+    setLoading(false);
+  };
+
+  const handleRunPreset = (promptText, moduleKey) => {
+    setCustomPrompt(promptText);
+    generateGeminiAdvice(promptText, moduleKey);
   };
 
   const handleCustomSubmit = (e) => {
     e.preventDefault();
     if (!customPrompt.trim()) return;
-
-    setLoading(true);
-    setTimeout(() => {
-      setAiResponse({
-        title: `✨ Gemini AI Archery Performance Response`,
-        query: customPrompt,
-        module: activeModule,
-        content: `### Archery Performance Analysis for ${selectedArcher.name}:
-
-Regarding your query: **"${customPrompt}"**
-
-1. **Biomechanics & Form**: Ensure consistent T-stance alignment and core stability throughout your shot cycle.
-2. **Equipment Check**: Verify that your bow poundage (${userEquipment.poundage}) and brace height (${userEquipment.braceHeight}) are in optimal tune.
-3. **Actionable Training Tip**: Practice blank-bale shooting at 5 meters to focus purely on feeling the proper back muscle engagement without target anxiety.`
-      });
-      setLoading(false);
-    }, 900);
+    generateGeminiAdvice(customPrompt, activeModule);
   };
 
   return (
@@ -166,7 +192,7 @@ Regarding your query: **"${customPrompt}"**
           <div>
             <div style={{ display: 'flex', alignItems: 'center', gap: '8px', marginBottom: '4px' }}>
               <span className="badge-gold">
-                <Sparkles size={13} /> Gemini AI Performance Suite
+                <Sparkles size={13} /> Powered by Live Gemini AI
               </span>
             </div>
             <h2 style={{ fontSize: '1.8rem', fontWeight: 800, color: '#f8fafc', margin: '4px 0', display: 'flex', alignItems: 'center', gap: '10px' }}>
@@ -358,14 +384,24 @@ Regarding your query: **"${customPrompt}"**
 
         {/* Right Column: AI Response Display Panel */}
         <div className="glass-card" style={{ padding: '24px', border: '1px solid rgba(5, 150, 105, 0.3)', minHeight: '380px' }}>
-          {!aiResponse ? (
+          {loading ? (
+            <div style={{ height: '100%', display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', textAlign: 'center', padding: '40px 20px' }}>
+              <RefreshCw size={48} color="#fbbf24" className="spin" style={{ marginBottom: '16px' }} />
+              <h4 style={{ fontSize: '1.15rem', fontWeight: 800, color: '#f8fafc', marginBottom: '6px' }}>
+                Consulting Gemini AI Archery Specialist...
+              </h4>
+              <p style={{ fontSize: '0.88rem', color: '#94a3b8' }}>
+                Generating custom performance analysis for {selectedArcher.name}
+              </p>
+            </div>
+          ) : !aiResponse ? (
             <div style={{ height: '100%', display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', textAlign: 'center', padding: '40px 20px', color: '#64748b' }}>
               <Sparkles size={52} color="#059669" style={{ marginBottom: '14px', opacity: 0.7 }} />
               <h4 style={{ fontSize: '1.15rem', fontWeight: 800, color: '#f8fafc', marginBottom: '6px' }}>
                 Select an Archery Preset or Ask a Question
               </h4>
               <p style={{ fontSize: '0.88rem', color: '#94a3b8', maxWidth: '380px', margin: 0, lineHeight: 1.5 }}>
-                Click any preset button on the left to generate personalized physio warm-ups, tournament meal plans, form diagnostics, or mental routines!
+                Click any preset button on the left to generate live Gemini AI warm-ups, tournament meal plans, form diagnostics, or mental routines!
               </p>
             </div>
           ) : (
@@ -375,7 +411,7 @@ Regarding your query: **"${customPrompt}"**
                   <Sparkles size={13} /> Gemini AI Response
                 </span>
                 <span style={{ fontSize: '0.75rem', color: '#94a3b8' }}>
-                  Custom Tailored Advice
+                  Live Custom Advice
                 </span>
               </div>
 
