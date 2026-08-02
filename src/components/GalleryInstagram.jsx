@@ -36,7 +36,7 @@ export default function GalleryInstagram({ archers, currentUser, onAddPhoto }) {
     <div style={{ marginBottom: '32px' }}>
       
       {/* Header */}
-      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '20px', flexWrap: 'wrap', gap: '12px' }}>
+      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '20px', flexWrap: 'wrap', gap: '12px' }} className="gallery-responsive-header">
         <div>
           <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
             <span className="badge-gold">
@@ -51,18 +51,18 @@ export default function GalleryInstagram({ archers, currentUser, onAddPhoto }) {
           </p>
         </div>
 
-        <div style={{ display: 'flex', gap: '12px' }}>
+        <div style={{ display: 'flex', gap: '12px', flexWrap: 'wrap', width: '100%', maxWidth: '420px' }} className="gallery-header-btns">
           <a
             href="https://www.instagram.com/theheritage_archery?utm_source=ig_web_button_share_sheet&igsh=ZDNlZDc0MzIxNw=="
             target="_blank"
             rel="noopener noreferrer"
             className="btn-gold"
-            style={{ textDecoration: 'none', padding: '12px 20px' }}
+            style={{ textDecoration: 'none', padding: '10px 18px', flex: 1, justifyContent: 'center' }}
           >
-            <InstagramIcon size={18} color="#090d16" /> Visit Official Instagram <ExternalLink size={14} />
+            <InstagramIcon size={18} color="#090d16" /> Instagram <ExternalLink size={14} />
           </a>
 
-          <button onClick={() => setShowUploadModal(true)} className="btn-emerald" style={{ padding: '12px 20px' }}>
+          <button onClick={() => setShowUploadModal(true)} className="btn-emerald" style={{ padding: '10px 18px', flex: 1, justifyContent: 'center' }}>
             <Plus size={18} /> Upload Photo
           </button>
         </div>
@@ -70,29 +70,30 @@ export default function GalleryInstagram({ archers, currentUser, onAddPhoto }) {
 
       {/* Official Instagram Embed Hero Card */}
       <div className="glass-card glass-card-gold" style={{ padding: '24px', marginBottom: '32px', border: '1px solid rgba(217, 119, 6, 0.4)' }}>
-        <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', flexWrap: 'wrap', gap: '16px' }}>
-          <div style={{ display: 'flex', alignItems: 'center', gap: '16px' }}>
+        <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', flexWrap: 'wrap', gap: '16px' }} className="instagram-card-responsive">
+          <div style={{ display: 'flex', alignItems: 'center', gap: '16px', flexWrap: 'wrap' }}>
             <div style={{
-              width: '64px',
-              height: '64px',
+              width: '58px',
+              height: '58px',
               borderRadius: '50%',
               background: 'linear-gradient(45deg, #f09433 0%, #e6683c 25%, #dc2743 50%, #cc2366 75%, #bc1888 100%)',
               padding: '3px',
               display: 'flex',
               alignItems: 'center',
               justifyContent: 'center',
-              boxShadow: '0 8px 25px rgba(220,39,67,0.4)'
+              boxShadow: '0 8px 25px rgba(220,39,67,0.4)',
+              flexShrink: 0
             }}>
               <div style={{ width: '100%', height: '100%', borderRadius: '50%', background: '#0f172a', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
-                <InstagramIcon size={30} color="#fbbf24" />
+                <InstagramIcon size={28} color="#fbbf24" />
               </div>
             </div>
 
             <div>
-              <h3 style={{ fontSize: '1.25rem', fontWeight: 800, color: '#f8fafc' }}>
+              <h3 style={{ fontSize: '1.25rem', fontWeight: 800, color: '#f8fafc', margin: 0 }}>
                 @theheritage_archery
               </h3>
-              <p style={{ color: '#94a3b8', fontSize: '0.88rem' }}>
+              <p style={{ color: '#94a3b8', fontSize: '0.85rem', margin: '4px 0 0 0' }}>
                 Official Instagram handle of The Heritage Archery Team • State Tournaments & Daily Practice Highlights
               </p>
             </div>
@@ -103,7 +104,7 @@ export default function GalleryInstagram({ archers, currentUser, onAddPhoto }) {
             target="_blank"
             rel="noopener noreferrer"
             className="btn-ghost"
-            style={{ border: '1px solid #fbbf24', color: '#fbbf24' }}
+            style={{ border: '1px solid #fbbf24', color: '#fbbf24', justifyContent: 'center' }}
           >
             Follow on Instagram
           </a>

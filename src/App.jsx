@@ -239,74 +239,34 @@ export default function App() {
               onUpdateCoach={handleUpdateCoach}
             />
 
-            {/* Quick Overview Section */}
-            <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(300px, 1fr))', gap: '20px', marginBottom: '32px' }}>
-              
-              {/* Announcements Card */}
+            {/* Quick Overview Section: Full Width Coach Announcements */}
+            <div style={{ marginBottom: '32px' }}>
               <div className="glass-card" style={{ padding: '24px' }}>
                 <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '16px' }}>
-                  <h3 style={{ fontSize: '1.1rem', fontWeight: 700, color: '#fbbf24', display: 'flex', alignItems: 'center', gap: '8px' }}>
-                    <Megaphone size={18} /> Coach Announcements
+                  <h3 style={{ fontSize: '1.15rem', fontWeight: 700, color: '#fbbf24', display: 'flex', alignItems: 'center', gap: '8px' }}>
+                    <Megaphone size={18} /> Coach Announcements & Team Bulletins
                   </h3>
                   <span style={{ fontSize: '0.75rem', color: '#94a3b8' }}>Latest Updates</span>
                 </div>
 
                 {appData.announcements.length === 0 ? (
-                  <div style={{ padding: '20px 0', textAlign: 'center', color: '#64748b', fontSize: '0.88rem' }}>
+                  <div style={{ padding: '24px 0', textAlign: 'center', color: '#64748b', fontSize: '0.9rem' }}>
                     No announcements published yet.
                   </div>
                 ) : (
                   <div style={{ display: 'flex', flexDirection: 'column', gap: '12px' }}>
-                    {appData.announcements.slice(0, 3).map((an) => (
-                      <div key={an.id} style={{ background: 'rgba(15, 23, 42, 0.5)', padding: '12px', borderRadius: '10px', borderLeft: '3px solid #d97706' }}>
-                        <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '4px' }}>
-                          <span style={{ fontWeight: 700, fontSize: '0.9rem', color: '#f8fafc' }}>{an.title}</span>
-                          <span style={{ fontSize: '0.72rem', color: '#94a3b8' }}>{an.date}</span>
+                    {appData.announcements.map((an) => (
+                      <div key={an.id} style={{ background: 'rgba(15, 23, 42, 0.5)', padding: '14px', borderRadius: '12px', borderLeft: '4px solid #d97706' }}>
+                        <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '4px', flexWrap: 'wrap', gap: '8px' }}>
+                          <span style={{ fontWeight: 800, fontSize: '0.95rem', color: '#f8fafc' }}>{an.title}</span>
+                          <span style={{ fontSize: '0.75rem', color: '#94a3b8' }}>{an.date}</span>
                         </div>
-                        <p style={{ fontSize: '0.82rem', color: '#cbd5e1', margin: 0 }}>{an.content}</p>
+                        <p style={{ fontSize: '0.88rem', color: '#cbd5e1', margin: 0, lineHeight: 1.5 }}>{an.content}</p>
                       </div>
                     ))}
                   </div>
                 )}
               </div>
-
-              {/* Leaderboard Summary Card */}
-              <div className="glass-card" style={{ padding: '24px' }}>
-                <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '16px' }}>
-                  <h3 style={{ fontSize: '1.1rem', fontWeight: 700, color: '#34d399', display: 'flex', alignItems: 'center', gap: '8px' }}>
-                    <Trophy size={18} /> Streak Leaderboard
-                  </h3>
-                  <button onClick={() => setActiveTab('leaderboard')} className="btn-ghost" style={{ fontSize: '0.75rem', padding: '4px 8px' }}>
-                    View All →
-                  </button>
-                </div>
-
-                {appData.archers.length === 0 ? (
-                  <div style={{ padding: '20px 0', textAlign: 'center', color: '#64748b', fontSize: '0.88rem' }}>
-                    No registered archers on leaderboard yet.
-                  </div>
-                ) : (
-                  <div style={{ display: 'flex', flexDirection: 'column', gap: '10px' }}>
-                    {appData.archers.slice(0, 3).map((archer, idx) => {
-                      const st = appData.streaks[archer.id] || { count: 0 };
-                      return (
-                        <div key={archer.id} style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', background: 'rgba(15, 23, 42, 0.4)', padding: '8px 12px', borderRadius: '10px' }}>
-                          <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
-                            <span style={{ fontWeight: 800, color: idx === 0 ? '#fbbf24' : idx === 1 ? '#94a3b8' : '#b45309', fontSize: '0.9rem' }}>
-                              #{idx + 1}
-                            </span>
-                            <span style={{ fontWeight: 600, fontSize: '0.88rem', color: '#f8fafc' }}>{archer.name}</span>
-                          </div>
-                          <span style={{ fontSize: '0.82rem', fontWeight: 700, color: '#34d399' }}>
-                            {st.count} Days 🔥
-                          </span>
-                        </div>
-                      );
-                    })}
-                  </div>
-                )}
-              </div>
-
             </div>
           </div>
         )}
