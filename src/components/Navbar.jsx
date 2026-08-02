@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { Target, Award, Calendar, MessageSquare, Shield, User, MapPin, Camera, Wrench, LogIn, LogOut, ChevronDown, UserPlus, Upload, HelpCircle, Key, CheckCircle2, Menu, X } from 'lucide-react';
+import { Target, Award, Calendar, MessageSquare, Shield, User, MapPin, Camera, Wrench, LogIn, LogOut, ChevronDown, UserPlus, Upload, HelpCircle, Key, CheckCircle2, Menu, X, Sparkles } from 'lucide-react';
 
 export default function Navbar({ activeTab, setActiveTab, currentUser, archers, coach, onSwitchUser, onAddArcher, onUpdateArcher }) {
   const [showRoleModal, setShowRoleModal] = useState(false);
@@ -205,6 +205,9 @@ export default function Navbar({ activeTab, setActiveTab, currentUser, archers, 
           <button className={`nav-tab ${activeTab === 'gallery' ? 'active' : ''}`} onClick={() => handleTabClick('gallery')}>
             <Camera size={17} /> Gallery
           </button>
+          <button className={`nav-tab ${activeTab === 'ai-coach' ? 'active' : ''}`} onClick={() => handleTabClick('ai-coach')}>
+            <Sparkles size={17} color="#fbbf24" /> AI Coach ✨
+          </button>
           {currentUser.role === 'archer' && (
             <button className={`nav-tab ${activeTab === 'profile' ? 'active' : ''}`} onClick={() => handleTabClick('profile')}>
               <User size={17} /> My Profile
@@ -355,6 +358,9 @@ export default function Navbar({ activeTab, setActiveTab, currentUser, archers, 
             </button>
             <button className={`mobile-nav-item ${activeTab === 'gallery' ? 'active' : ''}`} onClick={() => handleTabClick('gallery')}>
               <Camera size={18} /> Photo Gallery
+            </button>
+            <button className={`mobile-nav-item ${activeTab === 'ai-coach' ? 'active' : ''}`} onClick={() => handleTabClick('ai-coach')}>
+              <Sparkles size={18} color="#fbbf24" /> AI Performance Coach ✨
             </button>
             {currentUser.role === 'archer' && (
               <button className={`mobile-nav-item ${activeTab === 'profile' ? 'active' : ''}`} onClick={() => handleTabClick('profile')}>

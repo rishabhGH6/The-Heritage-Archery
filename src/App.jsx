@@ -10,6 +10,7 @@ import ChatHub from './components/ChatHub';
 import GalleryInstagram from './components/GalleryInstagram';
 import CoachPortal from './components/CoachPortal';
 import MyProfile from './components/MyProfile';
+import AiArcheryCoach from './components/AiArcheryCoach';
 import CinematicIntro from './components/CinematicIntro';
 
 import { defaultData, loadAppData, saveAppData } from './data/initialData';
@@ -348,6 +349,14 @@ export default function App() {
             currentUser={appData.currentUser}
             archers={appData.archers}
             onUpdateArcher={handleUpdateArcher}
+          />
+        )}
+
+        {activeTab === 'ai-coach' && (
+          <AiArcheryCoach
+            currentUser={appData.currentUser}
+            archers={appData.archers}
+            equipmentData={appData.equipment}
           />
         )}
 
