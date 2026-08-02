@@ -5,6 +5,20 @@ export default function Leaderboard({ archers, streaks, currentUser, onCheckInSt
   // Map archers with their streak stats
   const todayStr = new Date().toISOString().split('T')[0];
   
+  const getEffectiveStreak = (stObj) => {
+    if (!stObj || !stObj.lastChecked) return 0;
+    const todayStr = new Date().toISOString().split('T')[0];
+    
+    const yesterday = new Date();
+    yesterday.setDate(yesterday.getDate() - 1);
+    const yesterdayStr = yesterday.toISOString().split('T')[0];
+
+    if (stObj.lastChecked === todayStr || stObj.lastChecked === yesterdayStr) {
+      return stObj.count || 0;
+    }
+    return 0;
+  };
+
   const getPracticedHistorySet = (stObj) => {
     const historySet = new Set(stObj?.history || []);
     const effectiveStreak = getEffectiveStreak(stObj);
