@@ -206,7 +206,7 @@ export default function InteractiveScoring({ currentUser, archers = [], scoreLog
   // Requirement 5: PDF Export containing 6 rounds arrow-by-arrow data in a presentable format
   const handleExportPDF = () => {
     try {
-      const doc = new jsPDF('p', 'pt', 'a4');
+      const selectedArcher = selectedArcherId === 'coach' ? { name: 'Coach Jayanta Chakraborty' } : (archers.find(a => a.id === selectedArcherId) || currentUser);
       const archerName = selectedArcher?.name || "Archer";
       const todayDate = new Date().toLocaleDateString('en-US', { year: 'numeric', month: 'short', day: 'numeric' });
       const grandTotal = getGrandTotal();
@@ -378,15 +378,12 @@ export default function InteractiveScoring({ currentUser, archers = [], scoreLog
               value={selectedArcherId}
               onChange={(e) => setSelectedArcherId(e.target.value)}
               disabled={currentUser.role === 'archer'}
-              style={{ minWidth: '180px' }}
+              style={{ minWidth: '220px' }}
             >
-              {archers.length === 0 ? (
-                <option value="">Guest Archer (Register to save)</option>
-              ) : (
-                archers.map(a => (
-                  <option key={a.id} value={a.id}>{a.name}</option>
-                ))
-              )}
+              <option value="coach">Coach Jayanta Chakraborty (Head Coach) 🛡️</option>
+              {archers.map(a => (
+                <option key={a.id} value={a.id}>{a.name} ({a.category})</option>
+              ))}
             </select>
           </div>
 

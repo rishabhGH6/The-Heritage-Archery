@@ -18,7 +18,23 @@ export default function EquipmentTuner({ currentUser, archers, equipmentData, on
   const [sightMarks, setSightMarks] = useState(currentEq.sightMarks);
   const [goodArrows, setGoodArrows] = useState(currentEq.goodArrows || []);
 
-  const selectedArcher = archers.find(a => a.id === selectedArcherId) || archers[0];
+  const selectedArcher = selectedArcherId === 'coach'
+    ? { id: 'coach', name: 'Coach Jayanta Chakraborty', category: 'Head Coach' }
+    : (archers.find(a => a.id === selectedArcherId) || archers[0] || { name: 'Archer' });
+
+  const handleArcherChange = (newId) => {
+    setSelectedArcherId(newId);
+    const eq = equipmentData[newId] || {
+      poundage: "42 lbs",
+      braceHeight: "8.5 inches",
+      sightMarks: { "30m": "4.0", "50m": "6.0", "60m": "7.5", "70m": "9.0" },
+      goodArrows: [1, 2, 3, 4, 5, 6]
+    };
+    setPoundage(eq.poundage);
+    setBraceHeight(eq.braceHeight);
+    setSightMarks(eq.sightMarks);
+    setGoodArrows(eq.goodArrows || []);
+  };
 
   const handleToggleArrow = (arrowNum) => {
     if (goodArrows.includes(arrowNum)) {
@@ -67,16 +83,9 @@ export default function EquipmentTuner({ currentUser, archers, equipmentData, on
             <select 
               className="select-glass"
               value={selectedArcherId}
-              onChange={(e) => {
-                const id = e.target.value;
-                setSelectedArcherId(id);
-                const eq = equipmentData[id] || { poundage: "40 lbs", braceHeight: "8.5 inches", sightMarks: { "30m": "4.0", "50m": "6.0", "60m": "7.5", "70m": "9.0" }, goodArrows: [1, 2, 3] };
-                setPoundage(eq.poundage);
-                setBraceHeight(eq.braceHeight);
-                setSightMarks(eq.sightMarks);
-                setGoodArrows(eq.goodArrows || []);
-              }}
+              onChange={(e) => handleArcherChange(e.target.value)}
             >
+              <option value="coach">Coach Jayanta Chakraborty's Bow Profile 🛡️</option>
               {archers.map(a => (
                 <option key={a.id} value={a.id}>{a.name}'s Bow Profile</option>
               ))}
