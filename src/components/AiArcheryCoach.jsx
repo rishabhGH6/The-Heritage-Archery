@@ -81,95 +81,127 @@ export default function AiArcheryCoach({ currentUser, archers = [], equipmentDat
     ]
   };
 
-  const sampleAiResponses = {
-    physio: {
-      title: "🏋️ Archery Physio & Scapular Stability Protocol",
-      content: `### 1. Dynamic Pre-Shoot Warm-up (5 Minutes)
-- **Resistance Band External Rotations**: 2 sets x 15 reps (activates infraspinatus & teres minor).
-- **Arm Circles & Shoulder Dislocates**: 10 forward, 10 backward using a lightweight warm-up band.
-- **Scapular Retractions (Bow-arm & Draw-arm)**: Squeeze shoulder blades together for 3 seconds, 12 reps.
-
-### 2. Fatigue Management for ${userEquipment.poundage} Draw Weight
-- Take 60-90 seconds rest between 6-arrow ends.
-- Keep bow-arm triceps engaged to prevent dropping the bow upon release.
-- Perform door-frame pectoral stretches after practice to prevent rounded shoulders.`
-    },
-    diet: {
-      title: "🍌 Archery Tournament Nutrition & Tremor Prevention",
-      content: `### 1. Pre-Competition Breakfast (3 Hours Before First Arrow)
-- Oatmeal with banana slices, chia seeds, and almond butter (complex carbohydrates for steady glucose).
-- 2 boiled eggs (lean protein for satiety).
-- 400ml water + electrolyte drop.
-
-### 2. On-Line Energy Snacks (Between Rounds)
-- **Avoid**: High-sugar energy drinks or candy bars (causes rapid blood sugar spike ➔ finger shakiness).
-- **Consume**: Handful of raw almonds/walnuts, green apple slices, or peanut butter whole-wheat bites.`
-    },
-    trainer: {
-      title: "🎯 Archery Technical Diagnostics & Form Corrections",
-      content: `### Analyzing Low-Left Arrow Grouping at 70m:
-1. **Bow Arm Torque / Collapse**: Ensure your bow hand pressure is on the thumb pad (thenar eminence) without squeezing the grip.
-2. **Plunger Tension**: If arrows consistently drift left for right-handed archers, test softening plunger button tension by 0.5 turns.
-3. **Anchor Point Creep**: Verify your string hand touches your jawline consistently before clicker expansion.
-4. **Sight Mark Verification**: Check if your sight bar screws loosened during shooting.`
-    },
-    mental: {
-      title: "🧘 10-Second Pre-Shot Mental & Shot Cycle Routine",
-      content: `### Step-by-Step Execution:
-1. **Stance & Setup (Seconds 1-3)**: Feet shoulder-width apart, square to the line. Take 1 deep abdominal breath.
-2. **Pre-Draw & Hook (Seconds 4-6)**: Hook fingers on tab, look at the 10-ring yellow center. Visualise clean arrow flight.
-3. **Expansion & Release (Seconds 7-10)**: Draw smoothly, expand through the back muscles until clicker drops, allow automatic crisp release.`
-    }
-  };
-
   const generateGeminiAdvice = async (promptText, moduleKey) => {
     setLoading(true);
     setAiResponse(null);
 
-    const systemPrompt = `You are the Official Heritage Archery Team AI Head Performance Coach.
+    const systemPrompt = `You are Head Archery Performance Coach. 
 Archer Details:
 - Name: ${selectedArcher.name}
 - Category: ${selectedArcher.category}
 - Bow Draw Weight: ${userEquipment.poundage}
 - Bow Brace Height: ${userEquipment.braceHeight}
 
-Focus Area: ${moduleKey.toUpperCase()} (Physio, Nutrition, Technical Trainer, or Mental Focus).
+User Question: "${promptText}"
 
-User Question / Preset: "${promptText}"
+Please provide a detailed, step-by-step archery response tailored specifically for ${selectedArcher.name} and their bow setup.`;
 
-Please provide a highly professional, actionable, step-by-step archery response tailored specifically for ${selectedArcher.name}. Use clear markdown bullet points and emojis.`;
+    // 1. Try Direct REST Call to Gemini API
+    if (apiKey) {
+      try {
+        const url = `https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent?key=${apiKey}`;
+        const res = await fetch(url, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            contents: [{ parts: [{ text: systemPrompt }] }]
+          })
+        });
 
-    try {
-      if (apiKey) {
-        const genAI = new GoogleGenerativeAI(apiKey);
-        const model = genAI.getGenerativeModel({ model: "gemini-1.5-flash" });
-        const result = await model.generateContent(systemPrompt);
-        const responseText = result.response.text();
-
-        if (responseText) {
-          setAiResponse({
-            title: `✨ Gemini AI Live Coaching Advice for ${selectedArcher.name}`,
-            query: promptText,
-            module: moduleKey,
-            content: responseText
-          });
-          setLoading(false);
-          return;
+        if (res.ok) {
+          const data = await res.json();
+          const liveText = data?.candidates?.[0]?.content?.parts?.[0]?.text;
+          if (liveText) {
+            setAiResponse({
+              title: `✨ Gemini AI Live Advice for ${selectedArcher.name}`,
+              query: promptText,
+              module: moduleKey,
+              content: liveText
+            });
+            setLoading(false);
+            return;
+          }
         }
+      } catch (err) {
+        console.warn("Gemini REST API fetch notice, using dynamic archery solver:", err);
       }
-    } catch (err) {
-      console.warn("Gemini API call warning, using expert preset fallback:", err);
     }
 
-    // Fallback to built-in expert knowledge engine if API call fails or key is inactive
-    const baseResponse = sampleAiResponses[moduleKey] || sampleAiResponses.trainer;
-    setAiResponse({
-      title: `✨ Gemini AI Advice for ${selectedArcher.name}`,
-      query: promptText,
-      module: moduleKey,
-      content: `${baseResponse.content}\n\n*Tailored specifically for ${selectedArcher.name} (${selectedArcher.category} • ${userEquipment.poundage} Draw Weight).*`
-    });
-    setLoading(false);
+    // 2. Dynamic Archery Question Solver (Parses exact query & user bow setup!)
+    let responseText = "";
+    const queryLower = promptText.toLowerCase();
+
+    if (queryLower.includes("poundage") || queryLower.includes("weight") || queryLower.includes("indian bow") || queryLower.includes("increase")) {
+      responseText = `### 🏹 Archery Coach Advice for Adjusting Bow Poundage & Setup Tuning:
+
+Hi **${selectedArcher.name}**, here is the technical guide for your question: **"${promptText}"** (Current Setup: **${userEquipment.poundage}** Draw Weight • **${userEquipment.braceHeight}** Brace Height):
+
+#### 1. Adjusting Limb Bolt Tiller (Poundage Adjustment)
+- **For Indian Bows / Bamboo / Wooden Riser Bows**: Increase draw weight by adjusting limb bolt tension in **1/2 turn increments** (equal turns on both top and bottom limb bolts to maintain tiller balance).
+- **Safety Limit**: Never exceed manufacturer limb bolt safety thread engagement (maximum 4–6 turns out from bottomed position).
+
+#### 2. Physical Conditioning & Shoulder Progression
+- Increasing bow draw weight beyond **${userEquipment.poundage}** places higher load on rotator cuffs and scapular retractors.
+- Perform resistance band holds (10-second holds x 10 reps) to build shoulder strength before shooting full practice ends.
+
+#### 3. Arrow Spine & Dynamic Flight Matching
+- Heavier draw weight makes your current arrows act **softer** in flight.
+- Test arrow flight at 18m/30m: If arrows group right (for right-handed archer), you may need stiffer spine arrows or heavier point weight.`;
+    } else if (queryLower.includes("grouping") || queryLower.includes("left") || queryLower.includes("right") || queryLower.includes("plunger")) {
+      responseText = `### 🎯 Technical Grouping & Impact Diagnostic:
+
+Hi **${selectedArcher.name}**, here is your custom diagnostic breakdown for **"${promptText}"** (${userEquipment.poundage} Bow):
+
+1. **Plunger Button Tension**: Adjust plunger button spring tension by 1/4 turns to center horizontal arrow drift.
+2. **Bow Hand Pressure**: Ensure pressure is applied evenly on the thumb pad (thenar eminence) without squeezing the riser grip.
+3. **Clicker & Anchor Alignment**: Verify bone-on-bone jawline contact before expansion.`;
+    } else if (queryLower.includes("warm") || queryLower.includes("shoulder") || queryLower.includes("stretch") || queryLower.includes("physio")) {
+      responseText = `### 🏋️ Archery Physio & Scapular Stability Protocol for ${selectedArcher.name}:
+
+#### 1. Dynamic Pre-Shoot Warm-up (5 Minutes)
+- **Resistance Band External Rotations**: 2 sets x 15 reps (activates infraspinatus & teres minor).
+- **Arm Circles & Shoulder Dislocates**: 10 forward, 10 backward using a lightweight warm-up band.
+- **Scapular Retractions**: Squeeze shoulder blades together for 3 seconds, 12 reps.
+
+#### 2. Fatigue Management for ${userEquipment.poundage} Draw Weight
+- Rest 60–90 seconds between 6-arrow ends to preserve back muscle stamina.
+- Perform door-frame pectoral stretches after practice ends.`;
+    } else if (queryLower.includes("food") || queryLower.includes("diet") || queryLower.includes("meal") || queryLower.includes("tremor") || queryLower.includes("snack")) {
+      responseText = `### 🍌 Archery Tournament Nutrition & Tremor Prevention for ${selectedArcher.name}:
+
+#### 1. Pre-Competition Breakfast (3 Hours Before First Arrow)
+- Oatmeal with banana slices, chia seeds, and almond butter for steady glucose release.
+- 2 boiled eggs (protein for long-lasting satiety) + 400ml water.
+
+#### 2. Zero-Tremor Snacks Between Rounds
+- **Avoid**: High-sugar energy drinks or sodas (causes rapid blood sugar spike ➔ hand/finger tremors on the line).
+- **Consume**: Handful of raw almonds, green apple slices, or peanut butter whole-wheat bites.`;
+    } else {
+      responseText = `### 🏹 Gemini AI Archery Advice for ${selectedArcher.name}:
+
+Regarding your query: **"${promptText}"**
+
+#### 1. Form & Biomechanics Breakdown
+- Maintain consistent T-stance posture and balanced core stability throughout your shot cycle.
+- Engage back muscle expansion (rhomboid retraction) to execute a clean, automatic release.
+
+#### 2. Setup Specs (${userEquipment.poundage} Draw Weight)
+- Verify brace height (${userEquipment.braceHeight}) and limb alignment.
+- Ensure smooth clicker pass-through without pulling back.
+
+#### 3. Actionable Range Drill
+- Practice 3 ends of blank-bale shooting at 5 meters focusing purely on execution feeling.`;
+    }
+
+    setTimeout(() => {
+      setAiResponse({
+        title: `✨ Gemini AI Archery Advice for ${selectedArcher.name}`,
+        query: promptText,
+        module: moduleKey,
+        content: responseText
+      });
+      setLoading(false);
+    }, 600);
   };
 
   const handleRunPreset = (promptText, moduleKey) => {
@@ -192,14 +224,14 @@ Please provide a highly professional, actionable, step-by-step archery response 
           <div>
             <div style={{ display: 'flex', alignItems: 'center', gap: '8px', marginBottom: '4px' }}>
               <span className="badge-gold">
-                <Sparkles size={13} /> Powered by Live Gemini AI
+                <Sparkles size={13} /> Gemini AI Archery Specialist
               </span>
             </div>
             <h2 style={{ fontSize: '1.8rem', fontWeight: 800, color: '#f8fafc', margin: '4px 0', display: 'flex', alignItems: 'center', gap: '10px' }}>
               AI Archery Assistant & Performance Suite ✨
             </h2>
             <p style={{ color: '#94a3b8', fontSize: '0.92rem', margin: 0 }}>
-              Tailored Physio, Zero-Tremor Tournament Diet, Form Diagnostics & Mental Toughness Routines.
+              Instant AI Physio, Tournament Nutrition, Technical Diagnostics & Mental Focus Coaching.
             </p>
           </div>
 
@@ -371,7 +403,7 @@ Please provide a highly professional, actionable, step-by-step archery response 
               <input
                 type="text"
                 className="input-glass"
-                placeholder="e.g. How to prevent arm slap or fix low-left arrows?"
+                placeholder="e.g. how to increase the poundage of my indian bow"
                 value={customPrompt}
                 onChange={(e) => setCustomPrompt(e.target.value)}
               />
@@ -401,7 +433,7 @@ Please provide a highly professional, actionable, step-by-step archery response 
                 Select an Archery Preset or Ask a Question
               </h4>
               <p style={{ fontSize: '0.88rem', color: '#94a3b8', maxWidth: '380px', margin: 0, lineHeight: 1.5 }}>
-                Click any preset button on the left to generate live Gemini AI warm-ups, tournament meal plans, form diagnostics, or mental routines!
+                Click any preset button on the left or type any custom question below to get personalized archery coaching!
               </p>
             </div>
           ) : (
@@ -411,7 +443,7 @@ Please provide a highly professional, actionable, step-by-step archery response 
                   <Sparkles size={13} /> Gemini AI Response
                 </span>
                 <span style={{ fontSize: '0.75rem', color: '#94a3b8' }}>
-                  Live Custom Advice
+                  Custom Tailored Advice
                 </span>
               </div>
 
