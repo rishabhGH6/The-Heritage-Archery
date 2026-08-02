@@ -65,16 +65,41 @@ export default function InteractiveScoring({ currentUser, archers = [], scoreLog
     }
   };
 
-  // Handle clicking on SVG target face (Instant plot without popup)
+  // Handle clicking or touching on SVG target face (Accurate touch scaling for mobile screens)
   const handleTargetClick = (e) => {
     if (!svgRef.current) return;
-    const rect = svgRef.current.getBoundingClientRect();
-    const clickX = e.clientX - rect.left;
-    const clickY = e.clientY - rect.top;
 
-    // Convert to relative ratio coordinates (-1 to 1)
-    const xRatio = (clickX - CENTER) / MAX_RADIUS;
-    const yRatio = (clickY - CENTER) / MAX_RADIUS;
+    // Prevent double firing if both touch and click trigger on mobile
+    if (e.type === 'touchend') {
+      e.preventDefault();
+    }
+
+    const rect = svgRef.current.getBoundingClientRect();
+    
+    // Extract exact touch or mouse coordinates
+    let clientX = e.clientX;
+    let clientY = e.clientY;
+
+    if (e.touches && e.touches.length > 0) {
+      clientX = e.touches[0].clientX;
+      clientY = e.touches[0].clientY;
+    } else if (e.changedTouches && e.changedTouches.length > 0) {
+      clientX = e.changedTouches[0].clientX;
+      clientY = e.changedTouches[0].clientY;
+    }
+
+    if (clientX === undefined || clientY === undefined) return;
+
+    // Scale coordinates accurately from mobile rendered element size to SVG viewBox (380x380)
+    const scaleX = TARGET_SIZE / (rect.width || TARGET_SIZE);
+    const scaleY = TARGET_SIZE / (rect.height || TARGET_SIZE);
+
+    const svgX = (clientX - rect.left) * scaleX;
+    const svgY = (clientY - rect.top) * scaleY;
+
+    // Convert to relative ratio coordinates (-1 to 1) from target center
+    const xRatio = (svgX - CENTER) / MAX_RADIUS;
+    const yRatio = (svgY - CENTER) / MAX_RADIUS;
     const dist = Math.sqrt(xRatio * xRatio + yRatio * yRatio);
 
     const { score, isX, ringName } = getScoreFromRadius(dist);
@@ -482,13 +507,15 @@ export default function InteractiveScoring({ currentUser, archers = [], scoreLog
               width={TARGET_SIZE}
               height={TARGET_SIZE}
               onClick={handleTargetClick}
+              onTouchEnd={handleTargetClick}
               style={{
                 maxWidth: '100%',
                 height: 'auto',
                 borderRadius: '12px',
                 boxShadow: '0 12px 35px rgba(0,0,0,0.25)',
                 background: '#ffffff',
-                border: '1px solid #cbd5e1'
+                border: '1px solid #cbd5e1',
+                touchAction: 'manipulation'
               }}
             >
               {/* Target Registration Crosses on Edges */}
