@@ -203,6 +203,13 @@ export default function App() {
     syncSaveAnnouncement(annObj);
   };
 
+  const handleDeleteAnnouncement = (id) => {
+    setAppData(prev => ({
+      ...prev,
+      announcements: prev.announcements.filter(a => a.id !== id)
+    }));
+  };
+
   const handleGrantBadge = (badgeObj) => {
     setAppData(prev => ({
       ...prev,
@@ -367,6 +374,7 @@ export default function App() {
             announcements={appData.announcements}
             badges={appData.badges}
             onAddAnnouncement={handleAddAnnouncement}
+            onDeleteAnnouncement={handleDeleteAnnouncement}
             onGrantBadge={handleGrantBadge}
             onUpdateCoachPassword={handleUpdateCoachPassword}
           />
