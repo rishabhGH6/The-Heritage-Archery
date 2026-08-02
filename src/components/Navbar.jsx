@@ -153,7 +153,7 @@ export default function Navbar({ activeTab, setActiveTab, currentUser, archers, 
   };
 
   return (
-    <header style={{ position: 'sticky', top: 0, zIndex: 100 }} className="glass-card">
+    <header className="app-sticky-header">
       <div style={{ maxWidth: '1280px', margin: '0 auto', padding: '12px 20px', display: 'flex', alignItems: 'center', justifyContent: 'space-between', flexWrap: 'wrap', gap: '12px' }}>
         
         {/* Brand Logo */}

@@ -5,15 +5,30 @@ export default function Leaderboard({ archers, streaks, currentUser, onCheckInSt
   // Map archers with their streak stats
   const todayStr = new Date().toISOString().split('T')[0];
   
+  const getEffectiveStreak = (stObj) => {
+    if (!stObj || !stObj.lastChecked) return 0;
+    const todayStr = new Date().toISOString().split('T')[0];
+    
+    const yesterday = new Date();
+    yesterday.setDate(yesterday.getDate() - 1);
+    const yesterdayStr = yesterday.toISOString().split('T')[0];
+
+    if (stObj.lastChecked === todayStr || stObj.lastChecked === yesterdayStr) {
+      return stObj.count || 0;
+    }
+    return 0;
+  };
+
   const leaderboardData = archers.map(archer => {
     const s = streaks[archer.id] || { count: 0, lastChecked: null, history: [] };
+    const effectiveStreak = getEffectiveStreak(s);
     const hasCheckedToday = s.lastChecked === todayStr;
     return {
       ...archer,
-      streakCount: s.count,
+      streakCount: effectiveStreak,
       lastChecked: s.lastChecked,
       hasCheckedToday,
-      historyCount: s.history ? s.history.length : 0
+      historyCount: effectiveStreak > 0 ? (s.history ? s.history.length : effectiveStreak) : 0
     };
   }).sort((a, b) => b.streakCount - a.streakCount);
 

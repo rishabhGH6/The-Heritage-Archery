@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { Sparkles, Activity, Utensils, Target, Brain, Send, RefreshCw, CheckCircle2, Shield, ArrowRight, Zap, Info } from 'lucide-react';
+import { Sparkles, Activity, Utensils, Target, Brain, Send, RefreshCw, Shield, ArrowRight, Zap, CheckCircle2, ChevronRight } from 'lucide-react';
 
 export default function AiArcheryCoach({ currentUser, archers = [], equipmentData = {} }) {
   const [activeModule, setActiveModule] = useState('physio'); // 'physio', 'diet', 'trainer', 'mental'
@@ -126,13 +126,13 @@ export default function AiArcheryCoach({ currentUser, archers = [], equipmentDat
     setTimeout(() => {
       const baseResponse = sampleAiResponses[moduleKey] || sampleAiResponses.trainer;
       setAiResponse({
-        title: `✨ Gemini AI Custom Archery Advice for ${selectedArcher.name}`,
+        title: `✨ Gemini AI Advice for ${selectedArcher.name}`,
         query: promptText,
         module: moduleKey,
         content: `${baseResponse.content}\n\n*Tailored specifically for ${selectedArcher.name} (${selectedArcher.category} • ${userEquipment.poundage} Draw Weight).*`
       });
       setLoading(false);
-    }, 1000);
+    }, 800);
   };
 
   const handleCustomSubmit = (e) => {
@@ -154,130 +154,144 @@ Regarding your query: **"${customPrompt}"**
 3. **Actionable Training Tip**: Practice blank-bale shooting at 5 meters to focus purely on feeling the proper back muscle engagement without target anxiety.`
       });
       setLoading(false);
-    }, 1200);
+    }, 900);
   };
 
   return (
     <div style={{ marginBottom: '36px' }}>
       
-      {/* Header */}
-      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '20px', flexWrap: 'wrap', gap: '12px' }}>
-        <div>
-          <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
-            <span className="badge-gold">
-              <Sparkles size={13} /> Powered by Gemini AI
-            </span>
-          </div>
-          <h2 style={{ fontSize: '1.75rem', fontWeight: 800, color: '#f8fafc', margin: '4px 0', display: 'flex', alignItems: 'center', gap: '10px' }}>
-            AI Archery Performance Suite ✨
-          </h2>
-          <p style={{ color: '#94a3b8', fontSize: '0.9rem' }}>
-            Instant AI-powered Physio, Tournament Nutrition, Technical Diagnostics & Mental Focus Coaching.
-          </p>
-        </div>
-
-        {/* Archer Profile Context Badge */}
-        <div style={{ background: 'rgba(5, 150, 105, 0.15)', border: '1px solid rgba(5, 150, 105, 0.3)', padding: '8px 14px', borderRadius: '12px', display: 'flex', alignItems: 'center', gap: '10px' }}>
-          <Shield size={18} color="#34d399" />
+      {/* Header Banner */}
+      <div className="glass-card" style={{ padding: '24px', marginBottom: '24px', border: '1px solid rgba(217, 119, 6, 0.3)', background: 'linear-gradient(135deg, rgba(15,23,42,0.9), rgba(5,150,105,0.15))' }}>
+        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', gap: '16px' }}>
           <div>
-            <div style={{ fontSize: '0.82rem', fontWeight: 800, color: '#f8fafc' }}>{selectedArcher.name}</div>
-            <div style={{ fontSize: '0.7rem', color: '#34d399', fontWeight: 600 }}>{selectedArcher.category} • {userEquipment.poundage} Bow</div>
+            <div style={{ display: 'flex', alignItems: 'center', gap: '8px', marginBottom: '4px' }}>
+              <span className="badge-gold">
+                <Sparkles size={13} /> Gemini AI Performance Suite
+              </span>
+            </div>
+            <h2 style={{ fontSize: '1.8rem', fontWeight: 800, color: '#f8fafc', margin: '4px 0', display: 'flex', alignItems: 'center', gap: '10px' }}>
+              AI Archery Assistant & Performance Suite ✨
+            </h2>
+            <p style={{ color: '#94a3b8', fontSize: '0.92rem', margin: 0 }}>
+              Tailored Physio, Zero-Tremor Tournament Diet, Form Diagnostics & Mental Toughness Routines.
+            </p>
+          </div>
+
+          {/* Archer Profile Context Badge */}
+          <div style={{ background: 'rgba(15, 23, 42, 0.8)', border: '1px solid rgba(5, 150, 105, 0.4)', padding: '10px 16px', borderRadius: '14px', display: 'flex', alignItems: 'center', gap: '12px' }}>
+            <Shield size={22} color="#34d399" />
+            <div>
+              <div style={{ fontSize: '0.88rem', fontWeight: 800, color: '#f8fafc' }}>{selectedArcher.name}</div>
+              <div style={{ fontSize: '0.72rem', color: '#34d399', fontWeight: 700 }}>{selectedArcher.category} • {userEquipment.poundage} Bow</div>
+            </div>
           </div>
         </div>
       </div>
 
       {/* 4 AI Specialized Module Tabs */}
-      <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(220px, 1fr))', gap: '12px', marginBottom: '24px' }}>
+      <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(220px, 1fr))', gap: '14px', marginBottom: '24px' }}>
         
         <button
           onClick={() => setActiveModule('physio')}
           style={{
-            padding: '14px 16px',
-            borderRadius: '14px',
+            padding: '16px',
+            borderRadius: '16px',
             border: activeModule === 'physio' ? '2px solid #34d399' : '1px solid var(--border-glass)',
-            background: activeModule === 'physio' ? 'rgba(5, 150, 105, 0.25)' : 'rgba(15, 23, 42, 0.6)',
+            background: activeModule === 'physio' ? 'linear-gradient(135deg, rgba(5, 150, 105, 0.25), rgba(15,23,42,0.8))' : 'rgba(15, 23, 42, 0.6)',
             color: '#f8fafc',
             cursor: 'pointer',
             textAlign: 'left',
             display: 'flex',
             alignItems: 'center',
-            gap: '12px',
+            gap: '14px',
+            boxShadow: activeModule === 'physio' ? '0 8px 25px rgba(5, 150, 105, 0.3)' : 'none',
             transition: 'all 0.2s ease'
           }}
         >
-          <Activity size={24} color="#34d399" />
+          <div style={{ width: '42px', height: '42px', borderRadius: '12px', background: 'rgba(5, 150, 105, 0.2)', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+            <Activity size={22} color="#34d399" />
+          </div>
           <div>
-            <div style={{ fontWeight: 800, fontSize: '0.95rem' }}>Archery Physio</div>
-            <div style={{ fontSize: '0.72rem', color: '#94a3b8' }}>Warm-ups & Injury Prevention</div>
+            <div style={{ fontWeight: 800, fontSize: '0.98rem' }}>Archery Physio</div>
+            <div style={{ fontSize: '0.75rem', color: '#94a3b8' }}>Warm-ups & Injury Prevention</div>
           </div>
         </button>
 
         <button
           onClick={() => setActiveModule('diet')}
           style={{
-            padding: '14px 16px',
-            borderRadius: '14px',
+            padding: '16px',
+            borderRadius: '16px',
             border: activeModule === 'diet' ? '2px solid #fbbf24' : '1px solid var(--border-glass)',
-            background: activeModule === 'diet' ? 'rgba(217, 119, 6, 0.25)' : 'rgba(15, 23, 42, 0.6)',
+            background: activeModule === 'diet' ? 'linear-gradient(135deg, rgba(217, 119, 6, 0.25), rgba(15,23,42,0.8))' : 'rgba(15, 23, 42, 0.6)',
             color: '#f8fafc',
             cursor: 'pointer',
             textAlign: 'left',
             display: 'flex',
             alignItems: 'center',
-            gap: '12px',
+            gap: '14px',
+            boxShadow: activeModule === 'diet' ? '0 8px 25px rgba(217, 119, 6, 0.3)' : 'none',
             transition: 'all 0.2s ease'
           }}
         >
-          <Utensils size={24} color="#fbbf24" />
+          <div style={{ width: '42px', height: '42px', borderRadius: '12px', background: 'rgba(217, 119, 6, 0.2)', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+            <Utensils size={22} color="#fbbf24" />
+          </div>
           <div>
-            <div style={{ fontWeight: 800, fontSize: '0.95rem' }}>Dietician & Nutrition</div>
-            <div style={{ fontSize: '0.72rem', color: '#94a3b8' }}>Zero-Tremor Meal Plans</div>
+            <div style={{ fontWeight: 800, fontSize: '0.98rem' }}>Dietician & Nutrition</div>
+            <div style={{ fontSize: '0.75rem', color: '#94a3b8' }}>Zero-Tremor Meal Plans</div>
           </div>
         </button>
 
         <button
           onClick={() => setActiveModule('trainer')}
           style={{
-            padding: '14px 16px',
-            borderRadius: '14px',
+            padding: '16px',
+            borderRadius: '16px',
             border: activeModule === 'trainer' ? '2px solid #38bdf8' : '1px solid var(--border-glass)',
-            background: activeModule === 'trainer' ? 'rgba(56, 189, 248, 0.25)' : 'rgba(15, 23, 42, 0.6)',
+            background: activeModule === 'trainer' ? 'linear-gradient(135deg, rgba(56, 189, 248, 0.25), rgba(15,23,42,0.8))' : 'rgba(15, 23, 42, 0.6)',
             color: '#f8fafc',
             cursor: 'pointer',
             textAlign: 'left',
             display: 'flex',
             alignItems: 'center',
-            gap: '12px',
+            gap: '14px',
+            boxShadow: activeModule === 'trainer' ? '0 8px 25px rgba(56, 189, 248, 0.3)' : 'none',
             transition: 'all 0.2s ease'
           }}
         >
-          <Target size={24} color="#38bdf8" />
+          <div style={{ width: '42px', height: '42px', borderRadius: '12px', background: 'rgba(56, 189, 248, 0.2)', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+            <Target size={22} color="#38bdf8" />
+          </div>
           <div>
-            <div style={{ fontWeight: 800, fontSize: '0.95rem' }}>Assistant Trainer</div>
-            <div style={{ fontSize: '0.72rem', color: '#94a3b8' }}>Grouping & Form Diagnostics</div>
+            <div style={{ fontWeight: 800, fontSize: '0.98rem' }}>Assistant Trainer</div>
+            <div style={{ fontSize: '0.75rem', color: '#94a3b8' }}>Grouping & Form Diagnostics</div>
           </div>
         </button>
 
         <button
           onClick={() => setActiveModule('mental')}
           style={{
-            padding: '14px 16px',
-            borderRadius: '14px',
+            padding: '16px',
+            borderRadius: '16px',
             border: activeModule === 'mental' ? '2px solid #a855f7' : '1px solid var(--border-glass)',
-            background: activeModule === 'mental' ? 'rgba(168, 85, 247, 0.25)' : 'rgba(15, 23, 42, 0.6)',
+            background: activeModule === 'mental' ? 'linear-gradient(135deg, rgba(168, 85, 247, 0.25), rgba(15,23,42,0.8))' : 'rgba(15, 23, 42, 0.6)',
             color: '#f8fafc',
             cursor: 'pointer',
             textAlign: 'left',
             display: 'flex',
             alignItems: 'center',
-            gap: '12px',
+            gap: '14px',
+            boxShadow: activeModule === 'mental' ? '0 8px 25px rgba(168, 85, 247, 0.3)' : 'none',
             transition: 'all 0.2s ease'
           }}
         >
-          <Brain size={24} color="#a855f7" />
+          <div style={{ width: '42px', height: '42px', borderRadius: '12px', background: 'rgba(168, 85, 247, 0.2)', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+            <Brain size={22} color="#a855f7" />
+          </div>
           <div>
-            <div style={{ fontWeight: 800, fontSize: '0.95rem' }}>Mental Toughness</div>
-            <div style={{ fontSize: '0.72rem', color: '#94a3b8' }}>Target Panic & Visualization</div>
+            <div style={{ fontWeight: 800, fontSize: '0.98rem' }}>Mental Toughness</div>
+            <div style={{ fontSize: '0.75rem', color: '#94a3b8' }}>Target Panic & Visualization</div>
           </div>
         </button>
 
@@ -289,8 +303,8 @@ Regarding your query: **"${customPrompt}"**
         {/* Left Column: Preset Expert Prompts & Custom Query Input */}
         <div className="glass-card" style={{ padding: '24px', display: 'flex', flexDirection: 'column', justifyContent: 'space-between' }}>
           <div>
-            <h3 style={{ fontSize: '1.1rem', fontWeight: 800, color: '#fbbf24', marginBottom: '14px', display: 'flex', alignItems: 'center', gap: '8px' }}>
-              <Zap size={18} color="#fbbf24" /> Quick Expert Archery Presets
+            <h3 style={{ fontSize: '1.15rem', fontWeight: 800, color: '#fbbf24', marginBottom: '16px', display: 'flex', alignItems: 'center', gap: '8px' }}>
+              <Zap size={18} color="#fbbf24" /> Presets for {activeModule === 'physio' ? 'Physio' : activeModule === 'diet' ? 'Diet' : activeModule === 'trainer' ? 'Technique' : 'Mental Focus'}
             </h3>
 
             <div style={{ display: 'flex', flexDirection: 'column', gap: '10px', marginBottom: '20px' }}>
@@ -301,10 +315,10 @@ Regarding your query: **"${customPrompt}"**
                   style={{
                     background: 'rgba(15, 23, 42, 0.7)',
                     border: '1px solid rgba(255, 255, 255, 0.1)',
-                    padding: '12px 14px',
+                    padding: '14px 16px',
                     borderRadius: '12px',
                     color: '#f8fafc',
-                    fontSize: '0.88rem',
+                    fontSize: '0.9rem',
                     fontWeight: 700,
                     textAlign: 'left',
                     cursor: 'pointer',
@@ -316,7 +330,7 @@ Regarding your query: **"${customPrompt}"**
                   className="hover-card"
                 >
                   <span>{preset.title}</span>
-                  <ArrowRight size={15} color="#94a3b8" />
+                  <ChevronRight size={16} color="#94a3b8" />
                 </button>
               ))}
             </div>
@@ -324,7 +338,7 @@ Regarding your query: **"${customPrompt}"**
 
           {/* Custom Prompt Form */}
           <form onSubmit={handleCustomSubmit} style={{ borderTop: '1px solid rgba(255,255,255,0.1)', paddingTop: '16px' }}>
-            <label style={{ fontSize: '0.82rem', color: '#94a3b8', fontWeight: 700, display: 'block', marginBottom: '6px' }}>
+            <label style={{ fontSize: '0.82rem', color: '#94a3b8', fontWeight: 700, display: 'block', marginBottom: '8px' }}>
               Ask Gemini AI Custom Archery Question:
             </label>
             <div style={{ display: 'flex', gap: '8px' }}>
@@ -335,7 +349,7 @@ Regarding your query: **"${customPrompt}"**
                 value={customPrompt}
                 onChange={(e) => setCustomPrompt(e.target.value)}
               />
-              <button type="submit" className="btn-emerald" disabled={loading} style={{ padding: '0 18px', flexShrink: 0 }}>
+              <button type="submit" className="btn-emerald" disabled={loading} style={{ padding: '0 20px', flexShrink: 0, justifyContent: 'center' }}>
                 {loading ? <RefreshCw size={18} className="spin" /> : <Send size={18} />}
               </button>
             </div>
@@ -343,14 +357,14 @@ Regarding your query: **"${customPrompt}"**
         </div>
 
         {/* Right Column: AI Response Display Panel */}
-        <div className="glass-card" style={{ padding: '24px', border: '1px solid rgba(5, 150, 105, 0.3)', minHeight: '340px' }}>
+        <div className="glass-card" style={{ padding: '24px', border: '1px solid rgba(5, 150, 105, 0.3)', minHeight: '380px' }}>
           {!aiResponse ? (
-            <div style={{ height: '100%', display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', textAlign: 'center', padding: '30px 20px', color: '#64748b' }}>
-              <Sparkles size={48} color="#059669" style={{ marginBottom: '12px', opacity: 0.6 }} />
-              <h4 style={{ fontSize: '1.1rem', fontWeight: 800, color: '#f8fafc', marginBottom: '6px' }}>
+            <div style={{ height: '100%', display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', textAlign: 'center', padding: '40px 20px', color: '#64748b' }}>
+              <Sparkles size={52} color="#059669" style={{ marginBottom: '14px', opacity: 0.7 }} />
+              <h4 style={{ fontSize: '1.15rem', fontWeight: 800, color: '#f8fafc', marginBottom: '6px' }}>
                 Select an Archery Preset or Ask a Question
               </h4>
-              <p style={{ fontSize: '0.85rem', color: '#94a3b8', maxWidth: '360px', margin: 0 }}>
+              <p style={{ fontSize: '0.88rem', color: '#94a3b8', maxWidth: '380px', margin: 0, lineHeight: 1.5 }}>
                 Click any preset button on the left to generate personalized physio warm-ups, tournament meal plans, form diagnostics, or mental routines!
               </p>
             </div>
@@ -358,18 +372,18 @@ Regarding your query: **"${customPrompt}"**
             <div>
               <div style={{ display: 'flex', alignItems: 'center', gap: '8px', marginBottom: '12px' }}>
                 <span className="badge-emerald">
-                  <Sparkles size={13} /> Gemini AI Result
+                  <Sparkles size={13} /> Gemini AI Response
                 </span>
                 <span style={{ fontSize: '0.75rem', color: '#94a3b8' }}>
                   Custom Tailored Advice
                 </span>
               </div>
 
-              <h3 style={{ fontSize: '1.2rem', fontWeight: 800, color: '#fbbf24', marginBottom: '12px' }}>
+              <h3 style={{ fontSize: '1.25rem', fontWeight: 800, color: '#fbbf24', marginBottom: '14px' }}>
                 {aiResponse.title}
               </h3>
 
-              <div style={{ background: 'rgba(15, 23, 42, 0.6)', padding: '16px', borderRadius: '12px', borderLeft: '4px solid #059669', fontSize: '0.9rem', color: '#cbd5e1', lineHeight: 1.6, whiteSpace: 'pre-wrap' }}>
+              <div style={{ background: 'rgba(15, 23, 42, 0.7)', padding: '18px', borderRadius: '14px', borderLeft: '4px solid #059669', fontSize: '0.92rem', color: '#cbd5e1', lineHeight: 1.6, whiteSpace: 'pre-wrap' }}>
                 {aiResponse.content}
               </div>
             </div>
