@@ -474,14 +474,17 @@ export default function InteractiveScoring({ currentUser, archers = [], scoreLog
           </div>
 
           {/* Target Face SVG - Exact World Archery Replica */}
-          <div style={{ position: 'relative', cursor: 'crosshair', userSelect: 'none' }}>
+          <div style={{ position: 'relative', cursor: 'crosshair', userSelect: 'none', width: '100%', maxWidth: `${TARGET_SIZE}px`, display: 'flex', justifyContent: 'center' }}>
             <svg
               ref={svgRef}
+              viewBox={`0 0 ${TARGET_SIZE} ${TARGET_SIZE}`}
               width={TARGET_SIZE}
               height={TARGET_SIZE}
               onClick={handleTargetClick}
               style={{
-                borderRadius: '8px',
+                maxWidth: '100%',
+                height: 'auto',
+                borderRadius: '12px',
                 boxShadow: '0 12px 35px rgba(0,0,0,0.25)',
                 background: '#ffffff',
                 border: '1px solid #cbd5e1'

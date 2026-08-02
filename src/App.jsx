@@ -92,13 +92,21 @@ export default function App() {
   };
 
   const handleCheckInStreak = (archerId) => {
-    const todayStr = new Date().toISOString().split('T')[0];
+    const today = new Date();
+    const todayStr = today.toISOString().split('T')[0];
+
+    const yesterday = new Date(today);
+    yesterday.setDate(yesterday.getDate() - 1);
+    const yesterdayStr = yesterday.toISOString().split('T')[0];
+
     setAppData(prev => {
       const currentStreakObj = prev.streaks[archerId] || { count: 0, lastChecked: null, history: [] };
-      if (currentStreakObj.lastChecked === todayStr) return prev; // already checked today
+      if (currentStreakObj.lastChecked === todayStr) return prev; // Already checked in today
 
-      const newCount = currentStreakObj.count + 1;
-      const newHistory = [todayStr, ...(currentStreakObj.history || [])];
+      // If last checked was yesterday, streak + 1; otherwise reset to 1
+      const isConsecutive = currentStreakObj.lastChecked === yesterdayStr;
+      const newCount = isConsecutive ? currentStreakObj.count + 1 : 1;
+      const newHistory = Array.from(new Set([todayStr, ...(currentStreakObj.history || [])]));
 
       const newStreakObj = {
         count: newCount,
@@ -224,6 +232,8 @@ export default function App() {
               coach={appData.coach}
               venueSchedule={appData.venueSchedule}
               currentUser={appData.currentUser}
+              archers={appData.archers}
+              streaks={appData.streaks}
               onCheckInStreak={handleCheckInStreak}
               userStreak={userStreak}
               onUpdateCoach={handleUpdateCoach}

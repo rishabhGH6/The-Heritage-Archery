@@ -1,8 +1,8 @@
 import React, { useState } from 'react';
-import { Shield, Award, Edit3, Flame, MapPin, Calendar, ArrowRight, Quote, CheckCircle2, Upload, Trash2 } from 'lucide-react';
+import { Shield, Award, Edit3, Flame, MapPin, Calendar, ArrowRight, Quote, CheckCircle2, Upload, Trash2, Trophy, BarChart2, CheckSquare } from 'lucide-react';
 import confetti from 'canvas-confetti';
 
-export default function HeroCoach({ coach, venueSchedule, currentUser, onCheckInStreak, userStreak, onUpdateCoach }) {
+export default function HeroCoach({ coach, venueSchedule, currentUser, archers = [], streaks = {}, onCheckInStreak, userStreak, onUpdateCoach }) {
   const [showEditModal, setShowEditModal] = useState(false);
   const [tagline, setTagline] = useState(coach.tagline);
   const [motivatingLines, setMotivatingLines] = useState(coach.motivatingLines);
@@ -31,41 +31,92 @@ export default function HeroCoach({ coach, venueSchedule, currentUser, onCheckIn
   };
 
   const triggerStreakCheckIn = () => {
+    if (currentUser.role === 'guest') {
+      alert("🔒 Guest Mode: Please log in or register an archer account to track daily practice streaks!");
+      return;
+    }
     onCheckInStreak(currentUser.id);
     try {
       confetti({
-        particleCount: 80,
-        spread: 70,
+        particleCount: 90,
+        spread: 80,
         origin: { y: 0.6 },
         colors: ['#059669', '#d97706', '#fbbf24']
       });
     } catch (err) {}
   };
 
+  // Compute effective daily streak (resets down to 0 if last checked was before yesterday)
+  const getEffectiveStreak = (stObj) => {
+    if (!stObj || !stObj.lastChecked) return { count: 0, isCheckedToday: false };
+    const todayStr = new Date().toISOString().split('T')[0];
+    
+    const yesterday = new Date();
+    yesterday.setDate(yesterday.getDate() - 1);
+    const yesterdayStr = yesterday.toISOString().split('T')[0];
+
+    const isCheckedToday = stObj.lastChecked === todayStr;
+    const isCheckedYesterday = stObj.lastChecked === yesterdayStr;
+
+    // If last checked is today or yesterday, streak is valid; otherwise 0!
+    if (isCheckedToday || isCheckedYesterday) {
+      return { count: stObj.count, isCheckedToday };
+    }
+    return { count: 0, isCheckedToday: false };
+  };
+
+  const currentEffective = getEffectiveStreak(userStreak);
+
+  // Compute Live Leaderboard (Ranked by active streak)
+  const rankedLeaderboard = archers
+    .map(a => {
+      const stObj = streaks[a.id] || { count: 0, lastChecked: null };
+      const eff = getEffectiveStreak(stObj);
+      return {
+        ...a,
+        streakCount: eff.count,
+        lastChecked: stObj.lastChecked,
+        totalPracticedDays: (stObj.history || []).length
+      };
+    })
+    .sort((a, b) => b.streakCount - a.streakCount || b.totalPracticedDays - a.totalPracticedDays);
+
+  // Generate 30-Day LeetCode-Style Contribution Heatmap
+  const generateHeatmapDays = () => {
+    const days = [];
+    const historySet = new Set(userStreak?.history || []);
+    const today = new Date();
+
+    for (let i = 29; i >= 0; i--) {
+      const d = new Date(today);
+      d.setDate(d.getDate() - i);
+      const dateStr = d.toISOString().split('T')[0];
+      const isPracticed = historySet.has(dateStr);
+      days.push({
+        dateStr,
+        dayNum: d.getDate(),
+        isPracticed
+      });
+    }
+    return days;
+  };
+
+  const heatmapDays = generateHeatmapDays();
+  const totalPracticedCount = (userStreak?.history || []).length;
+
   return (
     <section style={{ marginBottom: '32px' }}>
       
-      {/* Main Glass Hero Card */}
-      <div className="glass-card" style={{ padding: '32px', position: 'relative', overflow: 'hidden', border: '1px solid rgba(217, 119, 6, 0.25)' }}>
+      {/* 1. Main Glass Hero Coach Card (Mobile Responsive) */}
+      <div className="glass-card" style={{ padding: '28px', position: 'relative', overflow: 'hidden', border: '1px solid rgba(217, 119, 6, 0.25)', marginBottom: '24px' }}>
         
-        {/* Subtle Background Glow */}
-        <div style={{
-          position: 'absolute',
-          top: '-50px',
-          right: '-50px',
-          width: '300px',
-          height: '300px',
-          background: 'radial-gradient(circle, rgba(217, 119, 6, 0.15) 0%, transparent 70%)',
-          pointerEvents: 'none'
-        }} />
-
-        <div style={{ display: 'grid', gridTemplateColumns: 'auto 1fr', gap: '28px', alignItems: 'center' }} className="hero-responsive-grid">
+        <div style={{ display: 'grid', gridTemplateColumns: 'auto 1fr', gap: '24px', alignItems: 'center' }} className="hero-responsive-grid">
           
           {/* Coach Photo Frame */}
-          <div style={{ position: 'relative' }}>
+          <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center' }}>
             <div style={{
-              width: '140px',
-              height: '140px',
+              width: '130px',
+              height: '130px',
               borderRadius: '24px',
               overflow: 'hidden',
               border: '3px solid #d97706',
@@ -84,34 +135,32 @@ export default function HeroCoach({ coach, venueSchedule, currentUser, onCheckIn
                 />
               ) : (
                 <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '4px' }}>
-                  <Shield size={52} color="#fbbf24" />
-                  <span style={{ fontSize: '0.68rem', color: '#fbbf24', fontWeight: 700 }}>COACH</span>
+                  <Shield size={48} color="#fbbf24" />
+                  <span style={{ fontSize: '0.65rem', color: '#fbbf24', fontWeight: 700 }}>COACH</span>
                 </div>
               )}
             </div>
+
             <div style={{
-              position: 'absolute',
-              bottom: '-10px',
-              left: '50%',
-              transform: 'translateX(-50%)',
+              marginTop: '-12px',
               background: '#d97706',
               color: '#090d16',
-              fontSize: '0.7rem',
+              fontSize: '0.68rem',
               fontWeight: 800,
-              padding: '2px 10px',
+              padding: '3px 12px',
               borderRadius: '9999px',
               textTransform: 'uppercase',
               letterSpacing: '0.05em',
-              whiteSpace: 'nowrap',
+              zIndex: 2,
               boxShadow: '0 4px 10px rgba(0,0,0,0.5)'
             }}>
-              Head Coach
+              Head Archery Coach
             </div>
           </div>
 
           {/* Coach Quotes & Hero Content */}
           <div>
-            <div style={{ display: 'flex', alignItems: 'center', gap: '10px', flexWrap: 'wrap', marginBottom: '8px' }}>
+            <div style={{ display: 'flex', alignItems: 'center', gap: '10px', flexWrap: 'wrap', marginBottom: '6px' }}>
               <span className="badge-gold">
                 <Award size={13} /> {coach.role}
               </span>
@@ -120,11 +169,11 @@ export default function HeroCoach({ coach, venueSchedule, currentUser, onCheckIn
               </span>
             </div>
 
-            <h2 style={{ fontSize: '1.9rem', fontWeight: 800, color: '#f8fafc', margin: '4px 0 8px 0', lineHeight: 1.2 }}>
+            <h2 style={{ fontSize: '1.8rem', fontWeight: 800, color: '#f8fafc', margin: '4px 0 6px 0', lineHeight: 1.2 }}>
               {coach.name}
             </h2>
 
-            <p style={{ fontSize: '1.05rem', color: '#fbbf24', fontStyle: 'italic', fontWeight: 600, marginBottom: '14px', display: 'flex', alignItems: 'center', gap: '6px' }}>
+            <p style={{ fontSize: '1rem', color: '#fbbf24', fontStyle: 'italic', fontWeight: 600, marginBottom: '12px', display: 'flex', alignItems: 'center', gap: '6px', flexWrap: 'wrap' }}>
               <Quote size={16} /> "{coach.tagline}"
             </p>
 
@@ -133,7 +182,7 @@ export default function HeroCoach({ coach, venueSchedule, currentUser, onCheckIn
               borderLeft: '4px solid #d97706',
               padding: '12px 16px',
               borderRadius: '0 12px 12px 0',
-              fontSize: '0.92rem',
+              fontSize: '0.9rem',
               color: '#cbd5e1',
               lineHeight: 1.5,
               marginBottom: '16px'
@@ -142,7 +191,7 @@ export default function HeroCoach({ coach, venueSchedule, currentUser, onCheckIn
             </div>
 
             {/* Action Buttons */}
-            <div style={{ display: 'flex', alignItems: 'center', gap: '14px', flexWrap: 'wrap' }}>
+            <div style={{ display: 'flex', alignItems: 'center', gap: '12px', flexWrap: 'wrap' }}>
               {currentUser.role === 'coach' && (
                 <button 
                   onClick={() => {
@@ -152,20 +201,31 @@ export default function HeroCoach({ coach, venueSchedule, currentUser, onCheckIn
                     setShowEditModal(true);
                   }}
                   className="btn-gold"
+                  style={{ width: '100%', maxWidth: '240px', justifyContent: 'center' }}
                 >
                   <Edit3 size={16} /> Edit Profile & Photo
                 </button>
               )}
 
-              {/* Streak Check-in Button */}
+              {/* Daily Streak Check-in Button */}
               <button 
                 onClick={triggerStreakCheckIn}
-                className={userStreak.lastChecked === new Date().toISOString().split('T')[0] ? "btn-ghost" : "btn-emerald"}
-                style={{ display: 'flex', alignItems: 'center', gap: '8px' }}
+                className={currentEffective.isCheckedToday ? "btn-ghost" : "btn-emerald"}
+                style={{
+                  display: 'flex',
+                  alignItems: 'center',
+                  gap: '8px',
+                  justifyContent: 'center',
+                  padding: '10px 18px',
+                  borderRadius: '12px',
+                  fontWeight: 700,
+                  width: '100%',
+                  maxWidth: '300px'
+                }}
               >
-                <Flame size={18} color="#f59e0b" fill={userStreak.count > 0 ? "#f59e0b" : "none"} />
-                {userStreak.lastChecked === new Date().toISOString().split('T')[0] ? (
-                  <span>Practiced Today! ({userStreak.count} 🔥)</span>
+                <Flame size={18} color="#f59e0b" fill={currentEffective.count > 0 ? "#f59e0b" : "none"} />
+                {currentEffective.isCheckedToday ? (
+                  <span>Practiced Today! ({currentEffective.count} 🔥 Streak)</span>
                 ) : (
                   <span>Mark Practiced Today (+1 Streak)</span>
                 )}
@@ -176,6 +236,132 @@ export default function HeroCoach({ coach, venueSchedule, currentUser, onCheckIn
 
         </div>
 
+      </div>
+
+      {/* 2. Interactive LeetCode-Style Practice Heatmap Widget */}
+      <div className="glass-card" style={{ padding: '24px', marginBottom: '24px', border: '1px solid rgba(5, 150, 105, 0.3)' }}>
+        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '16px', flexWrap: 'wrap', gap: '12px' }}>
+          <div>
+            <h3 style={{ fontSize: '1.15rem', fontWeight: 800, color: '#f8fafc', display: 'flex', alignItems: 'center', gap: '8px' }}>
+              <Flame size={20} color="#f59e0b" /> Daily Practice Tracker & LeetCode Heatmap
+            </h3>
+            <p style={{ fontSize: '0.82rem', color: '#94a3b8', margin: '2px 0 0 0' }}>
+              Practice every day to build your streak! Missing 1 day resets your active streak to 0.
+            </p>
+          </div>
+
+          <div style={{ display: 'flex', gap: '12px' }}>
+            <div style={{ background: 'rgba(5, 150, 105, 0.15)', border: '1px solid rgba(5,150,105,0.4)', padding: '6px 12px', borderRadius: '10px', textAlign: 'center' }}>
+              <div style={{ fontSize: '0.7rem', color: '#94a3b8', textTransform: 'uppercase', fontWeight: 700 }}>Total Practiced</div>
+              <div style={{ fontSize: '1.1rem', fontWeight: 800, color: '#34d399' }}>{totalPracticedCount} Days</div>
+            </div>
+
+            <div style={{ background: 'rgba(217, 119, 6, 0.15)', border: '1px solid rgba(217,119,6,0.4)', padding: '6px 12px', borderRadius: '10px', textAlign: 'center' }}>
+              <div style={{ fontSize: '0.7rem', color: '#94a3b8', textTransform: 'uppercase', fontWeight: 700 }}>Current Streak</div>
+              <div style={{ fontSize: '1.1rem', fontWeight: 800, color: '#fbbf24' }}>{currentEffective.count} 🔥</div>
+            </div>
+          </div>
+        </div>
+
+        {/* 30-Day Grid Heatmap */}
+        <div>
+          <span style={{ fontSize: '0.75rem', color: '#94a3b8', fontWeight: 700, display: 'block', marginBottom: '8px' }}>
+            Last 30 Days Activity Log
+          </span>
+          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(32px, 1fr))', gap: '8px' }}>
+            {heatmapDays.map((d, idx) => (
+              <div
+                key={idx}
+                title={`${d.dateStr}: ${d.isPracticed ? 'Practiced 🎯' : 'Rest Day'}`}
+                style={{
+                  height: '36px',
+                  borderRadius: '8px',
+                  background: d.isPracticed ? 'linear-gradient(135deg, #059669, #10b981)' : 'rgba(15, 23, 42, 0.7)',
+                  border: d.isPracticed ? '1px solid #34d399' : '1px solid rgba(255, 255, 255, 0.08)',
+                  display: 'flex',
+                  alignItems: 'center',
+                  justifyContent: 'center',
+                  fontSize: '0.75rem',
+                  fontWeight: 700,
+                  color: d.isPracticed ? '#ffffff' : '#64748b',
+                  boxShadow: d.isPracticed ? '0 2px 8px rgba(5, 150, 105, 0.4)' : 'none'
+                }}
+              >
+                {d.dayNum}
+              </div>
+            ))}
+          </div>
+        </div>
+      </div>
+
+      {/* 3. Live Updated Leaderboard Widget */}
+      <div className="glass-card" style={{ padding: '24px', border: '1px solid rgba(217, 119, 6, 0.3)' }}>
+        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '16px', flexWrap: 'wrap', gap: '12px' }}>
+          <div>
+            <h3 style={{ fontSize: '1.2rem', fontWeight: 800, color: '#fbbf24', display: 'flex', alignItems: 'center', gap: '8px' }}>
+              <Trophy size={20} color="#fbbf24" /> Live Team Daily Streak Leaderboard 🏆
+            </h3>
+            <p style={{ fontSize: '0.82rem', color: '#94a3b8', margin: '2px 0 0 0' }}>
+              Real-time rankings of archers maintaining daily practice streaks.
+            </p>
+          </div>
+        </div>
+
+        {rankedLeaderboard.length === 0 ? (
+          <div style={{ padding: '20px', textAlign: 'center', color: '#64748b', fontSize: '0.9rem' }}>
+            No registered archers on leaderboard yet.
+          </div>
+        ) : (
+          <div style={{ display: 'flex', flexDirection: 'column', gap: '10px' }}>
+            {rankedLeaderboard.slice(0, 5).map((archer, idx) => (
+              <div 
+                key={archer.id} 
+                style={{
+                  display: 'flex',
+                  alignItems: 'center',
+                  justifyContent: 'space-between',
+                  background: 'rgba(15, 23, 42, 0.6)',
+                  border: idx === 0 ? '1px solid rgba(251, 191, 36, 0.4)' : '1px solid var(--border-glass)',
+                  padding: '12px 16px',
+                  borderRadius: '14px'
+                }}
+              >
+                <div style={{ display: 'flex', alignItems: 'center', gap: '14px' }}>
+                  <div style={{
+                    fontSize: '1rem',
+                    fontWeight: 800,
+                    color: idx === 0 ? '#fbbf24' : idx === 1 ? '#94a3b8' : idx === 2 ? '#b45309' : '#64748b',
+                    minWidth: '24px'
+                  }}>
+                    #{idx + 1}
+                  </div>
+
+                  <img
+                    src={archer.photo || "https://images.unsplash.com/photo-1534528741775-53994a69daeb?auto=format&fit=crop&w=400&q=80"}
+                    alt={archer.name}
+                    style={{ width: '40px', height: '40px', borderRadius: '50%', objectFit: 'cover', border: '2px solid #059669' }}
+                  />
+
+                  <div>
+                    <div style={{ fontSize: '0.92rem', fontWeight: 800, color: '#f8fafc' }}>
+                      {archer.name}
+                    </div>
+                    <div style={{ fontSize: '0.72rem', color: '#34d399', fontWeight: 600 }}>
+                      {archer.category} Archer • {archer.totalPracticedDays} Total Days Practiced
+                    </div>
+                  </div>
+                </div>
+
+                <div style={{ display: 'flex', alignItems: 'center', gap: '6px', background: 'rgba(217, 119, 6, 0.15)', padding: '6px 12px', borderRadius: '9999px', border: '1px solid rgba(217, 119, 6, 0.3)' }}>
+                  <Flame size={16} color="#f59e0b" fill="#f59e0b" />
+                  <span style={{ fontSize: '0.88rem', fontWeight: 800, color: '#fbbf24' }}>
+                    {archer.streakCount} 🔥
+                  </span>
+                </div>
+              </div>
+            ))}
+          </div>
+        )}
       </div>
 
       {/* Edit Coach Info Modal */}
