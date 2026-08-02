@@ -66,16 +66,16 @@ export default function HeroCoach({ coach, venueSchedule, currentUser, archers =
 
   const currentEffective = getEffectiveStreak(userStreak);
 
-  // Compute full history set for any streak object (synthesizes dates if count > 0 but history array was empty)
   const getPracticedHistorySet = (stObj) => {
-    const eff = getEffectiveStreak(stObj);
-    const count = eff.count;
-    const historySet = new Set();
-    const lastChecked = stObj?.lastChecked;
+    const historySet = new Set(stObj?.history || []);
+    if (stObj?.lastChecked) {
+      historySet.add(stObj.lastChecked);
+    }
 
-    if (count > 0 && lastChecked) {
-      const startDate = new Date(lastChecked);
-      for (let i = 0; i < count; i++) {
+    const eff = getEffectiveStreak(stObj);
+    if (eff.count > 0 && stObj?.lastChecked) {
+      const startDate = new Date(stObj.lastChecked);
+      for (let i = 0; i < eff.count; i++) {
         const d = new Date(startDate);
         d.setDate(d.getDate() - i);
         historySet.add(d.toISOString().split('T')[0]);

@@ -21,8 +21,11 @@ export default function Leaderboard({ archers, streaks, currentUser, onCheckInSt
 
   const getPracticedHistorySet = (stObj) => {
     const historySet = new Set(stObj?.history || []);
-    const effectiveStreak = getEffectiveStreak(stObj);
+    if (stObj?.lastChecked) {
+      historySet.add(stObj.lastChecked);
+    }
 
+    const effectiveStreak = getEffectiveStreak(stObj);
     if (effectiveStreak > 0 && stObj?.lastChecked) {
       const startDate = new Date(stObj.lastChecked);
       for (let i = 0; i < effectiveStreak; i++) {
