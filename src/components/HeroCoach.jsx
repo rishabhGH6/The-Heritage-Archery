@@ -66,16 +66,36 @@ export default function HeroCoach({ coach, venueSchedule, currentUser, archers =
 
   const currentEffective = getEffectiveStreak(userStreak);
 
+  // Compute full history set for any streak object (synthesizes dates if count > 0 but history array was empty)
+  const getPracticedHistorySet = (stObj) => {
+    const historySet = new Set(stObj?.history || []);
+    const count = stObj?.count || 0;
+    const lastChecked = stObj?.lastChecked;
+
+    if (count > 0 && lastChecked) {
+      const startDate = new Date(lastChecked);
+      for (let i = 0; i < count; i++) {
+        const d = new Date(startDate);
+        d.setDate(d.getDate() - i);
+        historySet.add(d.toISOString().split('T')[0]);
+      }
+    }
+    return historySet;
+  };
+
+  const userPracticedSet = getPracticedHistorySet(userStreak);
+
   // Compute Live Leaderboard (Ranked by active streak)
   const rankedLeaderboard = archers
     .map(a => {
       const stObj = streaks[a.id] || { count: 0, lastChecked: null };
       const eff = getEffectiveStreak(stObj);
+      const practicedSet = getPracticedHistorySet(stObj);
       return {
         ...a,
         streakCount: eff.count,
         lastChecked: stObj.lastChecked,
-        totalPracticedDays: (stObj.history || []).length
+        totalPracticedDays: practicedSet.size
       };
     })
     .sort((a, b) => b.streakCount - a.streakCount || b.totalPracticedDays - a.totalPracticedDays);
@@ -83,14 +103,13 @@ export default function HeroCoach({ coach, venueSchedule, currentUser, archers =
   // Generate 28-Day Calendar Grid (7 columns x 4 rows)
   const generateCalendarDays = () => {
     const days = [];
-    const historySet = new Set(userStreak?.history || []);
     const today = new Date();
 
     for (let i = 27; i >= 0; i--) {
       const d = new Date(today);
       d.setDate(d.getDate() - i);
       const dateStr = d.toISOString().split('T')[0];
-      const isPracticed = historySet.has(dateStr);
+      const isPracticed = userPracticedSet.has(dateStr);
       days.push({
         dateStr,
         dayNum: d.getDate(),
@@ -101,7 +120,7 @@ export default function HeroCoach({ coach, venueSchedule, currentUser, archers =
   };
 
   const calendarDays = generateCalendarDays();
-  const totalPracticedCount = (userStreak?.history || []).length;
+  const totalPracticedCount = userPracticedSet.size;
 
   return (
     <section style={{ marginBottom: '32px' }}>

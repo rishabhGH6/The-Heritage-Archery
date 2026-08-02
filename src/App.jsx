@@ -103,10 +103,18 @@ export default function App() {
       const currentStreakObj = prev.streaks[archerId] || { count: 0, lastChecked: null, history: [] };
       if (currentStreakObj.lastChecked === todayStr) return prev; // Already checked in today
 
-      // If last checked was yesterday, streak + 1; otherwise reset to 1
       const isConsecutive = currentStreakObj.lastChecked === yesterdayStr;
       const newCount = isConsecutive ? currentStreakObj.count + 1 : 1;
-      const newHistory = Array.from(new Set([todayStr, ...(currentStreakObj.history || [])]));
+
+      // Populate full streak date range into history set
+      const historySet = new Set(currentStreakObj.history || []);
+      const startDate = new Date(today);
+      for (let i = 0; i < newCount; i++) {
+        const d = new Date(startDate);
+        d.setDate(d.getDate() - i);
+        historySet.add(d.toISOString().split('T')[0]);
+      }
+      const newHistory = Array.from(historySet);
 
       const newStreakObj = {
         count: newCount,
