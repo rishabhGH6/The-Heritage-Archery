@@ -5,32 +5,34 @@ export default function Leaderboard({ archers, streaks, currentUser, onCheckInSt
   // Map archers with their streak stats
   const todayStr = new Date().toISOString().split('T')[0];
   
-  const getEffectiveStreak = (stObj) => {
-    if (!stObj || !stObj.lastChecked) return 0;
-    const todayStr = new Date().toISOString().split('T')[0];
-    
-    const yesterday = new Date();
-    yesterday.setDate(yesterday.getDate() - 1);
-    const yesterdayStr = yesterday.toISOString().split('T')[0];
+  const getPracticedHistorySet = (stObj) => {
+    const historySet = new Set(stObj?.history || []);
+    const effectiveStreak = getEffectiveStreak(stObj);
 
-    if (stObj.lastChecked === todayStr || stObj.lastChecked === yesterdayStr) {
-      return stObj.count || 0;
+    if (effectiveStreak > 0 && stObj?.lastChecked) {
+      const startDate = new Date(stObj.lastChecked);
+      for (let i = 0; i < effectiveStreak; i++) {
+        const d = new Date(startDate);
+        d.setDate(d.getDate() - i);
+        historySet.add(d.toISOString().split('T')[0]);
+      }
     }
-    return 0;
+    return historySet;
   };
 
   const leaderboardData = archers.map(archer => {
     const s = streaks[archer.id] || { count: 0, lastChecked: null, history: [] };
     const effectiveStreak = getEffectiveStreak(s);
+    const historySet = getPracticedHistorySet(s);
     const hasCheckedToday = s.lastChecked === todayStr;
     return {
       ...archer,
       streakCount: effectiveStreak,
+      totalPracticedDays: historySet.size,
       lastChecked: s.lastChecked,
-      hasCheckedToday,
-      historyCount: effectiveStreak > 0 ? (s.history ? s.history.length : effectiveStreak) : 0
+      hasCheckedToday
     };
-  }).sort((a, b) => b.streakCount - a.streakCount);
+  }).sort((a, b) => b.streakCount - a.streakCount || b.totalPracticedDays - a.totalPracticedDays);
 
   return (
     <div style={{ marginBottom: '32px' }}>
@@ -44,10 +46,10 @@ export default function Leaderboard({ archers, streaks, currentUser, onCheckInSt
             </span>
           </div>
           <h2 style={{ fontSize: '1.75rem', fontWeight: 800, color: '#f8fafc', margin: '4px 0' }}>
-            Practice Days Streak Leaderboard 🎯
+            Practice Days & Active Streak Leaderboard 🎯
           </h2>
           <p style={{ color: '#94a3b8', fontSize: '0.9rem' }}>
-            Consistent range practice builds champions. Check-in daily to climb the team ranking!
+            Tracks two key metrics: <strong>Active Consecutive Streak</strong> and <strong>Total Days Practiced (Calendar)</strong>.
           </p>
         </div>
 
@@ -63,7 +65,7 @@ export default function Leaderboard({ archers, streaks, currentUser, onCheckInSt
       </div>
 
       {/* Leaderboard Cards Grid */}
-      <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(280px, 1fr))', gap: '20px' }}>
+      <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(300px, 1fr))', gap: '20px' }}>
         {leaderboardData.map((archer, index) => {
           let rankBadge = null;
           let rankColor = '#475569';
@@ -109,36 +111,21 @@ export default function Leaderboard({ archers, streaks, currentUser, onCheckInSt
                 {rankBadge || <span style={{ color: '#64748b', fontWeight: 800, fontSize: '1rem' }}>#{index + 1}</span>}
               </div>
 
-              {/* Streak Counter Box */}
-              <div style={{
-                background: 'rgba(15, 23, 42, 0.7)',
-                padding: '14px',
-                borderRadius: '12px',
-                display: 'flex',
-                alignItems: 'center',
-                justifyContent: 'space-between',
-                marginBottom: '12px',
-                border: '1px solid rgba(255,255,255,0.05)'
-              }}>
-                <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
-                  <Flame size={24} color={archer.streakCount > 0 ? "#f59e0b" : "#64748b"} className={archer.streakCount > 5 ? "pulse-glow" : ""} />
-                  <div>
-                    <div style={{ fontSize: '1.35rem', fontWeight: 800, color: '#f8fafc', lineHeight: 1 }}>
-                      {archer.streakCount} <span style={{ fontSize: '0.8rem', fontWeight: 600, color: '#94a3b8' }}>Days</span>
-                    </div>
-                    <span style={{ fontSize: '0.72rem', color: '#64748b' }}>Current Streak</span>
+              {/* 2 Metric Stats Boxes: Active Streak & Total Days Practiced */}
+              <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '10px', marginBottom: '14px' }}>
+                <div style={{ background: 'rgba(217, 119, 6, 0.15)', border: '1px solid rgba(217, 119, 6, 0.3)', padding: '10px', borderRadius: '10px', textAlign: 'center' }}>
+                  <div style={{ fontSize: '0.68rem', color: '#fbbf24', fontWeight: 700, textTransform: 'uppercase' }}>Active Streak</div>
+                  <div style={{ fontSize: '1.15rem', fontWeight: 800, color: '#fbbf24', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '4px' }}>
+                    <Flame size={16} color="#f59e0b" fill="#f59e0b" /> {archer.streakCount} 🔥
                   </div>
                 </div>
 
-                {archer.hasCheckedToday ? (
-                  <span style={{ color: '#34d399', fontSize: '0.75rem', fontWeight: 700, display: 'flex', alignItems: 'center', gap: '4px' }}>
-                    <CheckCircle2 size={14} /> Checked Today
-                  </span>
-                ) : (
-                  <span style={{ color: '#94a3b8', fontSize: '0.75rem' }}>
-                    Pending Today
-                  </span>
-                )}
+                <div style={{ background: 'rgba(5, 150, 105, 0.15)', border: '1px solid rgba(5, 150, 105, 0.3)', padding: '10px', borderRadius: '10px', textAlign: 'center' }}>
+                  <div style={{ fontSize: '0.68rem', color: '#34d399', fontWeight: 700, textTransform: 'uppercase' }}>Total Practiced</div>
+                  <div style={{ fontSize: '1.15rem', fontWeight: 800, color: '#34d399', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '4px' }}>
+                    <Calendar size={15} color="#34d399" /> {archer.totalPracticedDays} Days
+                  </div>
+                </div>
               </div>
 
               <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', fontSize: '0.78rem', color: '#94a3b8' }}>
