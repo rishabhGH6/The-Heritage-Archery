@@ -3,7 +3,11 @@ import { Wrench, CheckCircle, AlertTriangle, Save, Compass, Target, ArrowRight }
 
 export default function EquipmentTuner({ currentUser, archers, equipmentData, onSaveEquipment }) {
   const [selectedArcherId, setSelectedArcherId] = useState(
-    currentUser.role === 'archer' ? currentUser.id : (archers[0]?.id || '')
+    currentUser.role === 'archer' 
+      ? currentUser.id 
+      : currentUser.role === 'coach' 
+        ? 'coach' 
+        : (archers[0]?.id || '')
   );
 
   const currentEq = equipmentData[selectedArcherId] || {

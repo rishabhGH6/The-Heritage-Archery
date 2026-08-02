@@ -5,7 +5,11 @@ import html2canvas from 'html2canvas';
 
 export default function InteractiveScoring({ currentUser, archers = [], scoreLogs = [], onSaveScorecard }) {
   const [selectedArcherId, setSelectedArcherId] = useState(
-    currentUser.role === 'archer' ? currentUser.id : (archers[0]?.id || '')
+    currentUser.role === 'archer' 
+      ? currentUser.id 
+      : currentUser.role === 'coach' 
+        ? 'coach' 
+        : (archers[0]?.id || '')
   );
   const [distance, setDistance] = useState("70m");
   const [targetType, setTargetType] = useState("10-ring"); // "10-ring" or "6-ring-center"
@@ -377,7 +381,7 @@ export default function InteractiveScoring({ currentUser, archers = [], scoreLog
               className="select-glass" 
               value={selectedArcherId}
               onChange={(e) => setSelectedArcherId(e.target.value)}
-              disabled={currentUser.role === 'archer'}
+              disabled={currentUser.role === 'archer' || currentUser.role === 'coach'}
               style={{ minWidth: '220px' }}
             >
               <option value="coach">Coach Jayanta Chakraborty (Head Coach) 🛡️</option>
