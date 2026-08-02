@@ -1,8 +1,9 @@
 import React, { useState } from 'react';
-import { Target, Award, Calendar, MessageSquare, Shield, User, MapPin, Camera, Wrench, LogIn, ChevronDown, UserPlus, Upload, HelpCircle, Key, CheckCircle2 } from 'lucide-react';
+import { Target, Award, Calendar, MessageSquare, Shield, User, MapPin, Camera, Wrench, LogIn, LogOut, ChevronDown, UserPlus, Upload, HelpCircle, Key, CheckCircle2, Menu, X } from 'lucide-react';
 
 export default function Navbar({ activeTab, setActiveTab, currentUser, archers, coach, onSwitchUser, onAddArcher, onUpdateArcher }) {
   const [showRoleModal, setShowRoleModal] = useState(false);
+  const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const [selectedRole, setSelectedRole] = useState(currentUser.role); // 'coach', 'archer', 'new_archer', 'forgot_password'
   const [selectedArcherId, setSelectedArcherId] = useState(archers[0]?.id || '');
   const [inputPassword, setInputPassword] = useState('');
@@ -23,6 +24,12 @@ export default function Navbar({ activeTab, setActiveTab, currentUser, archers, 
   const [forgotAnswerInput, setForgotAnswerInput] = useState('');
   const [forgotVerified, setForgotVerified] = useState(false);
   const [newPasswordInput, setNewPasswordInput] = useState('');
+
+  const handleSignOut = () => {
+    onSwitchUser({ role: 'guest', id: 'guest', name: 'Guest' });
+    setShowRoleModal(false);
+    setMobileMenuOpen(false);
+  };
 
   const handleLoginSubmit = (e) => {
     e.preventDefault();
@@ -60,7 +67,7 @@ export default function Navbar({ activeTab, setActiveTab, currentUser, archers, 
         id: "archer_" + Date.now(),
         name: regName.trim(),
         password: regPass.trim(),
-        securityAnswer: regHighestScoreAnswer.trim(), // Hidden from profile section
+        securityAnswer: regHighestScoreAnswer.trim(),
         photo: regPhoto || "https://images.unsplash.com/photo-1534528741775-53994a69daeb?auto=format&fit=crop&w=400&q=80",
         category: regCategory,
         occupation: regOccupation,
@@ -89,7 +96,6 @@ export default function Navbar({ activeTab, setActiveTab, currentUser, archers, 
       }
 
       if (!forgotVerified) {
-        // Step 1: Verify Answer to "What is your highest score?"
         const expectedAnswer = (archer.securityAnswer || "").trim().toLowerCase();
         const givenAnswer = forgotAnswerInput.trim().toLowerCase();
 
@@ -97,14 +103,12 @@ export default function Navbar({ activeTab, setActiveTab, currentUser, archers, 
           setForgotVerified(true);
           setPasswordError('');
         } else if (!expectedAnswer && givenAnswer !== "") {
-          // If no security answer was set initially, allow fallback verify
           setForgotVerified(true);
           setPasswordError('');
         } else {
           setPasswordError('Incorrect answer to security question: What is your highest score?');
         }
       } else {
-        // Step 2: Set New Password
         if (!newPasswordInput.trim()) {
           setPasswordError('Please enter a valid new password.');
           return;
@@ -143,12 +147,17 @@ export default function Navbar({ activeTab, setActiveTab, currentUser, archers, 
     }
   };
 
+  const handleTabClick = (tabKey) => {
+    setActiveTab(tabKey);
+    setMobileMenuOpen(false);
+  };
+
   return (
     <header style={{ position: 'sticky', top: 0, zIndex: 100 }} className="glass-card">
-      <div style={{ maxWidth: '1280px', margin: '0 auto', padding: '12px 24px', display: 'flex', alignItems: 'center', justifyContent: 'space-between', flexWrap: 'wrap', gap: '16px' }}>
+      <div style={{ maxWidth: '1280px', margin: '0 auto', padding: '12px 20px', display: 'flex', alignItems: 'center', justifyContent: 'space-between', flexWrap: 'wrap', gap: '12px' }}>
         
         {/* Brand Logo */}
-        <div style={{ display: 'flex', alignItems: 'center', gap: '12px', cursor: 'pointer' }} onClick={() => setActiveTab('home')}>
+        <div style={{ display: 'flex', alignItems: 'center', gap: '12px', cursor: 'pointer' }} onClick={() => handleTabClick('home')}>
           <div style={{
             background: 'linear-gradient(135deg, #059669, #d97706)',
             padding: '10px',
@@ -161,55 +170,56 @@ export default function Navbar({ activeTab, setActiveTab, currentUser, archers, 
             <Target size={26} color="#ffffff" />
           </div>
           <div>
-            <h1 style={{ fontSize: '1.35rem', fontWeight: 800, background: 'linear-gradient(90deg, #f8fafc, #fbbf24)', WebkitBackgroundClip: 'text', WebkitTextFillColor: 'transparent', lineHeight: 1.1 }}>
+            <h1 style={{ fontSize: '1.25rem', fontWeight: 800, background: 'linear-gradient(90deg, #f8fafc, #fbbf24)', WebkitBackgroundClip: 'text', WebkitTextFillColor: 'transparent', lineHeight: 1.1 }}>
               THE HERITAGE ARCHERY
             </h1>
-            <span style={{ fontSize: '0.72rem', color: '#94a3b8', fontWeight: 600, letterSpacing: '0.08em', textTransform: 'uppercase' }}>
+            <span style={{ fontSize: '0.68rem', color: '#94a3b8', fontWeight: 600, letterSpacing: '0.08em', textTransform: 'uppercase' }}>
               College Team Portal
             </span>
           </div>
         </div>
 
-        {/* Navigation Tabs */}
-        <nav style={{ display: 'flex', alignItems: 'center', gap: '4px', overflowX: 'auto', padding: '4px 0' }}>
-          <button className={`nav-tab ${activeTab === 'home' ? 'active' : ''}`} onClick={() => setActiveTab('home')}>
+        {/* Desktop Navigation Tabs */}
+        <nav className="desktop-nav">
+          <button className={`nav-tab ${activeTab === 'home' ? 'active' : ''}`} onClick={() => handleTabClick('home')}>
             <Target size={17} /> Home
           </button>
-          <button className={`nav-tab ${activeTab === 'leaderboard' ? 'active' : ''}`} onClick={() => setActiveTab('leaderboard')}>
+          <button className={`nav-tab ${activeTab === 'leaderboard' ? 'active' : ''}`} onClick={() => handleTabClick('leaderboard')}>
             <Award size={17} /> Leaderboard
           </button>
-          <button className={`nav-tab ${activeTab === 'scoring' ? 'active' : ''}`} onClick={() => setActiveTab('scoring')}>
+          <button className={`nav-tab ${activeTab === 'scoring' ? 'active' : ''}`} onClick={() => handleTabClick('scoring')}>
             <Target size={17} /> Scoring
           </button>
-          <button className={`nav-tab ${activeTab === 'equipment' ? 'active' : ''}`} onClick={() => setActiveTab('equipment')}>
+          <button className={`nav-tab ${activeTab === 'equipment' ? 'active' : ''}`} onClick={() => handleTabClick('equipment')}>
             <Wrench size={17} /> Equipment
           </button>
-          <button className={`nav-tab ${activeTab === 'archers' ? 'active' : ''}`} onClick={() => setActiveTab('archers')}>
+          <button className={`nav-tab ${activeTab === 'archers' ? 'active' : ''}`} onClick={() => handleTabClick('archers')}>
             <User size={17} /> Team Roster
           </button>
-          <button className={`nav-tab ${activeTab === 'venue' ? 'active' : ''}`} onClick={() => setActiveTab('venue')}>
+          <button className={`nav-tab ${activeTab === 'venue' ? 'active' : ''}`} onClick={() => handleTabClick('venue')}>
             <MapPin size={17} /> Venue
           </button>
-          <button className={`nav-tab ${activeTab === 'chat' ? 'active' : ''}`} onClick={() => setActiveTab('chat')}>
+          <button className={`nav-tab ${activeTab === 'chat' ? 'active' : ''}`} onClick={() => handleTabClick('chat')}>
             <MessageSquare size={17} /> Chat & DMs
           </button>
-          <button className={`nav-tab ${activeTab === 'gallery' ? 'active' : ''}`} onClick={() => setActiveTab('gallery')}>
+          <button className={`nav-tab ${activeTab === 'gallery' ? 'active' : ''}`} onClick={() => handleTabClick('gallery')}>
             <Camera size={17} /> Gallery
           </button>
           {currentUser.role === 'archer' && (
-            <button className={`nav-tab ${activeTab === 'profile' ? 'active' : ''}`} onClick={() => setActiveTab('profile')}>
+            <button className={`nav-tab ${activeTab === 'profile' ? 'active' : ''}`} onClick={() => handleTabClick('profile')}>
               <User size={17} /> My Profile
             </button>
           )}
           {currentUser.role === 'coach' && (
-            <button className={`nav-tab ${activeTab === 'coach' ? 'active' : ''}`} onClick={() => setActiveTab('coach')}>
+            <button className={`nav-tab ${activeTab === 'coach' ? 'active' : ''}`} onClick={() => handleTabClick('coach')}>
               <Shield size={17} /> Coach Dashboard
             </button>
           )}
         </nav>
 
-        {/* Login / Active User Profile Badge */}
-        <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
+        {/* Right Bar: Login Badge + Hamburger Button */}
+        <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
+          
           {currentUser.role === 'guest' ? (
             <button 
               onClick={() => setShowRoleModal(true)}
@@ -218,7 +228,7 @@ export default function Navbar({ activeTab, setActiveTab, currentUser, archers, 
                 display: 'flex',
                 alignItems: 'center',
                 gap: '8px',
-                padding: '8px 18px',
+                padding: '8px 16px',
                 borderRadius: '9999px',
                 fontSize: '0.85rem',
                 fontWeight: 700,
@@ -228,77 +238,147 @@ export default function Navbar({ activeTab, setActiveTab, currentUser, archers, 
               <LogIn size={16} /> Login / Sign Up
             </button>
           ) : (
-            <div 
-              onClick={() => setShowRoleModal(true)}
-              style={{
-                display: 'flex',
-                alignItems: 'center',
-                gap: '10px',
-                padding: '6px 14px',
-                borderRadius: '9999px',
-                background: currentUser.role === 'coach' ? 'rgba(217, 119, 6, 0.15)' : 'rgba(5, 150, 105, 0.15)',
-                border: `1px solid ${currentUser.role === 'coach' ? 'rgba(217, 119, 6, 0.4)' : 'rgba(5, 150, 105, 0.4)'}`,
-                cursor: 'pointer',
-                transition: 'all 0.2s ease'
-              }}
-            >
-              {(() => {
-                const userPhoto = currentUser.role === 'coach' 
-                  ? coach?.photo 
-                  : (archers.find(a => a.id === currentUser.id)?.photo || currentUser.photo);
-                
-                return userPhoto ? (
-                  <img 
-                    src={userPhoto} 
-                    alt={currentUser.name} 
-                    style={{
-                      width: '30px',
-                      height: '30px',
+            <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+              <div 
+                onClick={() => setShowRoleModal(true)}
+                style={{
+                  display: 'flex',
+                  alignItems: 'center',
+                  gap: '8px',
+                  padding: '6px 12px',
+                  borderRadius: '9999px',
+                  background: currentUser.role === 'coach' ? 'rgba(217, 119, 6, 0.15)' : 'rgba(5, 150, 105, 0.15)',
+                  border: `1px solid ${currentUser.role === 'coach' ? 'rgba(217, 119, 6, 0.4)' : 'rgba(5, 150, 105, 0.4)'}`,
+                  cursor: 'pointer',
+                  transition: 'all 0.2s ease'
+                }}
+              >
+                {(() => {
+                  const userPhoto = currentUser.role === 'coach' 
+                    ? coach?.photo 
+                    : (archers.find(a => a.id === currentUser.id)?.photo || currentUser.photo);
+                  
+                  return userPhoto ? (
+                    <img 
+                      src={userPhoto} 
+                      alt={currentUser.name} 
+                      style={{
+                        width: '28px',
+                        height: '28px',
+                        borderRadius: '50%',
+                        objectFit: 'cover',
+                        border: `2px solid ${currentUser.role === 'coach' ? '#d97706' : '#059669'}`
+                      }}
+                    />
+                  ) : (
+                    <div style={{
+                      width: '26px',
+                      height: '26px',
                       borderRadius: '50%',
-                      objectFit: 'cover',
-                      border: `2px solid ${currentUser.role === 'coach' ? '#d97706' : '#059669'}`
-                    }}
-                  />
-                ) : (
-                  <div style={{
-                    width: '28px',
-                    height: '28px',
-                    borderRadius: '50%',
-                    background: currentUser.role === 'coach' ? '#d97706' : '#059669',
-                    display: 'flex',
-                    alignItems: 'center',
-                    justifyContent: 'center',
-                    fontWeight: 'bold',
-                    fontSize: '0.8rem',
-                    color: '#ffffff'
-                  }}>
-                    {currentUser.role === 'coach' ? 'C' : 'A'}
+                      background: currentUser.role === 'coach' ? '#d97706' : '#059669',
+                      display: 'flex',
+                      alignItems: 'center',
+                      justifyContent: 'center',
+                      fontWeight: 'bold',
+                      fontSize: '0.78rem',
+                      color: '#ffffff'
+                    }}>
+                      {currentUser.role === 'coach' ? 'C' : 'A'}
+                    </div>
+                  );
+                })()}
+                <div>
+                  <div style={{ fontSize: '0.8rem', fontWeight: 700, color: '#f8fafc', lineHeight: 1.1 }}>
+                    {currentUser.name}
                   </div>
-                );
-              })()}
-              <div>
-                <div style={{ fontSize: '0.82rem', fontWeight: 700, color: '#f8fafc', lineHeight: 1.1 }}>
-                  {currentUser.name}
+                  <div style={{ fontSize: '0.65rem', color: currentUser.role === 'coach' ? '#fbbf24' : '#34d399', fontWeight: 600 }}>
+                    {currentUser.role === 'coach' ? 'Coach' : 'Archer'}
+                  </div>
                 </div>
-                <div style={{ fontSize: '0.68rem', color: currentUser.role === 'coach' ? '#fbbf24' : '#34d399', fontWeight: 600 }}>
-                  {currentUser.role === 'coach' ? 'Coach Jayanta' : 'Archer Account'} (Switch)
-                </div>
+                <ChevronDown size={14} color="#94a3b8" />
               </div>
-              <ChevronDown size={14} color="#94a3b8" />
+
+              {/* Header Sign Out Quick Button */}
+              <button
+                onClick={handleSignOut}
+                title="Sign Out to Guest Mode"
+                style={{
+                  background: 'rgba(239, 68, 68, 0.15)',
+                  border: '1px solid rgba(239, 68, 68, 0.4)',
+                  color: '#ef4444',
+                  padding: '7px 10px',
+                  borderRadius: '9999px',
+                  cursor: 'pointer',
+                  display: 'flex',
+                  alignItems: 'center',
+                  justifyContent: 'center'
+                }}
+              >
+                <LogOut size={15} />
+              </button>
             </div>
           )}
+
+          {/* Mobile Hamburger Menu Toggle Button */}
+          <button 
+            className="mobile-hamburger-btn"
+            onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
+            aria-label="Toggle navigation menu"
+          >
+            {mobileMenuOpen ? <X size={22} /> : <Menu size={22} />}
+          </button>
         </div>
+
+        {/* Mobile Navigation Drawer (Visible on narrow screens when menu is open) */}
+        {mobileMenuOpen && (
+          <div className="mobile-menu-drawer">
+            <button className={`mobile-nav-item ${activeTab === 'home' ? 'active' : ''}`} onClick={() => handleTabClick('home')}>
+              <Target size={18} /> Home
+            </button>
+            <button className={`mobile-nav-item ${activeTab === 'leaderboard' ? 'active' : ''}`} onClick={() => handleTabClick('leaderboard')}>
+              <Award size={18} /> Streak Leaderboard
+            </button>
+            <button className={`mobile-nav-item ${activeTab === 'scoring' ? 'active' : ''}`} onClick={() => handleTabClick('scoring')}>
+              <Target size={18} /> Interactive Scoring
+            </button>
+            <button className={`mobile-nav-item ${activeTab === 'equipment' ? 'active' : ''}`} onClick={() => handleTabClick('equipment')}>
+              <Wrench size={18} /> Equipment Tuner
+            </button>
+            <button className={`mobile-nav-item ${activeTab === 'archers' ? 'active' : ''}`} onClick={() => handleTabClick('archers')}>
+              <User size={18} /> Team Roster & Performance
+            </button>
+            <button className={`mobile-nav-item ${activeTab === 'venue' ? 'active' : ''}`} onClick={() => handleTabClick('venue')}>
+              <MapPin size={18} /> Practice Venue & Schedule
+            </button>
+            <button className={`mobile-nav-item ${activeTab === 'chat' ? 'active' : ''}`} onClick={() => handleTabClick('chat')}>
+              <MessageSquare size={18} /> Team Chat & Private DMs
+            </button>
+            <button className={`mobile-nav-item ${activeTab === 'gallery' ? 'active' : ''}`} onClick={() => handleTabClick('gallery')}>
+              <Camera size={18} /> Photo Gallery
+            </button>
+            {currentUser.role === 'archer' && (
+              <button className={`mobile-nav-item ${activeTab === 'profile' ? 'active' : ''}`} onClick={() => handleTabClick('profile')}>
+                <User size={18} /> My Archer Profile
+              </button>
+            )}
+            {currentUser.role === 'coach' && (
+              <button className={`mobile-nav-item ${activeTab === 'coach' ? 'active' : ''}`} onClick={() => handleTabClick('coach')}>
+                <Shield size={18} /> Coach Dashboard
+              </button>
+            )}
+          </div>
+        )}
 
       </div>
 
-      {/* Role Switch / Login / Sign Up / Forgot Password Modal */}
+      {/* Role Switch / Login / Sign Up / Sign Out Modal */}
       {showRoleModal && (
         <div className="modal-overlay" onClick={() => setShowRoleModal(false)}>
           <div className="modal-content" onClick={e => e.stopPropagation()} style={{ maxWidth: '460px' }}>
             <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '20px' }}>
               <h3 style={{ fontSize: '1.25rem', fontWeight: 700, color: '#f8fafc', display: 'flex', alignItems: 'center', gap: '8px' }}>
                 <LogIn size={20} color="#fbbf24" />
-                {selectedRole === 'forgot_password' ? 'Forgot Password Recovery' : 'Login or Sign Up'}
+                {selectedRole === 'forgot_password' ? 'Forgot Password Recovery' : 'Login or Account Switch'}
               </h3>
               <button onClick={() => setShowRoleModal(false)} className="btn-ghost" style={{ padding: '4px 8px' }}>✕</button>
             </div>
@@ -403,7 +483,7 @@ export default function Navbar({ activeTab, setActiveTab, currentUser, archers, 
                 </div>
               )}
 
-              {/* Mode B: New Archer Sign Up Form (includes Security Question) */}
+              {/* Mode B: New Archer Sign Up Form */}
               {selectedRole === 'new_archer' && (
                 <div style={{ display: 'flex', flexDirection: 'column', gap: '10px', background: 'rgba(15, 23, 42, 0.5)', padding: '12px', borderRadius: '12px', border: '1px solid rgba(56, 189, 248, 0.2)' }}>
                   <div>
@@ -447,69 +527,6 @@ export default function Navbar({ activeTab, setActiveTab, currentUser, archers, 
                       required
                     />
                     <span style={{ fontSize: '0.68rem', color: '#94a3b8' }}>🔒 Private: This answer will never be shown in your profile section.</span>
-                  </div>
-
-                  <div>
-                    <label style={{ fontSize: '0.78rem', color: '#94a3b8', fontWeight: 600, display: 'block', marginBottom: '4px' }}>Profile Photo (Optional)</label>
-                    <div style={{ display: 'flex', gap: '8px', alignItems: 'center' }}>
-                      <input
-                        type="file"
-                        accept="image/*"
-                        id="reg-photo-file-picker"
-                        style={{ display: 'none' }}
-                        onChange={(e) => {
-                          const file = e.target.files[0];
-                          if (file) {
-                            const reader = new FileReader();
-                            reader.onloadend = () => setRegPhoto(reader.result);
-                            reader.readAsDataURL(file);
-                          }
-                        }}
-                      />
-                      <label htmlFor="reg-photo-file-picker" className="btn-emerald" style={{ cursor: 'pointer', fontSize: '0.75rem', padding: '6px 12px' }}>
-                        <Upload size={13} /> Choose from Device
-                      </label>
-                      {regPhoto && <span style={{ fontSize: '0.72rem', color: '#34d399' }}>✓ Selected</span>}
-                    </div>
-                  </div>
-
-                  <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '8px' }}>
-                    <div>
-                      <label style={{ fontSize: '0.78rem', color: '#94a3b8', fontWeight: 600 }}>Category</label>
-                      <select className="select-glass" value={regCategory} onChange={(e) => setRegCategory(e.target.value)}>
-                        <option value="Junior">Junior Archer</option>
-                        <option value="Senior">Senior Archer</option>
-                      </select>
-                    </div>
-
-                    <div>
-                      <label style={{ fontSize: '0.78rem', color: '#94a3b8', fontWeight: 600 }}>Occupation</label>
-                      <select className="select-glass" value={regOccupation} onChange={(e) => setRegOccupation(e.target.value)}>
-                        <option value="Student">Student</option>
-                        <option value="Higher Studies">Higher Studies</option>
-                        <option value="Working Professional">Working Professional</option>
-                      </select>
-                    </div>
-                  </div>
-
-                  <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '8px' }}>
-                    <div>
-                      <label style={{ fontSize: '0.78rem', color: '#94a3b8', fontWeight: 600 }}>Practicing Now?</label>
-                      <select className="select-glass" value={regPracticing} onChange={(e) => setRegPracticing(e.target.value)}>
-                        <option value="Yes">Yes</option>
-                        <option value="No">No</option>
-                      </select>
-                    </div>
-
-                    <div>
-                      <label style={{ fontSize: '0.78rem', color: '#94a3b8', fontWeight: 600 }}>DOB (Private) 🔒</label>
-                      <input
-                        type="date"
-                        className="input-glass"
-                        value={regDob}
-                        onChange={(e) => setRegDob(e.target.value)}
-                      />
-                    </div>
                   </div>
                 </div>
               )}
@@ -622,6 +639,36 @@ export default function Navbar({ activeTab, setActiveTab, currentUser, archers, 
                     : 'Login to Account'}
                 </button>
               </div>
+
+              {/* Sign Out Option for Logged-In User */}
+              {currentUser.role !== 'guest' && (
+                <div style={{ borderTop: '1px solid rgba(255,255,255,0.1)', paddingTop: '16px', marginTop: '12px', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                  <div>
+                    <div style={{ fontSize: '0.82rem', color: '#f8fafc', fontWeight: 700 }}>Logged in as: {currentUser.name}</div>
+                    <div style={{ fontSize: '0.72rem', color: '#94a3b8' }}>{currentUser.role === 'coach' ? 'Head Coach' : 'Archer Account'}</div>
+                  </div>
+
+                  <button
+                    type="button"
+                    onClick={handleSignOut}
+                    style={{
+                      background: 'rgba(239, 68, 68, 0.15)',
+                      border: '1px solid rgba(239, 68, 68, 0.4)',
+                      color: '#ef4444',
+                      padding: '8px 14px',
+                      borderRadius: '10px',
+                      fontWeight: 700,
+                      fontSize: '0.82rem',
+                      cursor: 'pointer',
+                      display: 'flex',
+                      alignItems: 'center',
+                      gap: '6px'
+                    }}
+                  >
+                    <LogOut size={15} /> Sign Out (Guest Mode)
+                  </button>
+                </div>
+              )}
 
             </form>
           </div>
