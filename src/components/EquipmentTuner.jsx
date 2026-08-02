@@ -82,20 +82,18 @@ export default function EquipmentTuner({ currentUser, archers, equipmentData, on
           </p>
         </div>
 
-        {currentUser.role === 'coach' && (
+        {/* Pre-locked Archer / Profile Badge Banner */}
+        <div style={{ background: 'rgba(5, 150, 105, 0.15)', border: '1px solid rgba(5, 150, 105, 0.3)', padding: '10px 18px', borderRadius: '14px', display: 'flex', alignItems: 'center', gap: '10px' }}>
+          <Wrench size={20} color="#34d399" />
           <div>
-            <select 
-              className="select-glass"
-              value={selectedArcherId}
-              onChange={(e) => handleArcherChange(e.target.value)}
-            >
-              <option value="coach">Coach Jayanta Chakraborty's Bow Profile 🛡️</option>
-              {archers.map(a => (
-                <option key={a.id} value={a.id}>{a.name}'s Bow Profile</option>
-              ))}
-            </select>
+            <div style={{ fontSize: '0.9rem', fontWeight: 800, color: '#f8fafc' }}>
+              {selectedArcher.name}
+            </div>
+            <div style={{ fontSize: '0.72rem', color: '#34d399', fontWeight: 700 }}>
+              🔒 Pre-Locked Bow Profile
+            </div>
           </div>
-        )}
+        </div>
       </div>
 
       <form onSubmit={handleSave} style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '24px' }} className="equipment-responsive-grid">
