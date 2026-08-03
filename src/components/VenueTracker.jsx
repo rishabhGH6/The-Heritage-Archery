@@ -1,5 +1,6 @@
 import React, { useState } from 'react';
 import { MapPin, Clock, Edit3, UserCheck, Calendar, Info, Check } from 'lucide-react';
+import RangeWhistleControl from './RangeWhistleControl';
 
 export default function VenueTracker({ venueSchedule, currentUser, onUpdateVenue }) {
   const [showModal, setShowModal] = useState(false);
@@ -49,6 +50,9 @@ export default function VenueTracker({ venueSchedule, currentUser, onUpdateVenue
           <Edit3 size={18} /> Update Timing & Venue
         </button>
       </div>
+
+      {/* Official World Archery Whistle System */}
+      <RangeWhistleControl />
 
       {/* Main Live Venue Card */}
       <div className="glass-card glass-card-gold" style={{ padding: '32px', position: 'relative', border: '1px solid rgba(217, 119, 6, 0.4)' }}>

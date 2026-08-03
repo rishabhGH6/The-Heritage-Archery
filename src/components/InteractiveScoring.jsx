@@ -2,6 +2,7 @@ import React, { useState, useRef } from 'react';
 import { Target, Save, Download, RefreshCw, CheckCircle, AlertCircle, FileText, ChevronRight, BarChart2, Shield } from 'lucide-react';
 import jsPDF from 'jspdf';
 import html2canvas from 'html2canvas';
+import RangeWhistleControl from './RangeWhistleControl';
 
 export default function InteractiveScoring({ currentUser, archers = [], scoreLogs = [], onSaveScorecard }) {
   const [selectedArcherId, setSelectedArcherId] = useState(
@@ -447,6 +448,9 @@ export default function InteractiveScoring({ currentUser, archers = [], scoreLog
         </div>
 
       </div>
+
+      {/* World Archery Whistle Signal & Range Control System */}
+      <RangeWhistleControl />
 
       {/* Round Selection Tabs (1 to 6) */}
       <div style={{ display: 'flex', gap: '10px', marginBottom: '20px', overflowX: 'auto', paddingBottom: '4px' }}>
