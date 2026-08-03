@@ -792,45 +792,76 @@ export default function InteractiveScoring({ currentUser, archers = [], scoreLog
         </div>
       )}
 
-      {/* Historical Scorecard Log Table */}
-      <div className="glass-card" style={{ padding: '24px', marginTop: '32px' }}>
-        <h3 style={{ fontSize: '1.25rem', fontWeight: 700, color: '#f8fafc', marginBottom: '16px', display: 'flex', alignItems: 'center', gap: '8px' }}>
-          <FileText size={20} color="#fbbf24" /> Saved Score History Log
-        </h3>
+      {/* Historical Scorecard Log Table (Private to Archer & Head Coach Only) */}
+      {(() => {
+        const visibleScoreLogs = scoreLogs.filter(log => {
+          if (currentUser.role === 'coach') return true;
+          if (currentUser.role === 'archer') {
+            return log.archerId === currentUser.id || log.archerName === currentUser.name;
+          }
+          return false;
+        });
 
-        {scoreLogs.length === 0 ? (
-          <p style={{ color: '#64748b', fontSize: '0.9rem' }}>No scorecards saved yet.</p>
-        ) : (
-          <div style={{ overflowX: 'auto' }}>
-            <table style={{ width: '100%', borderCollapse: 'collapse', textAlign: 'left', fontSize: '0.88rem' }}>
-              <thead>
-                <tr style={{ borderBottom: '1px solid rgba(255,255,255,0.1)', color: '#94a3b8' }}>
-                  <th style={{ padding: '10px' }}>Date</th>
-                  <th style={{ padding: '10px' }}>Archer</th>
-                  <th style={{ padding: '10px' }}>Distance</th>
-                  <th style={{ padding: '10px' }}>Total Score</th>
-                  <th style={{ padding: '10px' }}>Grouping</th>
-                </tr>
-              </thead>
-              <tbody>
-                {scoreLogs.map(log => (
-                  <tr key={log.id} style={{ borderBottom: '1px solid rgba(255,255,255,0.05)', color: '#f8fafc' }}>
-                    <td style={{ padding: '10px' }}>{log.date}</td>
-                    <td style={{ padding: '10px', fontWeight: 600 }}>{log.archerName}</td>
-                    <td style={{ padding: '10px' }}>{log.distance}</td>
-                    <td style={{ padding: '10px', fontWeight: 800, color: '#fbbf24' }}>
-                      {log.totalScore} / 360
-                    </td>
-                    <td style={{ padding: '10px', color: '#34d399' }}>
-                      {log.groupingAnalysis?.tightness} ({log.groupingAnalysis?.bias})
-                    </td>
-                  </tr>
-                ))}
-              </tbody>
-            </table>
+        return (
+          <div className="glass-card" style={{ padding: '24px', marginTop: '32px' }}>
+            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '16px', flexWrap: 'wrap', gap: '12px' }}>
+              <div>
+                <h3 style={{ fontSize: '1.25rem', fontWeight: 800, color: '#f8fafc', margin: 0, display: 'flex', alignItems: 'center', gap: '8px' }}>
+                  <FileText size={20} color="#fbbf24" /> Saved Score History Log
+                </h3>
+                <p style={{ color: '#94a3b8', fontSize: '0.82rem', margin: '4px 0 0 0' }}>
+                  {currentUser.role === 'coach' 
+                    ? "Showing all saved team scorecard logs (Head Coach Access)." 
+                    : currentUser.role === 'archer'
+                      ? `Showing private scorecard logs for ${currentUser.name}.`
+                      : "Score logs are private. Log in as an Archer or Coach to view history."}
+                </p>
+              </div>
+
+              <div style={{ background: 'rgba(5, 150, 105, 0.15)', border: '1px solid rgba(5, 150, 105, 0.3)', padding: '6px 14px', borderRadius: '10px', fontSize: '0.78rem', color: '#34d399', fontWeight: 700 }}>
+                {currentUser.role === 'coach' ? '🛡️ Coach Access (All Archers)' : currentUser.role === 'archer' ? '🔒 Private (You & Coach Only)' : '🔒 Private Access'}
+              </div>
+            </div>
+
+            {visibleScoreLogs.length === 0 ? (
+              <p style={{ color: '#64748b', fontSize: '0.9rem', fontStyle: 'italic', padding: '12px 0', margin: 0 }}>
+                {currentUser.role === 'guest' 
+                  ? "🔒 Log in to your archer account to view your personal saved scorecards." 
+                  : `No saved scorecard history found for ${currentUser.name || 'your account'}.`}
+              </p>
+            ) : (
+              <div style={{ overflowX: 'auto' }}>
+                <table style={{ width: '100%', borderCollapse: 'collapse', textAlign: 'left', fontSize: '0.88rem' }}>
+                  <thead>
+                    <tr style={{ borderBottom: '1px solid rgba(255,255,255,0.1)', color: '#94a3b8' }}>
+                      <th style={{ padding: '10px' }}>Date</th>
+                      <th style={{ padding: '10px' }}>Archer</th>
+                      <th style={{ padding: '10px' }}>Distance</th>
+                      <th style={{ padding: '10px' }}>Total Score</th>
+                      <th style={{ padding: '10px' }}>Grouping</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    {visibleScoreLogs.map(log => (
+                      <tr key={log.id} style={{ borderBottom: '1px solid rgba(255,255,255,0.05)', color: '#f8fafc' }}>
+                        <td style={{ padding: '10px' }}>{log.date}</td>
+                        <td style={{ padding: '10px', fontWeight: 600 }}>{log.archerName}</td>
+                        <td style={{ padding: '10px' }}>{log.distance}</td>
+                        <td style={{ padding: '10px', fontWeight: 800, color: '#fbbf24' }}>
+                          {log.totalScore} / 360
+                        </td>
+                        <td style={{ padding: '10px', color: '#34d399' }}>
+                          {log.groupingAnalysis?.tightness} ({log.groupingAnalysis?.bias})
+                        </td>
+                      </tr>
+                    ))}
+                  </tbody>
+                </table>
+              </div>
+            )}
           </div>
-        )}
-      </div>
+        );
+      })()}
 
     </div>
   );
