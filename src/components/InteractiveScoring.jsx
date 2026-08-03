@@ -235,6 +235,7 @@ export default function InteractiveScoring({ currentUser, archers = [], scoreLog
   // Requirement 5: PDF Export containing 6 rounds arrow-by-arrow data in a presentable format
   const handleExportPDF = () => {
     try {
+      const doc = new jsPDF('p', 'pt', 'a4');
       const selectedArcher = selectedArcherId === 'coach' ? { name: 'Coach Jayanta Chakraborty' } : (archers.find(a => a.id === selectedArcherId) || currentUser);
       const archerName = selectedArcher?.name || "Archer";
       const todayDate = new Date().toLocaleDateString('en-US', { year: 'numeric', month: 'short', day: 'numeric' });
