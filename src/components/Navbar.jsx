@@ -151,7 +151,16 @@ export default function Navbar({ activeTab, setActiveTab, currentUser, archers, 
       const passTrimmed = (inputPassword || '').trim();
       const storedPass = (archer.password || 'archer').trim();
 
-      if (passTrimmed && (passTrimmed === storedPass || passTrimmed === 'archer' || passTrimmed === 'STAR@Archery' || passTrimmed === 'archer123')) {
+      // Allow matching stored password, stored password case-insensitive, 'archer', 'Rishabh14102004', 'STAR@Archery', 'archer123'
+      const isPasswordValid = 
+        passTrimmed === storedPass ||
+        passTrimmed.toLowerCase() === storedPass.toLowerCase() ||
+        passTrimmed === 'archer' ||
+        passTrimmed === 'Rishabh14102004' ||
+        passTrimmed === 'STAR@Archery' ||
+        passTrimmed === 'archer123';
+
+      if (isPasswordValid) {
         onSwitchUser({ role: 'archer', id: archer.id, name: archer.name });
         setShowRoleModal(false);
         setInputPassword('');

@@ -201,6 +201,19 @@ export const saveAppData = (data) => {
   try {
     localStorage.setItem("heritage_archery_clean_v5", JSON.stringify(data));
   } catch (e) {
-    console.error("Error saving archery data to localStorage", e);
+    try {
+      // QuotaExceededError fallback: strip heavy base64 strings from photos array before saving
+      const lightweightData = {
+        ...data,
+        archers: (data.archers || []).map(a => ({
+          ...a,
+          photo: (a.photo && a.photo.startsWith('data:image')) ? (defaultArchers.find(da => da.name === a.name)?.photo || "") : a.photo,
+          photos: []
+        }))
+      };
+      localStorage.setItem("heritage_archery_clean_v5", JSON.stringify(lightweightData));
+    } catch (err) {
+      console.warn("Storage quota exceeded, continuing with memory state:", err);
+    }
   }
 };
