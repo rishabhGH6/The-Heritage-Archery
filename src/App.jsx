@@ -38,7 +38,7 @@ export default function App() {
     fetchSupabaseData(defaultData).then(remoteData => {
       setAppData(prev => {
         const loadedArchers = (remoteData.archers && remoteData.archers.length > 0) ? remoteData.archers : (prev.archers && prev.archers.length > 0 ? prev.archers : defaultArchers);
-        let activeUser = (prev.currentUser && prev.currentUser.id !== 'guest') ? prev.currentUser : getPersistentSession();
+        let activeUser = (prev.currentUser && prev.currentUser.id !== 'guest') ? prev.currentUser : { id: 'guest', role: 'guest', name: 'Guest' };
 
         if (activeUser && activeUser.role === 'archer') {
           const matchedArcher = loadedArchers.find(a => 
