@@ -145,8 +145,38 @@ export const defaultData = {
   chatMessages: []
 };
 
+// Load persistent session if less than 5 days old
+export const getPersistentSession = () => {
+  try {
+    const savedSession = localStorage.getItem("heritage_archery_user_session");
+    if (savedSession) {
+      const parsed = JSON.parse(savedSession);
+      const now = Date.now();
+      const FIVE_DAYS_MS = 5 * 24 * 60 * 60 * 1000;
+      if (parsed.timestamp && (now - parsed.timestamp < FIVE_DAYS_MS) && parsed.user) {
+        return parsed.user;
+      }
+    }
+  } catch (e) {}
+  return { id: "guest", role: "guest", name: "Guest" };
+};
+
+export const savePersistentSession = (userObj) => {
+  try {
+    if (!userObj || userObj.role === 'guest') {
+      localStorage.removeItem("heritage_archery_user_session");
+    } else {
+      localStorage.setItem("heritage_archery_user_session", JSON.stringify({
+        user: userObj,
+        timestamp: Date.now()
+      }));
+    }
+  } catch (e) {}
+};
+
 // Helper function to load data from LocalStorage or initialize default
 export const loadAppData = () => {
+  const activeUser = getPersistentSession();
   const saved = localStorage.getItem("heritage_archery_clean_v5");
   if (saved) {
     try {
@@ -155,7 +185,7 @@ export const loadAppData = () => {
         ...parsed,
         archers: (parsed.archers && parsed.archers.length > 0) ? parsed.archers : defaultArchers,
         streaks: (parsed.streaks && Object.keys(parsed.streaks).length > 0) ? parsed.streaks : defaultStreaks,
-        currentUser: { id: "guest", role: "guest", name: "Guest" } // Always start website in Guest mode
+        currentUser: activeUser
       };
     } catch (e) {
       console.error("Error loading saved archery data", e);
@@ -163,7 +193,7 @@ export const loadAppData = () => {
   }
   return {
     ...defaultData,
-    currentUser: { id: "guest", role: "guest", name: "Guest" }
+    currentUser: activeUser
   };
 };
 

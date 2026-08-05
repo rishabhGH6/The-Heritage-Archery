@@ -36,10 +36,13 @@ export default function App() {
   // Load from Supabase on mount
   useEffect(() => {
     fetchSupabaseData(defaultData).then(remoteData => {
-      setAppData(prev => ({
-        ...remoteData,
-        currentUser: prev.currentUser
-      }));
+      setAppData(prev => {
+        const activeUser = prev.currentUser && prev.currentUser.id !== 'guest' ? prev.currentUser : getPersistentSession();
+        return {
+          ...remoteData,
+          currentUser: activeUser
+        };
+      });
     });
   }, []);
 
@@ -54,6 +57,7 @@ export default function App() {
       ...prev,
       currentUser: userObj
     }));
+    savePersistentSession(userObj);
     setActiveTab('home'); // Requirement 3: Account switch resets to home section!
   };
 

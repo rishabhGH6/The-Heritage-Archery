@@ -8,6 +8,7 @@ export default function Navbar({ activeTab, setActiveTab, currentUser, archers, 
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const [selectedRole, setSelectedRole] = useState(currentUser.role); // 'coach', 'archer', 'new_archer', 'forgot_password'
   const [selectedArcherId, setSelectedArcherId] = useState(displayArchers[0]?.id || '');
+  const [inputArcherName, setInputArcherName] = useState('');
   const [inputPassword, setInputPassword] = useState('');
   const [passwordError, setPasswordError] = useState('');
 
@@ -133,16 +134,26 @@ export default function Navbar({ activeTab, setActiveTab, currentUser, archers, 
         alert(`Password updated successfully for ${archer.name}! You are now logged in.`);
       }
     } else {
-      // Existing archer login
-      const archer = displayArchers.find(a => a.id === selectedArcherId) || displayArchers[0];
-      if (!archer) {
-        setPasswordError('No archer selected. Switch to "New Archer" to register!');
+      // Existing archer login via text input (Name + Password)
+      if (!inputArcherName.trim()) {
+        setPasswordError('Please enter your Archer Name / Username.');
         return;
       }
+
+      const targetNameLower = inputArcherName.trim().toLowerCase();
+      const archer = displayArchers.find(a => a.name.trim().toLowerCase() === targetNameLower);
+
+      if (!archer) {
+        setPasswordError(`No archer profile found matching "${inputArcherName.trim()}". Please check your spelling or click "New Archer" to register!`);
+        return;
+      }
+
       if (inputPassword && inputPassword === archer.password) {
         onSwitchUser({ role: 'archer', id: archer.id, name: archer.name });
         setShowRoleModal(false);
         setInputPassword('');
+        setInputArcherName('');
+        setPasswordError('');
       } else {
         setPasswordError('Incorrect password. Please enter the password set for your account.');
       }
@@ -467,21 +478,19 @@ export default function Navbar({ activeTab, setActiveTab, currentUser, archers, 
                 </div>
               )}
 
-              {/* Mode A: Existing Archer Select */}
+              {/* Mode A: Archer Login via Text Input (No Dropdown Exposed) */}
               {selectedRole === 'archer' && (
                 <div>
-                  <label style={{ fontSize: '0.85rem', color: '#94a3b8', display: 'block', marginBottom: '6px', fontWeight: 600 }}>
-                    Select Archer Username / Name
+                  <label style={{ fontSize: '0.82rem', color: '#38bdf8', display: 'block', marginBottom: '4px', fontWeight: 700 }}>
+                    Archer Name / Username
                   </label>
-                  <select 
-                    className="select-glass"
-                    value={selectedArcherId}
-                    onChange={(e) => setSelectedArcherId(e.target.value)}
-                  >
-                    {displayArchers.map(a => (
-                      <option key={a.id} value={a.id}>{a.name} ({a.category})</option>
-                    ))}
-                  </select>
+                  <input 
+                    type="text"
+                    className="input-glass"
+                    placeholder="Enter your registered name (e.g. Rishabh Kumar Sinha)"
+                    value={inputArcherName}
+                    onChange={(e) => { setInputArcherName(e.target.value); setPasswordError(''); }}
+                  />
                 </div>
               )}
 
