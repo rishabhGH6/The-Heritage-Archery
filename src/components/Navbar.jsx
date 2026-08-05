@@ -1,11 +1,13 @@
 import React, { useState } from 'react';
 import { Target, Award, Calendar, MessageSquare, Shield, User, MapPin, Camera, Wrench, LogIn, LogOut, ChevronDown, UserPlus, Upload, HelpCircle, Key, CheckCircle2, Menu, X, Sparkles } from 'lucide-react';
+import { defaultArchers } from '../data/initialData';
 
 export default function Navbar({ activeTab, setActiveTab, currentUser, archers, coach, onSwitchUser, onAddArcher, onUpdateArcher }) {
+  const displayArchers = (archers && archers.length > 0) ? archers : defaultArchers;
   const [showRoleModal, setShowRoleModal] = useState(false);
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const [selectedRole, setSelectedRole] = useState(currentUser.role); // 'coach', 'archer', 'new_archer', 'forgot_password'
-  const [selectedArcherId, setSelectedArcherId] = useState(archers[0]?.id || '');
+  const [selectedArcherId, setSelectedArcherId] = useState(displayArchers[0]?.id || '');
   const [inputPassword, setInputPassword] = useState('');
   const [passwordError, setPasswordError] = useState('');
 
@@ -132,7 +134,7 @@ export default function Navbar({ activeTab, setActiveTab, currentUser, archers, 
       }
     } else {
       // Existing archer login
-      const archer = archers.find(a => a.id === selectedArcherId);
+      const archer = displayArchers.find(a => a.id === selectedArcherId) || displayArchers[0];
       if (!archer) {
         setPasswordError('No archer selected. Switch to "New Archer" to register!');
         return;
@@ -471,21 +473,15 @@ export default function Navbar({ activeTab, setActiveTab, currentUser, archers, 
                   <label style={{ fontSize: '0.85rem', color: '#94a3b8', display: 'block', marginBottom: '6px', fontWeight: 600 }}>
                     Select Archer Username / Name
                   </label>
-                  {archers.length === 0 ? (
-                    <div style={{ fontSize: '0.82rem', color: '#38bdf8', background: 'rgba(56, 189, 248, 0.1)', padding: '10px', borderRadius: '10px', border: '1px solid rgba(56, 189, 248, 0.3)' }}>
-                      ℹ️ No archers registered yet. Click <strong>"New Archer"</strong> above to register your account!
-                    </div>
-                  ) : (
-                    <select 
-                      className="select-glass"
-                      value={selectedArcherId}
-                      onChange={(e) => setSelectedArcherId(e.target.value)}
-                    >
-                      {archers.map(a => (
-                        <option key={a.id} value={a.id}>{a.name} ({a.category})</option>
-                      ))}
-                    </select>
-                  )}
+                  <select 
+                    className="select-glass"
+                    value={selectedArcherId}
+                    onChange={(e) => setSelectedArcherId(e.target.value)}
+                  >
+                    {displayArchers.map(a => (
+                      <option key={a.id} value={a.id}>{a.name} ({a.category})</option>
+                    ))}
+                  </select>
                 </div>
               )}
 
