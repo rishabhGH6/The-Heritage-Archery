@@ -39,10 +39,11 @@ export const fetchSupabaseData = async (defaultData) => {
 
     if (archersData && archersData.length > 0) {
       result.archers = archersData.map(a => {
-        const defaultA = defaultData.archers?.find(da => da.id === a.id || da.name === a.name);
+        const defaultA = defaultData.archers?.find(da => da.name.trim().toLowerCase() === a.name.trim().toLowerCase() || da.id === a.id);
         const fallbackPhoto = defaultA?.photo || "https://images.unsplash.com/photo-1534528741775-53994a69daeb?auto=format&fit=crop&w=400&q=80";
         return {
           id: a.id,
+          altId: defaultA?.id,
           name: a.name,
           password: a.password || 'archer',
           securityAnswer: a.security_answer || '',
@@ -73,13 +74,19 @@ export const fetchSupabaseData = async (defaultData) => {
     }
 
     if (streaksData && streaksData.length > 0) {
-      const streaksObj = {};
+      const streaksObj = { ...defaultData.streaks };
       streaksData.forEach(s => {
-        streaksObj[s.archer_id] = {
+        const matchingArcher = result.archers.find(a => a.id === s.archer_id || a.altId === s.archer_id);
+        const streakData = {
           count: s.count || 0,
           lastChecked: s.last_checked || null,
           history: parseJson(s.history, [])
         };
+        if (s.archer_id) streaksObj[s.archer_id] = streakData;
+        if (matchingArcher) {
+          streaksObj[matchingArcher.id] = streakData;
+          if (matchingArcher.altId) streaksObj[matchingArcher.altId] = streakData;
+        }
       });
       result.streaks = streaksObj;
     }
