@@ -13,7 +13,7 @@ import MyProfile from './components/MyProfile';
 import AiArcheryCoach from './components/AiArcheryCoach';
 import CinematicIntro from './components/CinematicIntro';
 
-import { defaultData, loadAppData, saveAppData } from './data/initialData';
+import { defaultData, loadAppData, saveAppData, defaultArchers, defaultStreaks, getPersistentSession, savePersistentSession } from './data/initialData';
 import {
   fetchSupabaseData,
   syncSaveArcher,
