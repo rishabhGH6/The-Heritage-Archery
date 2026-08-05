@@ -10,7 +10,11 @@ export default function AiArcheryCoach({ currentUser, archers = [], equipmentDat
 
   const apiKey = import.meta.env.VITE_GEMINI_API_KEY || "";
 
-  const selectedArcher = archers.find(a => a.id === currentUser.id) || {
+  const selectedArcher = (archers && archers.find(a => 
+    a.id === currentUser.id || 
+    (a.altId && a.altId === currentUser.id) || 
+    (a.name && currentUser.name && a.name.trim().toLowerCase() === currentUser.name.trim().toLowerCase())
+  )) || {
     name: currentUser.name || "Archer",
     category: "Recurve",
     aim: "Consistent execution"

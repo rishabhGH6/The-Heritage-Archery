@@ -37,10 +37,27 @@ export default function App() {
   useEffect(() => {
     fetchSupabaseData(defaultData).then(remoteData => {
       setAppData(prev => {
-        const activeUser = (prev.currentUser && prev.currentUser.id !== 'guest') ? prev.currentUser : getPersistentSession();
+        const loadedArchers = (remoteData.archers && remoteData.archers.length > 0) ? remoteData.archers : (prev.archers && prev.archers.length > 0 ? prev.archers : defaultArchers);
+        let activeUser = (prev.currentUser && prev.currentUser.id !== 'guest') ? prev.currentUser : getPersistentSession();
+
+        if (activeUser && activeUser.role === 'archer') {
+          const matchedArcher = loadedArchers.find(a => 
+            a.id === activeUser.id || 
+            (a.altId && a.altId === activeUser.id) ||
+            (a.name && activeUser.name && a.name.trim().toLowerCase() === activeUser.name.trim().toLowerCase())
+          );
+          if (matchedArcher) {
+            activeUser = {
+              role: 'archer',
+              id: matchedArcher.id,
+              name: matchedArcher.name
+            };
+          }
+        }
+
         return {
           ...remoteData,
-          archers: (remoteData.archers && remoteData.archers.length > 0) ? remoteData.archers : (prev.archers && prev.archers.length > 0 ? prev.archers : defaultArchers),
+          archers: loadedArchers,
           streaks: (remoteData.streaks && Object.keys(remoteData.streaks).length > 0) ? remoteData.streaks : (prev.streaks && Object.keys(prev.streaks).length > 0 ? prev.streaks : defaultStreaks),
           currentUser: activeUser
         };

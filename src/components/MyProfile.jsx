@@ -2,7 +2,11 @@ import React, { useState } from 'react';
 import { User, Edit3, Lock, Plus, Trash2, Award, Calendar, Briefcase, Camera, Save, CheckCircle2, Shield, Eye, EyeOff, Upload } from 'lucide-react';
 
 export default function MyProfile({ currentUser, archers, onUpdateArcher }) {
-  const currentArcher = archers.find(a => a.id === currentUser.id) || {
+  const currentArcher = (archers && archers.find(a => 
+    a.id === currentUser.id || 
+    (a.altId && a.altId === currentUser.id) || 
+    (a.name && currentUser.name && a.name.trim().toLowerCase() === currentUser.name.trim().toLowerCase())
+  )) || {
     id: currentUser.id,
     name: currentUser.name,
     password: 'archer',
@@ -18,6 +22,10 @@ export default function MyProfile({ currentUser, archers, onUpdateArcher }) {
   };
 
   const [formData, setFormData] = useState({ ...currentArcher });
+
+  React.useEffect(() => {
+    setFormData({ ...currentArcher });
+  }, [currentArcher.id, currentArcher.photo, currentArcher.summary, currentArcher.aim, currentArcher.password, currentArcher.dob, currentArcher.category, currentArcher.occupation, currentArcher.currentlyPracticing]);
   const [newState, setNewState] = useState('');
   const [newPhotoUrl, setNewPhotoUrl] = useState('');
   const [showPassword, setShowPassword] = useState(false);

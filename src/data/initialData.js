@@ -1,8 +1,9 @@
 export const defaultArchers = [
   {
-    id: "archer_rishabh",
+    id: "archer_1785297210984",
+    altId: "archer_rishabh",
     name: "Rishabh Kumar Sinha",
-    password: "archer",
+    password: "Rishabh14102004",
     securityAnswer: "archer",
     photo: "https://images.unsplash.com/photo-1534528741775-53994a69daeb?auto=format&fit=crop&w=400&q=80",
     category: "Junior Archer",
@@ -15,9 +16,10 @@ export const defaultArchers = [
     photos: []
   },
   {
-    id: "archer_rishiraj",
+    id: "archer_1785340402782",
+    altId: "archer_rishiraj",
     name: "Rishiraj Rout",
-    password: "archer",
+    password: "rishi9211",
     securityAnswer: "archer",
     photo: "https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?auto=format&fit=crop&w=400&q=80",
     category: "Senior Archer",
@@ -30,9 +32,10 @@ export const defaultArchers = [
     photos: []
   },
   {
-    id: "archer_ajay",
-    name: "Ajay Kumar",
-    password: "archer",
+    id: "archer_1785338580996",
+    altId: "archer_ajay",
+    name: "AJAΨ KUMAR",
+    password: "SarwasresthDhanurdharX36",
     securityAnswer: "archer",
     photo: "https://images.unsplash.com/photo-1500648767791-00dcc994a43e?auto=format&fit=crop&w=400&q=80",
     category: "Junior Archer",
@@ -45,9 +48,10 @@ export const defaultArchers = [
     photos: []
   },
   {
-    id: "archer_anisha",
+    id: "archer_1785650256269",
+    altId: "archer_anisha",
     name: "Anisha Karan",
-    password: "archer",
+    password: "pihumerijaan",
     securityAnswer: "archer",
     photo: "https://images.unsplash.com/photo-1494790108377-be9c29b29330?auto=format&fit=crop&w=400&q=80",
     category: "Junior Archer",
@@ -60,9 +64,10 @@ export const defaultArchers = [
     photos: []
   },
   {
-    id: "archer_rahim",
+    id: "archer_1785342143430",
+    altId: "archer_rahim",
     name: "Md Rahimuddin",
-    password: "archer",
+    password: "Rahim@2002",
     securityAnswer: "archer",
     photo: "https://images.unsplash.com/photo-1472099645785-5658abf4ff4e?auto=format&fit=crop&w=400&q=80",
     category: "Junior Archer",
