@@ -48,20 +48,43 @@ export default function HeroCoach({ coach, venueSchedule, currentUser, archers =
 
   // Compute effective daily streak (resets down to 0 if last checked was before yesterday)
   const getEffectiveStreak = (stObj) => {
-    if (!stObj || !stObj.lastChecked) return { count: 0, isCheckedToday: false };
-    const todayStr = new Date().toISOString().split('T')[0];
-    
-    const yesterday = new Date();
+    if (!stObj) return { count: 0, isCheckedToday: false };
+
+    const historySet = new Set(stObj.history || []);
+    if (stObj.lastChecked) historySet.add(stObj.lastChecked);
+
+    if (historySet.size === 0) return { count: 0, isCheckedToday: false };
+
+    const today = new Date();
+    const todayStr = today.toISOString().split('T')[0];
+
+    const yesterday = new Date(today);
     yesterday.setDate(yesterday.getDate() - 1);
     const yesterdayStr = yesterday.toISOString().split('T')[0];
 
-    const isCheckedToday = stObj.lastChecked === todayStr;
-    const isCheckedYesterday = stObj.lastChecked === yesterdayStr;
+    const isCheckedToday = historySet.has(todayStr);
+    const isCheckedYesterday = historySet.has(yesterdayStr);
 
-    if (isCheckedToday || isCheckedYesterday) {
-      return { count: stObj.count, isCheckedToday };
+    if (!isCheckedToday && !isCheckedYesterday) {
+      return { count: 0, isCheckedToday: false };
     }
-    return { count: 0, isCheckedToday: false };
+
+    // Count unbroken consecutive practice days backwards starting from today (or yesterday)
+    let consecutive = 0;
+    let curr = new Date(isCheckedToday ? today : yesterday);
+
+    while (true) {
+      const dStr = curr.toISOString().split('T')[0];
+      if (historySet.has(dStr)) {
+        consecutive++;
+        curr.setDate(curr.getDate() - 1);
+      } else {
+        break;
+      }
+    }
+
+    const finalCount = Math.max(consecutive, stObj.count || 0);
+    return { count: finalCount, isCheckedToday };
   };
 
   const currentEffective = getEffectiveStreak(userStreak);

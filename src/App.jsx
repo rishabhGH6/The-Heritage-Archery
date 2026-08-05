@@ -96,31 +96,32 @@ export default function App() {
     const today = new Date();
     const todayStr = today.toISOString().split('T')[0];
 
-    const yesterday = new Date(today);
-    yesterday.setDate(yesterday.getDate() - 1);
-    const yesterdayStr = yesterday.toISOString().split('T')[0];
-
     setAppData(prev => {
       const currentStreakObj = prev.streaks[archerId] || { count: 0, lastChecked: null, history: [] };
       if (currentStreakObj.lastChecked === todayStr) return prev; // Already checked in today
 
-      const isConsecutive = currentStreakObj.lastChecked === yesterdayStr;
-      const newCount = isConsecutive ? currentStreakObj.count + 1 : 1;
-
-      // Populate full streak date range into history set
       const historySet = new Set(currentStreakObj.history || []);
-      const startDate = new Date(today);
-      for (let i = 0; i < newCount; i++) {
-        const d = new Date(startDate);
-        d.setDate(d.getDate() - i);
-        historySet.add(d.toISOString().split('T')[0]);
+      if (currentStreakObj.lastChecked) historySet.add(currentStreakObj.lastChecked);
+      historySet.add(todayStr);
+
+      // Compute consecutive unbroken practice days ending today
+      let consecutive = 0;
+      let curr = new Date(today);
+
+      while (true) {
+        const dStr = curr.toISOString().split('T')[0];
+        if (historySet.has(dStr)) {
+          consecutive++;
+          curr.setDate(curr.getDate() - 1);
+        } else {
+          break;
+        }
       }
-      const newHistory = Array.from(historySet);
 
       const newStreakObj = {
-        count: newCount,
+        count: consecutive,
         lastChecked: todayStr,
-        history: newHistory
+        history: Array.from(historySet)
       };
 
       syncSaveStreak(archerId, newStreakObj);
