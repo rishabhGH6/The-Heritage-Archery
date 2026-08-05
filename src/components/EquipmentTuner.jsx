@@ -24,7 +24,7 @@ export default function EquipmentTuner({ currentUser, archers, equipmentData, on
 
   const selectedArcher = selectedArcherId === 'coach'
     ? { id: 'coach', name: 'Coach Jayanta Chakraborty', category: 'Head Coach' }
-    : (archers.find(a => a.id === selectedArcherId) || archers[0] || { name: 'Archer' });
+    : ((archers && archers.find(a => a.id === selectedArcherId)) || archers?.[0] || { name: currentUser.name || 'Archer', category: 'Recurve' });
 
   const handleArcherChange = (newId) => {
     setSelectedArcherId(newId);

@@ -37,12 +37,16 @@ export default function App() {
   useEffect(() => {
     fetchSupabaseData(defaultData).then(remoteData => {
       setAppData(prev => {
-        const activeUser = prev.currentUser && prev.currentUser.id !== 'guest' ? prev.currentUser : getPersistentSession();
+        const activeUser = (prev.currentUser && prev.currentUser.id !== 'guest') ? prev.currentUser : getPersistentSession();
         return {
           ...remoteData,
+          archers: (remoteData.archers && remoteData.archers.length > 0) ? remoteData.archers : (prev.archers && prev.archers.length > 0 ? prev.archers : defaultArchers),
+          streaks: (remoteData.streaks && Object.keys(remoteData.streaks).length > 0) ? remoteData.streaks : (prev.streaks && Object.keys(prev.streaks).length > 0 ? prev.streaks : defaultStreaks),
           currentUser: activeUser
         };
       });
+    }).catch(err => {
+      console.warn("Supabase background sync notice:", err);
     });
   }, []);
 

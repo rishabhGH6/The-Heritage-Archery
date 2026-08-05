@@ -192,7 +192,7 @@ export default function InteractiveScoring({ currentUser, archers = [], scoreLog
 
   const activeRoundArrows = roundsData[currentRound - 1].arrows;
   const activeRoundGrouping = calculateGrouping(activeRoundArrows);
-  const selectedArcher = archers.find(a => a.id === selectedArcherId) || archers[0];
+  const selectedArcher = (archers && archers.find(a => a.id === selectedArcherId)) || archers?.[0] || { id: currentUser.id, name: currentUser.name || "Archer", category: "Recurve" };
 
   // Save current bullet tags to arrow
   const handleSaveArrowTags = () => {
