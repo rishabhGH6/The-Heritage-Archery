@@ -38,29 +38,34 @@ export const fetchSupabaseData = async (defaultData) => {
     const result = { ...defaultData };
 
     if (archersData && archersData.length > 0) {
-      result.archers = archersData.map(a => ({
-        id: a.id,
-        name: a.name,
-        password: a.password,
-        securityAnswer: a.security_answer || '',
-        photo: a.photo || '',
-        category: a.category || 'Junior',
-        occupation: a.occupation || 'Student',
-        currentlyPracticing: a.currently_practicing || 'Yes',
-        dob: a.dob || '',
-        aim: a.aim || '',
-        summary: a.summary || '',
-        statesPlayed: parseJson(a.states_played, []),
-        photos: parseJson(a.photos, [])
-      }));
+      result.archers = archersData.map(a => {
+        const defaultA = defaultData.archers?.find(da => da.id === a.id || da.name === a.name);
+        const fallbackPhoto = defaultA?.photo || "https://images.unsplash.com/photo-1534528741775-53994a69daeb?auto=format&fit=crop&w=400&q=80";
+        return {
+          id: a.id,
+          name: a.name,
+          password: a.password || 'archer',
+          securityAnswer: a.security_answer || '',
+          photo: (a.photo && a.photo.trim().length > 5) ? a.photo : fallbackPhoto,
+          category: a.category || defaultA?.category || 'Junior',
+          occupation: a.occupation || defaultA?.occupation || 'Student',
+          currentlyPracticing: a.currently_practicing || 'Yes',
+          dob: a.dob || defaultA?.dob || '',
+          aim: a.aim || defaultA?.aim || '',
+          summary: a.summary || defaultA?.summary || '',
+          statesPlayed: parseJson(a.states_played, defaultA?.statesPlayed || ["West Bengal"]),
+          photos: parseJson(a.photos, [])
+        };
+      });
     }
 
     if (coachData && coachData.length > 0) {
       const c = coachData[0];
+      const defaultCoachPhoto = "https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?auto=format&fit=crop&w=400&q=80";
       result.coach = {
         name: c.name || defaultData.coach.name,
         role: c.role || defaultData.coach.role,
-        photo: c.photo || '',
+        photo: (c.photo && c.photo.trim().length > 5) ? c.photo : (defaultData.coach.photo || defaultCoachPhoto),
         tagline: c.tagline || defaultData.coach.tagline,
         motivatingLines: c.motivating_lines || defaultData.coach.motivatingLines,
         password: c.password || defaultData.coach.password
