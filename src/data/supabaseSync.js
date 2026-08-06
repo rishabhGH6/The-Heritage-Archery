@@ -38,10 +38,14 @@ export const fetchSupabaseData = async (defaultData) => {
     const result = { ...defaultData };
 
     if (archersData && archersData.length > 0) {
-      result.archers = archersData.map(a => {
+      const activeList = [];
+      const pendingList = [];
+
+      archersData.forEach(a => {
         const defaultA = defaultData.archers?.find(da => da.name.trim().toLowerCase() === a.name.trim().toLowerCase() || da.id === a.id);
         const fallbackPhoto = defaultA?.photo || "https://images.unsplash.com/photo-1534528741775-53994a69daeb?auto=format&fit=crop&w=400&q=80";
-        return {
+
+        const archerObj = {
           id: a.id,
           altId: defaultA?.id,
           name: a.name,
@@ -55,9 +59,22 @@ export const fetchSupabaseData = async (defaultData) => {
           aim: a.aim || defaultA?.aim || '',
           summary: a.summary || defaultA?.summary || '',
           statesPlayed: parseJson(a.states_played, defaultA?.statesPlayed || ["West Bengal"]),
-          photos: parseJson(a.photos, [])
+          photos: parseJson(a.photos, []),
+          status: a.status || 'approved',
+          requestDate: a.created_at ? new Date(a.created_at).toLocaleDateString() : new Date().toLocaleDateString()
         };
+
+        if (a.status === 'pending') {
+          pendingList.push(archerObj);
+        } else {
+          activeList.push(archerObj);
+        }
       });
+
+      if (activeList.length > 0) {
+        result.archers = activeList;
+      }
+      result.pendingArchers = pendingList;
     }
 
     if (coachData && coachData.length > 0) {
@@ -181,10 +198,19 @@ export const syncSaveArcher = async (archer) => {
       aim: archer.aim || '',
       summary: archer.summary || '',
       states_played: JSON.stringify(archer.statesPlayed || []),
-      photos: JSON.stringify(archer.photos || [])
+      photos: JSON.stringify(archer.photos || []),
+      status: archer.status || 'approved'
     });
   } catch (e) {
     console.error("Supabase archer save error", e);
+  }
+};
+
+export const syncDeleteArcher = async (archerId) => {
+  try {
+    await supabase.from('archers').delete().eq('id', archerId);
+  } catch (e) {
+    console.error("Supabase archer delete error", e);
   }
 };
 

@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import { Shield, Megaphone, Award, Key, Plus, Trash2, CheckCircle2, UserCheck, Bell, Sparkles, Users, Send } from 'lucide-react';
 
-export default function CoachPortal({ coach, archers = [], announcements = [], badges = [], onAddAnnouncement, onDeleteAnnouncement, onGrantBadge, onUpdateCoachPassword }) {
+export default function CoachPortal({ coach, archers = [], pendingArchers = [], announcements = [], badges = [], onAddAnnouncement, onDeleteAnnouncement, onGrantBadge, onUpdateCoachPassword, onApproveArcher, onRejectArcher }) {
   const [annTitle, setAnnTitle] = useState('');
   const [annContent, setAnnContent] = useState('');
   const [annCategory, setAnnCategory] = useState('General Notice 📢');
@@ -91,6 +91,81 @@ export default function CoachPortal({ coach, archers = [], announcements = [], b
 
       {/* 1-Column Stacked System for Coach Portal Sections */}
       <div style={{ display: 'flex', flexDirection: 'column', gap: '24px' }}>
+        
+        {/* Section 0: Pending Team Member Registration Requests */}
+        <div className="glass-card" style={{ padding: '24px', border: '1px solid rgba(56, 189, 248, 0.4)', background: 'linear-gradient(135deg, rgba(15,23,42,0.85), rgba(56,189,248,0.08))' }}>
+          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '16px', flexWrap: 'wrap', gap: '10px' }}>
+            <h3 style={{ fontSize: '1.25rem', fontWeight: 800, color: '#38bdf8', margin: 0, display: 'flex', alignItems: 'center', gap: '10px' }}>
+              <UserCheck size={22} color="#38bdf8" /> Pending Team Member Approvals
+              {pendingArchers.length > 0 && (
+                <span style={{ background: '#ef4444', color: '#ffffff', fontSize: '0.78rem', padding: '2px 10px', borderRadius: '12px', fontWeight: 800 }}>
+                  {pendingArchers.length} New Request{pendingArchers.length > 1 ? 's' : ''}
+                </span>
+              )}
+            </h3>
+            <span style={{ fontSize: '0.78rem', color: '#94a3b8' }}>🔒 Admin Control: Only approved archers can access team accounts</span>
+          </div>
+
+          {pendingArchers.length === 0 ? (
+            <div style={{ background: 'rgba(15, 23, 42, 0.5)', padding: '18px', borderRadius: '12px', border: '1px border-dashed rgba(148, 163, 184, 0.2)', textAlign: 'center', color: '#94a3b8', fontSize: '0.9rem' }}>
+              ✅ All team registration requests have been reviewed. No pending approval requests at this moment.
+            </div>
+          ) : (
+            <div style={{ display: 'flex', flexDirection: 'column', gap: '14px' }}>
+              {pendingArchers.map(pa => (
+                <div key={pa.id} style={{ background: 'rgba(15, 23, 42, 0.8)', padding: '18px', borderRadius: '12px', border: '1px solid rgba(56, 189, 248, 0.25)', display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', gap: '16px' }}>
+                  <div>
+                    <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+                      <span style={{ fontSize: '1.1rem', fontWeight: 800, color: '#f8fafc' }}>{pa.name}</span>
+                      <span style={{ background: 'rgba(56, 189, 248, 0.15)', color: '#38bdf8', fontSize: '0.72rem', padding: '2px 8px', borderRadius: '6px', fontWeight: 700, border: '1px solid rgba(56, 189, 248, 0.3)' }}>
+                        {pa.category}
+                      </span>
+                    </div>
+
+                    <div style={{ fontSize: '0.82rem', color: '#cbd5e1', marginTop: '6px', display: 'flex', flexWrap: 'wrap', gap: '14px' }}>
+                      <span>💼 <strong>Occupation:</strong> {pa.occupation}</span>
+                      <span>🎂 <strong>DOB:</strong> {pa.dob || 'Not specified'}</span>
+                      <span>🎯 <strong>Practicing:</strong> {pa.currentlyPracticing}</span>
+                      <span>🔑 <strong>Set Password:</strong> <code style={{ color: '#fbbf24', background: 'rgba(0,0,0,0.4)', padding: '2px 6px', borderRadius: '4px' }}>{pa.password}</code></span>
+                      <span>🔒 <strong>Score Answer:</strong> {pa.securityAnswer}</span>
+                    </div>
+
+                    <div style={{ fontSize: '0.72rem', color: '#64748b', marginTop: '6px' }}>
+                      Submitted on {pa.requestDate || 'Recently'}
+                    </div>
+                  </div>
+
+                  <div style={{ display: 'flex', gap: '10px' }}>
+                    <button
+                      type="button"
+                      onClick={() => {
+                        if (window.confirm(`Approve registration request for "${pa.name}"? They will become an official active archer on the team.`)) {
+                          onApproveArcher && onApproveArcher(pa);
+                        }
+                      }}
+                      className="btn-gold"
+                      style={{ background: 'linear-gradient(135deg, #059669, #10b981)', border: 'none', color: '#ffffff', gap: '6px', padding: '8px 14px', fontSize: '0.85rem' }}
+                    >
+                      <CheckCircle2 size={16} /> Approve & Add to Team
+                    </button>
+
+                    <button
+                      type="button"
+                      onClick={() => {
+                        if (window.confirm(`Reject registration request for "${pa.name}"?`)) {
+                          onRejectArcher && onRejectArcher(pa.id);
+                        }
+                      }}
+                      style={{ background: 'rgba(239, 68, 68, 0.15)', border: '1px solid rgba(239, 68, 68, 0.3)', color: '#ef4444', borderRadius: '8px', cursor: 'pointer', padding: '8px 12px', fontSize: '0.85rem', fontWeight: 700, display: 'flex', alignItems: 'center', gap: '4px' }}
+                    >
+                      <Trash2 size={15} /> Reject
+                    </button>
+                  </div>
+                </div>
+              ))}
+            </div>
+          )}
+        </div>
         
         {/* Section 1: Broadcast Team Announcement */}
         <div className="glass-card" style={{ padding: '24px', border: '1px solid rgba(217, 119, 6, 0.35)' }}>

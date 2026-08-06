@@ -127,6 +127,8 @@ export const defaultData = {
 
   archers: defaultArchers,
 
+  pendingArchers: [],
+
   streaks: defaultStreaks,
 
   venueSchedule: {

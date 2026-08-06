@@ -17,6 +17,7 @@ import { defaultData, loadAppData, saveAppData, defaultArchers, defaultStreaks, 
 import {
   fetchSupabaseData,
   syncSaveArcher,
+  syncDeleteArcher,
   syncSaveCoach,
   syncSaveStreak,
   syncSaveVenue,
@@ -115,6 +116,42 @@ export default function App() {
       archers: [...prev.archers, newArcherObj]
     }));
     syncSaveArcher(newArcherObj);
+  };
+
+  // Submit new registration request for admin approval
+  const handleRequestAddArcher = (newPendingArcher) => {
+    const pendingArcherObj = {
+      ...newPendingArcher,
+      status: 'pending'
+    };
+    setAppData(prev => ({
+      ...prev,
+      pendingArchers: [...(prev.pendingArchers || []), pendingArcherObj]
+    }));
+    syncSaveArcher(pendingArcherObj);
+  };
+
+  // Coach Jayanta (Admin) approves a pending registration
+  const handleApproveArcher = (pendingArcher) => {
+    const approvedArcher = {
+      ...pendingArcher,
+      status: 'approved'
+    };
+    setAppData(prev => ({
+      ...prev,
+      pendingArchers: (prev.pendingArchers || []).filter(p => p.id !== pendingArcher.id),
+      archers: [...prev.archers, approvedArcher]
+    }));
+    syncSaveArcher(approvedArcher);
+  };
+
+  // Coach Jayanta (Admin) rejects a pending registration
+  const handleRejectArcher = (pendingArcherId) => {
+    setAppData(prev => ({
+      ...prev,
+      pendingArchers: (prev.pendingArchers || []).filter(p => p.id !== pendingArcherId)
+    }));
+    syncDeleteArcher(pendingArcherId);
   };
 
   const handleCheckInStreak = (archerId) => {
@@ -258,9 +295,11 @@ export default function App() {
         setActiveTab={setActiveTab}
         currentUser={appData.currentUser}
         archers={appData.archers}
+        pendingArchers={appData.pendingArchers || []}
         coach={appData.coach}
         onSwitchUser={handleSwitchUser}
         onAddArcher={handleAddArcher}
+        onRequestAddArcher={handleRequestAddArcher}
         onUpdateArcher={handleUpdateArcher}
       />
 
@@ -397,12 +436,15 @@ export default function App() {
           <CoachPortal
             coach={appData.coach}
             archers={appData.archers}
+            pendingArchers={appData.pendingArchers || []}
             announcements={appData.announcements}
             badges={appData.badges}
             onAddAnnouncement={handleAddAnnouncement}
             onDeleteAnnouncement={handleDeleteAnnouncement}
             onGrantBadge={handleGrantBadge}
             onUpdateCoachPassword={handleUpdateCoachPassword}
+            onApproveArcher={handleApproveArcher}
+            onRejectArcher={handleRejectArcher}
           />
         )}
 

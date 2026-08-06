@@ -2,7 +2,7 @@ import React, { useState } from 'react';
 import { Target, Award, Calendar, MessageSquare, Shield, User, MapPin, Camera, Wrench, LogIn, LogOut, ChevronDown, UserPlus, Upload, HelpCircle, Key, CheckCircle2, Menu, X, Sparkles } from 'lucide-react';
 import { defaultArchers } from '../data/initialData';
 
-export default function Navbar({ activeTab, setActiveTab, currentUser, archers, coach, onSwitchUser, onAddArcher, onUpdateArcher }) {
+export default function Navbar({ activeTab, setActiveTab, currentUser, archers, pendingArchers = [], coach, onSwitchUser, onAddArcher, onRequestAddArcher, onUpdateArcher }) {
   const displayArchers = (archers && archers.length > 0) ? archers : defaultArchers;
   const [showRoleModal, setShowRoleModal] = useState(false);
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
@@ -44,29 +44,26 @@ export default function Navbar({ activeTab, setActiveTab, currentUser, archers, 
         setShowRoleModal(false);
         setInputPassword('');
       } else {
-        setPasswordError('Incorrect password for Coach Jayanta Chakraborty.');
+        setPasswordError('Incorrect Coach Password. Password for Head Coach is "STAR@Archery".');
       }
     } else if (selectedRole === 'new_archer') {
-      // Register new archer
       if (!regName.trim() || !regPass.trim()) {
-        setPasswordError('Please provide your name and password.');
-        return;
-      }
-      if (!regHighestScoreAnswer.trim()) {
-        setPasswordError('Please answer the security question: What is your highest score?');
+        setPasswordError('Please fill out all required fields.');
         return;
       }
 
-      // Check for duplicate account name (case-insensitive)
+      // Check for duplicate account name (case-insensitive) in active archers and pending requests
       const targetNameLower = regName.trim().toLowerCase();
-      const duplicateExists = archers.some(a => a.name.trim().toLowerCase() === targetNameLower) || 
+      const duplicateActive = displayArchers.some(a => a.name.trim().toLowerCase() === targetNameLower) || 
                               (coach && coach.name && coach.name.trim().toLowerCase() === targetNameLower);
-      if (duplicateExists) {
-        setPasswordError(`⚠️ An account with the name "${regName.trim()}" already exists! Please use a unique name.`);
+      const duplicatePending = pendingArchers.some(p => p.name.trim().toLowerCase() === targetNameLower);
+
+      if (duplicateActive || duplicatePending) {
+        setPasswordError(`⚠️ An account or registration request with the name "${regName.trim()}" already exists! Please use a unique name.`);
         return;
       }
 
-      const newArcher = {
+      const newArcherRequest = {
         id: "archer_" + Date.now(),
         name: regName.trim(),
         password: regPass.trim(),
@@ -79,18 +76,24 @@ export default function Navbar({ activeTab, setActiveTab, currentUser, archers, 
         aim: "Focusing on consistent technique and release.",
         summary: "Heritage Archery team member.",
         statesPlayed: [],
-        photos: []
+        photos: [],
+        status: "pending",
+        requestDate: new Date().toLocaleDateString()
       };
 
-      if (onAddArcher) {
-        onAddArcher(newArcher);
+      if (onRequestAddArcher) {
+        onRequestAddArcher(newArcherRequest);
+      } else if (onAddArcher) {
+        onAddArcher(newArcherRequest);
       }
-      onSwitchUser({ role: 'archer', id: newArcher.id, name: newArcher.name });
+
       setShowRoleModal(false);
       setRegName('');
       setRegPass('');
       setRegHighestScoreAnswer('');
       setRegDob('');
+
+      alert(`📩 Registration Request Submitted!\n\nYour account request for "${newArcherRequest.name}" has been sent to Admin (Coach Jayanta) for verification.\n\nOnce Coach Jayanta approves your request, you will be able to log in using your password.`);
     } else if (selectedRole === 'forgot_password') {
       const archer = archers.find(a => a.id === forgotArcherId);
       if (!archer) {
@@ -141,6 +144,14 @@ export default function Navbar({ activeTab, setActiveTab, currentUser, archers, 
       }
 
       const targetNameLower = inputArcherName.trim().toLowerCase();
+
+      // Check if this account registration is pending admin approval
+      const isPending = pendingArchers && pendingArchers.some(p => p.name.trim().toLowerCase() === targetNameLower);
+      if (isPending) {
+        setPasswordError(`⏳ Registration Request Pending: Your account request for "${inputArcherName.trim()}" is awaiting approval from Coach Jayanta (Admin). Once Coach Jayanta approves your request, you will be able to log in.`);
+        return;
+      }
+
       const archer = displayArchers.find(a => a.name.trim().toLowerCase() === targetNameLower);
 
       if (!archer) {
