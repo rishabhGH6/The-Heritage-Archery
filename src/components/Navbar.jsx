@@ -413,6 +413,16 @@ export default function Navbar({ activeTab, setActiveTab, currentUser, archers, 
                 <User size={18} /> My Archer Profile
               </button>
             )}
+            {(currentUser.role === 'admin' || (currentUser.name && currentUser.name.trim().toLowerCase() === 'rishabh kumar sinha')) && (
+              <button className={`mobile-nav-item ${activeTab === 'admin' ? 'active' : ''}`} onClick={() => handleTabClick('admin')} style={{ borderColor: 'rgba(239, 68, 68, 0.4)' }}>
+                <Shield size={18} color="#ef4444" /> Admin Control Panel
+                {pendingArchers && pendingArchers.length > 0 && (
+                  <span style={{ background: '#ef4444', color: '#ffffff', fontSize: '0.72rem', padding: '2px 8px', borderRadius: '10px', fontWeight: 800, marginLeft: 'auto' }}>
+                    {pendingArchers.length} Pending
+                  </span>
+                )}
+              </button>
+            )}
             {currentUser.role === 'coach' && (
               <button className={`mobile-nav-item ${activeTab === 'coach' ? 'active' : ''}`} onClick={() => handleTabClick('coach')}>
                 <Shield size={18} /> Coach Dashboard
