@@ -35,9 +35,9 @@ export default function App() {
   const [activeTab, setActiveTab] = useState('home');
   const [showIntro, setShowIntro] = useState(true);
 
-  // Load from Supabase on mount
+  // Load from Supabase on mount using instant cache-first strategy
   useEffect(() => {
-    fetchSupabaseData(defaultData).then(remoteData => {
+    fetchSupabaseData(appData).then(remoteData => {
       setAppData(prev => {
         const loadedArchers = (remoteData.archers && remoteData.archers.length > 0) ? remoteData.archers : (prev.archers && prev.archers.length > 0 ? prev.archers : defaultArchers);
         let activeUser = (prev.currentUser && prev.currentUser.id !== 'guest') ? prev.currentUser : { id: 'guest', role: 'guest', name: 'Guest' };
@@ -68,6 +68,18 @@ export default function App() {
       console.warn("Supabase background sync notice:", err);
     });
   }, []);
+
+  // Preload profile photos in background for instant 0ms rendering
+  useEffect(() => {
+    if (appData.archers && appData.archers.length > 0) {
+      appData.archers.forEach(a => {
+        if (a.photo && a.photo.startsWith('http')) {
+          const img = new Image();
+          img.src = a.photo;
+        }
+      });
+    }
+  }, [appData.archers]);
 
   // Auto-save appData to localStorage as fallback cache
   useEffect(() => {

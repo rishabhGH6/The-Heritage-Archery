@@ -184,7 +184,7 @@ export const savePersistentSession = (userObj) => {
 // Helper function to load data from LocalStorage or initialize default
 export const loadAppData = () => {
   const guestUser = { id: "guest", role: "guest", name: "Guest" };
-  const saved = localStorage.getItem("heritage_archery_clean_v5");
+  const saved = localStorage.getItem("heritage_archery_clean_v6") || localStorage.getItem("heritage_archery_clean_v5");
   if (saved) {
     try {
       const parsed = JSON.parse(saved);
@@ -206,7 +206,7 @@ export const loadAppData = () => {
 
 export const saveAppData = (data) => {
   try {
-    localStorage.setItem("heritage_archery_clean_v5", JSON.stringify(data));
+    localStorage.setItem("heritage_archery_clean_v6", JSON.stringify(data));
   } catch (e) {
     try {
       // QuotaExceededError fallback: strip heavy base64 strings from photos array before saving
@@ -218,7 +218,7 @@ export const saveAppData = (data) => {
           photos: []
         }))
       };
-      localStorage.setItem("heritage_archery_clean_v5", JSON.stringify(lightweightData));
+      localStorage.setItem("heritage_archery_clean_v6", JSON.stringify(lightweightData));
     } catch (err) {
       console.warn("Storage quota exceeded, continuing with memory state:", err);
     }
