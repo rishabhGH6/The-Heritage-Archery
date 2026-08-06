@@ -93,7 +93,7 @@ export default function Navbar({ activeTab, setActiveTab, currentUser, archers, 
       setRegHighestScoreAnswer('');
       setRegDob('');
 
-      alert(`📩 Registration Request Submitted!\n\nYour account request for "${newArcherRequest.name}" has been sent to Admin (Coach Jayanta) for verification.\n\nOnce Coach Jayanta approves your request, you will be able to log in using your password.`);
+      alert(`📩 Registration Request Submitted!\n\nYour account request for "${newArcherRequest.name}" has been sent to Admin (Rishabh Kumar Sinha) for verification.\n\nOnce Admin approves your request, you will be able to log in using your password.`);
     } else if (selectedRole === 'forgot_password') {
       const archer = archers.find(a => a.id === forgotArcherId);
       if (!archer) {
@@ -148,7 +148,7 @@ export default function Navbar({ activeTab, setActiveTab, currentUser, archers, 
       // Check if this account registration is pending admin approval
       const isPending = pendingArchers && pendingArchers.some(p => p.name.trim().toLowerCase() === targetNameLower);
       if (isPending) {
-        setPasswordError(`⏳ Registration Request Pending: Your account request for "${inputArcherName.trim()}" is awaiting approval from Coach Jayanta (Admin). Once Coach Jayanta approves your request, you will be able to log in.`);
+        setPasswordError(`⏳ Registration Request Pending: Your account request for "${inputArcherName.trim()}" is awaiting approval from Admin (Rishabh Kumar Sinha). Once Admin approves your request, you will be able to log in.`);
         return;
       }
 
