@@ -495,7 +495,7 @@ export default function Navbar({ activeTab, setActiveTab, currentUser, archers, 
                         gap: '4px'
                       }}
                     >
-                      <UserPlus size={16} color="#38bdf8" /> New Archer
+                      <UserPlus size={16} color="#38bdf8" /> Request Coach
                     </button>
                   </div>
                 </div>
@@ -667,7 +667,7 @@ export default function Navbar({ activeTab, setActiveTab, currentUser, archers, 
 
                 <button type="submit" className={selectedRole === 'coach' ? 'btn-gold' : 'btn-emerald'} style={{ flex: 1, justifyContent: 'center' }}>
                   {selectedRole === 'new_archer'
-                    ? 'Register & Login'
+                    ? 'Request Coach'
                     : selectedRole === 'forgot_password'
                     ? (forgotVerified ? 'Update Password & Login' : 'Verify Answer')
                     : 'Login to Account'}
