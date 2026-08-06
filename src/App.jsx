@@ -11,6 +11,7 @@ import GalleryInstagram from './components/GalleryInstagram';
 import CoachPortal from './components/CoachPortal';
 import MyProfile from './components/MyProfile';
 import AiArcheryCoach from './components/AiArcheryCoach';
+import AdminControl from './components/AdminControl';
 import CinematicIntro from './components/CinematicIntro';
 
 import { defaultData, loadAppData, saveAppData, defaultArchers, defaultStreaks, getPersistentSession, savePersistentSession } from './data/initialData';
@@ -432,19 +433,25 @@ export default function App() {
           />
         )}
 
+        {activeTab === 'admin' && (appData.currentUser.role === 'admin' || (appData.currentUser.name && appData.currentUser.name.trim().toLowerCase() === 'rishabh kumar sinha')) && (
+          <AdminControl
+            archers={appData.archers}
+            pendingArchers={appData.pendingArchers || []}
+            onApproveArcher={handleApproveArcher}
+            onRejectArcher={handleRejectArcher}
+          />
+        )}
+
         {activeTab === 'coach' && appData.currentUser.role === 'coach' && (
           <CoachPortal
             coach={appData.coach}
             archers={appData.archers}
-            pendingArchers={appData.pendingArchers || []}
             announcements={appData.announcements}
             badges={appData.badges}
             onAddAnnouncement={handleAddAnnouncement}
             onDeleteAnnouncement={handleDeleteAnnouncement}
             onGrantBadge={handleGrantBadge}
             onUpdateCoachPassword={handleUpdateCoachPassword}
-            onApproveArcher={handleApproveArcher}
-            onRejectArcher={handleRejectArcher}
           />
         )}
 

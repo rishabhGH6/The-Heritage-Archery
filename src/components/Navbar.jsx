@@ -249,6 +249,16 @@ export default function Navbar({ activeTab, setActiveTab, currentUser, archers, 
               <User size={17} /> My Profile
             </button>
           )}
+          {(currentUser.role === 'admin' || (currentUser.name && currentUser.name.trim().toLowerCase() === 'rishabh kumar sinha')) && (
+            <button className={`nav-tab ${activeTab === 'admin' ? 'active' : ''}`} onClick={() => handleTabClick('admin')} style={{ borderColor: 'rgba(239, 68, 68, 0.4)' }}>
+              <Shield size={17} color="#ef4444" /> Admin Control
+              {pendingArchers && pendingArchers.length > 0 && (
+                <span style={{ background: '#ef4444', color: '#ffffff', fontSize: '0.68rem', padding: '1px 6px', borderRadius: '10px', fontWeight: 800, marginLeft: '4px' }}>
+                  {pendingArchers.length}
+                </span>
+              )}
+            </button>
+          )}
           {currentUser.role === 'coach' && (
             <button className={`nav-tab ${activeTab === 'coach' ? 'active' : ''}`} onClick={() => handleTabClick('coach')}>
               <Shield size={17} /> Coach Dashboard
@@ -495,7 +505,7 @@ export default function Navbar({ activeTab, setActiveTab, currentUser, archers, 
                         gap: '4px'
                       }}
                     >
-                      <UserPlus size={16} color="#38bdf8" /> Request Coach
+                      <UserPlus size={16} color="#38bdf8" /> New Archer Register
                     </button>
                   </div>
                 </div>
@@ -667,7 +677,7 @@ export default function Navbar({ activeTab, setActiveTab, currentUser, archers, 
 
                 <button type="submit" className={selectedRole === 'coach' ? 'btn-gold' : 'btn-emerald'} style={{ flex: 1, justifyContent: 'center' }}>
                   {selectedRole === 'new_archer'
-                    ? 'Request Coach'
+                    ? 'Request Admin'
                     : selectedRole === 'forgot_password'
                     ? (forgotVerified ? 'Update Password & Login' : 'Verify Answer')
                     : 'Login to Account'}
