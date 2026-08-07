@@ -10,21 +10,55 @@ export default function RangeWhistleControl() {
 
   const [audioSource, setAudioSource] = useState('real_audio'); // 'real_audio' (sports-whistle.mp3) or 'synth'
 
-  // Play real sports whistle audio file (public/whistle.mp3) with sequence repeat
+  // Play real sports whistle audio file (public/whistle.mp3) with Web Audio 350% Volume Boost
   const playRealAudioWhistle = (blastCount, isEmergency = false) => {
     let playCount = 0;
     const gapMs = isEmergency ? 120 : 220;
 
-    const playNext = () => {
+    const playNext = async () => {
       if (playCount >= blastCount) return;
       playCount++;
 
-      const audio = new Audio('/whistle.mp3');
-      audio.volume = 1.0;
-      audio.play().catch(err => {
-        console.warn("Audio play error, falling back to Web Audio synth:", err);
-        playWhistleSound(blastCount, isEmergency);
-      });
+      try {
+        const AudioCtx = window.AudioContext || window.webkitAudioContext;
+        if (AudioCtx) {
+          const ctx = new AudioCtx();
+
+          // 3.5x (350%) High-Power Volume Boost
+          const gainNode = ctx.createGain();
+          gainNode.gain.setValueAtTime(3.5, ctx.currentTime);
+
+          // Dynamics Compressor to punch maximum loudness without distortion
+          const compressor = ctx.createDynamicsCompressor();
+          compressor.threshold.setValueAtTime(-6, ctx.currentTime);
+          compressor.knee.setValueAtTime(30, ctx.currentTime);
+          compressor.ratio.setValueAtTime(12, ctx.currentTime);
+          compressor.attack.setValueAtTime(0, ctx.currentTime);
+          compressor.release.setValueAtTime(0.25, ctx.currentTime);
+
+          const response = await fetch('/whistle.mp3');
+          const arrayBuffer = await response.arrayBuffer();
+          const audioBuffer = await ctx.decodeAudioData(arrayBuffer);
+
+          const source = ctx.createBufferSource();
+          source.buffer = audioBuffer;
+
+          source.connect(gainNode);
+          gainNode.connect(compressor);
+          compressor.connect(ctx.destination);
+
+          source.start(0);
+        } else {
+          const audio = new Audio('/whistle.mp3');
+          audio.volume = 1.0;
+          audio.play();
+        }
+      } catch (err) {
+        console.warn("Web Audio boost error, playing standard audio:", err);
+        const audio = new Audio('/whistle.mp3');
+        audio.volume = 1.0;
+        audio.play().catch(e => console.warn(e));
+      }
 
       if (playCount < blastCount) {
         // Schedule next blast in sequence after current whistle finishes (~450ms + gapMs)
