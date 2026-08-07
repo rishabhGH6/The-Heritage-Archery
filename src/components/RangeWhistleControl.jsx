@@ -8,6 +8,41 @@ export default function RangeWhistleControl() {
   const [activeSignal, setActiveSignal] = useState(null);
   const [emergencyAlert, setEmergencyAlert] = useState(false);
 
+  const [audioSource, setAudioSource] = useState('real_audio'); // 'real_audio' (sports-whistle.mp3) or 'synth'
+
+  // Play real sports whistle audio file (public/whistle.mp3) with sequence repeat
+  const playRealAudioWhistle = (blastCount, isEmergency = false) => {
+    let playCount = 0;
+    const gapMs = isEmergency ? 120 : 220;
+
+    const playNext = () => {
+      if (playCount >= blastCount) return;
+      playCount++;
+
+      const audio = new Audio('/whistle.mp3');
+      audio.volume = 1.0;
+      audio.play().catch(err => {
+        console.warn("Audio play error, falling back to Web Audio synth:", err);
+        playWhistleSound(blastCount, isEmergency);
+      });
+
+      if (playCount < blastCount) {
+        // Schedule next blast in sequence after current whistle finishes (~450ms + gapMs)
+        setTimeout(playNext, 450 + gapMs);
+      }
+    };
+
+    playNext();
+  };
+
+  const triggerWhistleSignal = (blastCount, isEmergency = false) => {
+    if (audioSource === 'real_audio') {
+      playRealAudioWhistle(blastCount, isEmergency);
+    } else {
+      playWhistleSound(blastCount, isEmergency);
+    }
+  };
+
   // Web Audio API Whistle Sound Synthesizer with High-Power Volume Boost & Harmonic Resonance
   const playWhistleSound = (blastCount, isEmergency = false) => {
     try {
@@ -96,7 +131,7 @@ export default function RangeWhistleControl() {
           description: `Shooting active! ${timerMax}s countdown running.`,
           color: "#34d399"
         });
-        playWhistleSound(1);
+        triggerWhistleSignal(1);
       } else if (phase === 'SHOOTING') {
         // Shooting timer complete! Automatically sound 3 whistles (Collect & Score Arrows)!
         setPhase('COLLECT');
@@ -106,7 +141,7 @@ export default function RangeWhistleControl() {
           description: "Shooting end complete! Step forward to targets to score & retrieve arrows.",
           color: "#38bdf8"
         });
-        playWhistleSound(3);
+        triggerWhistleSignal(3);
       }
     }
 
@@ -124,7 +159,7 @@ export default function RangeWhistleControl() {
       description: "10s line access timer running! Step to shooting line & hook bow string. 1 whistle will sound automatically when timer reaches 0.",
       color: "#fbbf24"
     });
-    playWhistleSound(2);
+    triggerWhistleSignal(2);
   };
 
   // 2. Begin Shooting Manually (1 Whistle + 90s/180s Countdown)
@@ -138,7 +173,7 @@ export default function RangeWhistleControl() {
       description: `Shooting active! ${timerMax}s countdown running. 3 whistles will sound automatically at 0.`,
       color: "#34d399"
     });
-    playWhistleSound(1);
+    triggerWhistleSignal(1);
   };
 
   // 3. Cease Fire & Collect Arrows Manually (3 Whistles)
@@ -151,7 +186,7 @@ export default function RangeWhistleControl() {
       description: "Shooting end complete! Step forward to targets to score & retrieve arrows.",
       color: "#38bdf8"
     });
-    playWhistleSound(3);
+    triggerWhistleSignal(3);
   };
 
   // 4. Emergency Cease Fire (Continuous Whistles)
@@ -164,7 +199,7 @@ export default function RangeWhistleControl() {
       description: "STOP SHOOTING IMMEDIATELY! Un-draw bow, replace arrows, step back behind waiting line.",
       color: "#ef4444"
     });
-    playWhistleSound(5, true);
+    triggerWhistleSignal(5, true);
   };
 
   const handleSelectTimerMax = (secs) => {
@@ -202,39 +237,76 @@ export default function RangeWhistleControl() {
           </h3>
         </div>
 
-        {/* Shooting End Duration Selector (90s / 180s) */}
-        <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
-          <button
-            onClick={() => handleSelectTimerMax(90)}
-            style={{
-              padding: '8px 14px',
-              borderRadius: '10px',
-              border: timerMax === 90 ? '2px solid #fbbf24' : '1px solid rgba(255,255,255,0.1)',
-              background: timerMax === 90 ? 'rgba(217, 119, 6, 0.3)' : 'rgba(15,23,42,0.6)',
-              color: timerMax === 90 ? '#fbbf24' : '#94a3b8',
-              fontSize: '0.82rem',
-              fontWeight: 800,
-              cursor: 'pointer'
-            }}
-          >
-            90s (3-Arrow End)
-          </button>
+        {/* Shooting End Duration & Audio Engine Selector */}
+        <div style={{ display: 'flex', alignItems: 'center', gap: '10px', flexWrap: 'wrap' }}>
+          <div style={{ display: 'flex', background: 'rgba(15,23,42,0.6)', padding: '3px', borderRadius: '10px', border: '1px solid rgba(255,255,255,0.1)' }}>
+            <button
+              onClick={() => setAudioSource('real_audio')}
+              style={{
+                padding: '6px 12px',
+                borderRadius: '8px',
+                border: 'none',
+                background: audioSource === 'real_audio' ? '#38bdf8' : 'transparent',
+                color: audioSource === 'real_audio' ? '#0f172a' : '#94a3b8',
+                fontSize: '0.78rem',
+                fontWeight: 800,
+                cursor: 'pointer'
+              }}
+              title="Use authentic MyInstants Sports Whistle audio recording"
+            >
+              🔊 Real Sports Whistle
+            </button>
+            <button
+              onClick={() => setAudioSource('synth')}
+              style={{
+                padding: '6px 12px',
+                borderRadius: '8px',
+                border: 'none',
+                background: audioSource === 'synth' ? '#fbbf24' : 'transparent',
+                color: audioSource === 'synth' ? '#0f172a' : '#94a3b8',
+                fontSize: '0.78rem',
+                fontWeight: 800,
+                cursor: 'pointer'
+              }}
+              title="Use synthesized range whistle frequency"
+            >
+              ⚡ Synth Tone
+            </button>
+          </div>
 
-          <button
-            onClick={() => handleSelectTimerMax(180)}
-            style={{
-              padding: '8px 14px',
-              borderRadius: '10px',
-              border: timerMax === 180 ? '2px solid #fbbf24' : '1px solid rgba(255,255,255,0.1)',
-              background: timerMax === 180 ? 'rgba(217, 119, 6, 0.3)' : 'rgba(15,23,42,0.6)',
-              color: timerMax === 180 ? '#fbbf24' : '#94a3b8',
-              fontSize: '0.82rem',
-              fontWeight: 800,
-              cursor: 'pointer'
-            }}
-          >
-            180s (6-Arrow End)
-          </button>
+          <div style={{ display: 'flex', gap: '6px' }}>
+            <button
+              onClick={() => handleSelectTimerMax(90)}
+              style={{
+                padding: '8px 12px',
+                borderRadius: '10px',
+                border: timerMax === 90 ? '2px solid #fbbf24' : '1px solid rgba(255,255,255,0.1)',
+                background: timerMax === 90 ? 'rgba(217, 119, 6, 0.3)' : 'rgba(15,23,42,0.6)',
+                color: timerMax === 90 ? '#fbbf24' : '#94a3b8',
+                fontSize: '0.82rem',
+                fontWeight: 800,
+                cursor: 'pointer'
+              }}
+            >
+              90s (3-Arrow)
+            </button>
+
+            <button
+              onClick={() => handleSelectTimerMax(180)}
+              style={{
+                padding: '8px 12px',
+                borderRadius: '10px',
+                border: timerMax === 180 ? '2px solid #fbbf24' : '1px solid rgba(255,255,255,0.1)',
+                background: timerMax === 180 ? 'rgba(217, 119, 6, 0.3)' : 'rgba(15,23,42,0.6)',
+                color: timerMax === 180 ? '#fbbf24' : '#94a3b8',
+                fontSize: '0.82rem',
+                fontWeight: 800,
+                cursor: 'pointer'
+              }}
+            >
+              180s (6-Arrow)
+            </button>
+          </div>
         </div>
       </div>
 
