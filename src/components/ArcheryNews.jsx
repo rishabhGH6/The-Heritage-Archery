@@ -166,10 +166,66 @@ const initialNewsArticles = [
 export default function ArcheryNews() {
   const [searchTerm, setSearchTerm] = useState('');
   const [selectedCategory, setSelectedCategory] = useState('All');
+  const [newsArticles, setNewsArticles] = useState(initialNewsArticles);
+  const [loadingApi, setLoadingApi] = useState(true);
+  const [apiConnected, setApiConnected] = useState(false);
+
+  React.useEffect(() => {
+    const fetchLiveNews = async () => {
+      const apiKey = import.meta.env.VITE_NEWS_API_KEY || '907a3a63603e4fdcbc4be9a7208f138f';
+      try {
+        const res = await fetch(`https://newsapi.org/v2/everything?q=archery&language=en&sortBy=publishedAt&pageSize=12&apiKey=${apiKey}`);
+        const data = await res.json();
+
+        if (data && data.articles && data.articles.length > 0) {
+          const apiFormatted = data.articles.map((art, idx) => {
+            let cat = 'Live Global News 📰';
+            const titleLower = (art.title || '').toLowerCase();
+            const descLower = (art.description || '').toLowerCase();
+
+            if (titleLower.includes('india') || descLower.includes('india') || titleLower.includes('aai')) {
+              cat = 'Indian Archery 🇮🇳';
+            } else if (titleLower.includes('world archery') || titleLower.includes('cup') || titleLower.includes('olympic')) {
+              cat = 'World Archery 🏆';
+            } else if (titleLower.includes('bow') || titleLower.includes('arrow') || titleLower.includes('target') || titleLower.includes('tech')) {
+              cat = 'Equipment & Tech 🏹';
+            }
+
+            return {
+              id: `api_news_${idx}_${Date.now()}`,
+              title: art.title || 'Live Archery Update',
+              category: cat,
+              date: art.publishedAt ? new Date(art.publishedAt).toLocaleDateString() : 'Recent',
+              source: art.source?.name || 'NewsAPI Sports',
+              image: (art.urlToImage && art.urlToImage.startsWith('http')) ? art.urlToImage : "https://images.unsplash.com/photo-1541534741688-6078c6bfb5c5?auto=format&fit=crop&w=800&q=80",
+              summary: art.description || 'Latest archery news coverage from global sports media.',
+              bullets: [
+                `Source: ${art.source?.name || 'Global Sports Desk'}`,
+                `Author: ${art.author || 'Sports Correspondent'}`,
+                `Published: ${art.publishedAt ? new Date(art.publishedAt).toLocaleDateString() : 'Today'}`
+              ],
+              url: art.url
+            };
+          });
+
+          // Combine live API articles with official social media posts
+          const socialPosts = initialNewsArticles.filter(a => a.type === 'social');
+          setNewsArticles([...socialPosts, ...apiFormatted]);
+          setApiConnected(true);
+        }
+      } catch (err) {
+        console.warn("NewsAPI live sync notice:", err);
+      } finally {
+        setLoadingApi(false);
+      }
+    };
+
+    fetchLiveNews();
+  }, []);
 
   const categories = ['All', 'Instagram Posts 📸', 'Indian Archery 🇮🇳', 'World Archery 🏆', 'Paralympic Archery 🏅', 'Equipment & Tech 🏹'];
 
-  const filteredArticles = initialNewsArticles.filter(article => {
+  const filteredArticles = newsArticles.filter(article => {
     let matchesCategory = false;
     if (selectedCategory === 'All') {
       matchesCategory = true;
@@ -194,22 +250,22 @@ export default function ArcheryNews() {
           <div>
             <div style={{ display: 'flex', alignItems: 'center', gap: '8px', marginBottom: '4px' }}>
               <span className="badge-gold" style={{ background: 'rgba(56, 189, 248, 0.18)', color: '#38bdf8', border: '1px solid rgba(56, 189, 248, 0.35)' }}>
-                <Newspaper size={13} /> Global & Indian Archery Updates
+                <Newspaper size={13} /> {apiConnected ? '🟢 Live NewsAPI Feed Connected' : 'Global & Indian Archery Updates'}
               </span>
             </div>
             <h2 style={{ fontSize: '1.8rem', fontWeight: 800, color: '#f8fafc', margin: '4px 0', display: 'flex', alignItems: 'center', gap: '10px' }}>
               Archery World & India News Hub 📰🎯
             </h2>
             <p style={{ color: '#94a3b8', fontSize: '0.92rem', margin: 0 }}>
-              Stay updated with national team trials, World Archery Cup results, equipment tech breakthroughs, and collegiate archery bulletins.
+              Live real-time sports news feed powered by NewsAPI + Official Instagram updates from @indianarchery & @worldarchery.
             </p>
           </div>
 
           {/* News Stats Pill */}
           <div style={{ display: 'flex', gap: '12px', flexWrap: 'wrap' }}>
             <div style={{ background: 'rgba(15,23,42,0.8)', border: '1px solid rgba(56, 189, 248, 0.3)', padding: '10px 18px', borderRadius: '12px', textAlign: 'center' }}>
-              <div style={{ fontSize: '0.7rem', color: '#94a3b8', textTransform: 'uppercase', fontWeight: 700 }}>Featured Articles</div>
-              <div style={{ fontSize: '1.25rem', fontWeight: 800, color: '#38bdf8' }}>{initialNewsArticles.length} Live Bulletins</div>
+              <div style={{ fontSize: '0.7rem', color: '#94a3b8', textTransform: 'uppercase', fontWeight: 700 }}>Total Live Articles</div>
+              <div style={{ fontSize: '1.25rem', fontWeight: 800, color: '#38bdf8' }}>{newsArticles.length} Live Bulletins</div>
             </div>
           </div>
         </div>
