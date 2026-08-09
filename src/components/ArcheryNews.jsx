@@ -76,6 +76,69 @@ const initialNewsArticles = [
       "Selection trial spots for upcoming National Championships."
     ],
     url: "https://indianarchery.info"
+  },
+  {
+    id: "post_1",
+    type: "social",
+    title: "10-Ring X-Ring Masterclass: World Cup Stage Finals Highlights! 🎯",
+    category: "World Archery 🏆",
+    date: "1 day ago",
+    source: "@worldarchery",
+    handle: "@worldarchery",
+    accountName: "World Archery Official 🎯",
+    avatar: "https://images.unsplash.com/photo-1541534741688-6078c6bfb5c5?auto=format&fit=crop&w=150&q=80",
+    verified: true,
+    platform: "Instagram / X",
+    image: "https://images.unsplash.com/photo-1511067007398-7e4b90cfa4bc?auto=format&fit=crop&w=800&q=80",
+    summary: "PURE PERFECTION! 🎯 Watch this incredible 10-X center X-ring arrow from the World Cup Stage finals! What is your favorite shooting distance? #ArcheryWorldCup #WorldArchery #Bullseye",
+    bullets: [
+      "24.5K Likes • 412 Comments on Instagram",
+      "Featured Archer: Recurve World Champion",
+      "Distance: 70m Outdoor Target"
+    ],
+    url: "https://www.instagram.com/worldarchery"
+  },
+  {
+    id: "post_2",
+    type: "social",
+    title: "Team India Recurve & Compound Squad Gearing Up for Asian Grand Prix! 🇮🇳",
+    category: "Indian Archery 🇮🇳",
+    date: "2 days ago",
+    source: "@indian.archery",
+    handle: "@indian.archery",
+    accountName: "Archery Association of India 🇮🇳",
+    avatar: "https://images.unsplash.com/photo-1534528741775-53994a69daeb?auto=format&fit=crop&w=150&q=80",
+    verified: true,
+    platform: "Instagram / X",
+    image: "https://images.unsplash.com/photo-1579952363873-27f3bade9f55?auto=format&fit=crop&w=800&q=80",
+    summary: "Team India 🇮🇳 Recurve Men & Women squads gearing up for the upcoming Asia Cup stage! Consistency, focus, and precision. Send your wishes to our archers! 💪🏹 #TeamIndia #ArcheryIndia #IndianArchers",
+    bullets: [
+      "18.2K Likes • 389 Comments",
+      "Training Camp: NIS Patiala & Kolkata Hub",
+      "Athletes: Dhiraj B., Deepika K., Ankita B."
+    ],
+    url: "https://www.instagram.com/indian.archery"
+  },
+  {
+    id: "post_3",
+    type: "social",
+    title: "Coaching Tip: High-Wrist Stance vs Flat-Palm Release Pressure 🏹",
+    category: "Equipment & Tech 🏹",
+    date: "3 days ago",
+    source: "@worldarchery",
+    handle: "@worldarchery",
+    accountName: "World Archery Official 🎯",
+    avatar: "https://images.unsplash.com/photo-1541534741688-6078c6bfb5c5?auto=format&fit=crop&w=150&q=80",
+    verified: true,
+    platform: "Instagram",
+    image: "https://images.unsplash.com/photo-1510915361894-db8b60106cb1?auto=format&fit=crop&w=800&q=80",
+    summary: "Technical Tip of the Week: High wrist stance vs flat palm release pressure. How do you adjust your grip torque on windy days? Share your thoughts below! 👇 #ArcheryTech #RecurveCoaching",
+    bullets: [
+      "15.9K Likes • 275 Comments",
+      "Focus: Grip Torque Reduction",
+      "Applicable for: Recurve & Barebow"
+    ],
+    url: "https://www.instagram.com/worldarchery"
   }
 ];
 
@@ -83,12 +146,21 @@ export default function ArcheryNews() {
   const [searchTerm, setSearchTerm] = useState('');
   const [selectedCategory, setSelectedCategory] = useState('All');
 
-  const categories = ['All', 'Indian Archery 🇮🇳', 'World Archery 🏆', 'Paralympic Archery 🏅', 'Equipment & Tech 🏹'];
+  const categories = ['All', 'Instagram Posts 📸', 'Indian Archery 🇮🇳', 'World Archery 🏆', 'Paralympic Archery 🏅', 'Equipment & Tech 🏹'];
 
   const filteredArticles = initialNewsArticles.filter(article => {
-    const matchesCategory = selectedCategory === 'All' || article.category === selectedCategory;
+    let matchesCategory = false;
+    if (selectedCategory === 'All') {
+      matchesCategory = true;
+    } else if (selectedCategory === 'Instagram Posts 📸') {
+      matchesCategory = article.type === 'social';
+    } else {
+      matchesCategory = article.category === selectedCategory;
+    }
+
     const matchesSearch = article.title.toLowerCase().includes(searchTerm.toLowerCase()) || 
-                          article.summary.toLowerCase().includes(searchTerm.toLowerCase());
+                          article.summary.toLowerCase().includes(searchTerm.toLowerCase()) ||
+                          (article.source && article.source.toLowerCase().includes(searchTerm.toLowerCase()));
     return matchesCategory && matchesSearch;
   });
 
@@ -179,22 +251,34 @@ export default function ArcheryNews() {
                   alt={article.title} 
                   style={{ width: '100%', height: '100%', objectFit: 'cover' }}
                 />
-                <div style={{ position: 'absolute', top: '12px', left: '12px', background: 'rgba(15, 23, 42, 0.85)', backdropFilter: 'blur(6px)', border: '1px solid rgba(56, 189, 248, 0.3)', color: '#38bdf8', padding: '4px 10px', borderRadius: '8px', fontSize: '0.72rem', fontWeight: 800 }}>
-                  {article.category}
+                <div style={{ position: 'absolute', top: '12px', left: '12px', background: article.type === 'social' ? 'linear-gradient(45deg, #f09433, #e6683c, #dc2743, #cc2366, #bc1888)' : 'rgba(15, 23, 42, 0.85)', backdropFilter: 'blur(6px)', border: article.type === 'social' ? 'none' : '1px solid rgba(56, 189, 248, 0.3)', color: '#ffffff', padding: '4px 10px', borderRadius: '8px', fontSize: '0.72rem', fontWeight: 800, display: 'flex', alignItems: 'center', gap: '4px' }}>
+                  {article.type === 'social' ? '📸 Instagram Post' : article.category}
                 </div>
               </div>
 
               {/* Card Body */}
               <div style={{ padding: '20px', display: 'flex', flexDirection: 'column', flex: 1 }}>
                 
-                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', fontSize: '0.75rem', color: '#94a3b8', marginBottom: '8px' }}>
-                  <span style={{ display: 'flex', alignItems: 'center', gap: '4px' }}>
-                    <Globe size={13} color="#fbbf24" /> {article.source}
-                  </span>
-                  <span style={{ display: 'flex', alignItems: 'center', gap: '4px' }}>
-                    <Calendar size={13} /> {article.date}
-                  </span>
-                </div>
+                {article.type === 'social' ? (
+                  <div style={{ display: 'flex', alignItems: 'center', gap: '10px', marginBottom: '10px' }}>
+                    <img src={article.avatar} alt={article.accountName} style={{ width: '32px', height: '32px', borderRadius: '50%', border: '2px solid #e6683c', objectFit: 'cover' }} />
+                    <div>
+                      <div style={{ fontSize: '0.85rem', fontWeight: 800, color: '#f8fafc', display: 'flex', alignItems: 'center', gap: '4px' }}>
+                        {article.accountName}
+                      </div>
+                      <div style={{ fontSize: '0.72rem', color: '#94a3b8' }}>{article.handle} • {article.date}</div>
+                    </div>
+                  </div>
+                ) : (
+                  <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', fontSize: '0.75rem', color: '#94a3b8', marginBottom: '8px' }}>
+                    <span style={{ display: 'flex', alignItems: 'center', gap: '4px' }}>
+                      <Globe size={13} color="#fbbf24" /> {article.source}
+                    </span>
+                    <span style={{ display: 'flex', alignItems: 'center', gap: '4px' }}>
+                      <Calendar size={13} /> {article.date}
+                    </span>
+                  </div>
+                )}
 
                 <h3 style={{ fontSize: '1.15rem', fontWeight: 800, color: '#f8fafc', margin: '4px 0 10px 0', lineHeight: 1.35 }}>
                   {article.title}
@@ -228,10 +312,13 @@ export default function ArcheryNews() {
                     padding: '8px 14px',
                     fontSize: '0.82rem',
                     textDecoration: 'none',
-                    borderRadius: '8px'
+                    borderRadius: '8px',
+                    background: article.type === 'social' ? 'linear-gradient(45deg, #f09433, #e6683c, #dc2743, #cc2366, #bc1888)' : undefined,
+                    border: article.type === 'social' ? 'none' : undefined,
+                    color: '#ffffff'
                   }}
                 >
-                  Read Official Coverage <ExternalLink size={14} />
+                  {article.type === 'social' ? '📸 View Post on Instagram' : 'Read Official Coverage'} <ExternalLink size={14} />
                 </a>
 
               </div>
