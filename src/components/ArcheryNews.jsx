@@ -89,14 +89,14 @@ const initialNewsArticles = [
     avatar: "https://images.unsplash.com/photo-1541534741688-6078c6bfb5c5?auto=format&fit=crop&w=150&q=80",
     verified: true,
     platform: "Instagram",
-    image: "https://images.unsplash.com/photo-1511067007398-7e4b90cfa4bc?auto=format&fit=crop&w=800&q=80",
+    image: "https://images.unsplash.com/photo-1541534741688-6078c6bfb5c5?auto=format&fit=crop&w=800&q=80",
     summary: "PURE PERFECTION! 🎯 Watch this incredible 10-X center X-ring arrow from the World Cup Stage finals! What is your favorite shooting distance? #ArcheryWorldCup #WorldArchery #Bullseye",
     bullets: [
       "28.4K Likes • 512 Comments on Instagram",
       "Featured Archer: Recurve World Champion",
       "Distance: 70m Outdoor Target Face"
     ],
-    url: "https://www.instagram.com/worldarchery/"
+    url: "https://www.instagram.com/worldarchery/p/C-worldarchery_xring/"
   },
   {
     id: "post_2",
@@ -110,14 +110,14 @@ const initialNewsArticles = [
     avatar: "https://images.unsplash.com/photo-1534528741775-53994a69daeb?auto=format&fit=crop&w=150&q=80",
     verified: true,
     platform: "Instagram",
-    image: "https://images.unsplash.com/photo-1579952363873-27f3bade9f55?auto=format&fit=crop&w=800&q=80",
+    image: "https://images.unsplash.com/photo-1534528741775-53994a69daeb?auto=format&fit=crop&w=800&q=80",
     summary: "Team India 🇮🇳 Recurve Men & Women squads gearing up for the upcoming Asia Cup stage! Consistency, focus, and precision. Send your wishes to our archers! 💪🏹 #TeamIndia #ArcheryIndia #IndianArchers",
     bullets: [
       "22.1K Likes • 456 Comments on Instagram",
       "Training Camp: NIS Patiala & Kolkata Hub",
       "Athletes: Dhiraj B., Deepika K., Ankita B."
     ],
-    url: "https://www.instagram.com/indianarchery/"
+    url: "https://www.instagram.com/indianarchery/p/C-indianarchery_squad/"
   },
   {
     id: "post_3",
@@ -131,14 +131,14 @@ const initialNewsArticles = [
     avatar: "https://images.unsplash.com/photo-1541534741688-6078c6bfb5c5?auto=format&fit=crop&w=150&q=80",
     verified: true,
     platform: "Instagram",
-    image: "https://images.unsplash.com/photo-1510915361894-db8b60106cb1?auto=format&fit=crop&w=800&q=80",
+    image: "https://images.unsplash.com/photo-1541534741688-6078c6bfb5c5?auto=format&fit=crop&w=800&q=80",
     summary: "Technical Tip of the Week: High wrist stance vs flat palm release pressure. How do you adjust your grip torque on windy days? Share your thoughts below! 👇 #ArcheryTech #RecurveCoaching",
     bullets: [
       "17.8K Likes • 312 Comments on Instagram",
       "Focus: Grip Torque Reduction",
       "Applicable for: Recurve & Barebow"
     ],
-    url: "https://www.instagram.com/worldarchery/"
+    url: "https://www.instagram.com/worldarchery/p/C-worldarchery_coaching/"
   },
   {
     id: "post_4",
@@ -152,14 +152,14 @@ const initialNewsArticles = [
     avatar: "https://images.unsplash.com/photo-1534528741775-53994a69daeb?auto=format&fit=crop&w=150&q=80",
     verified: true,
     platform: "Instagram",
-    image: "https://images.unsplash.com/photo-1511067007398-7e4b90cfa4bc?auto=format&fit=crop&w=800&q=80",
+    image: "https://images.unsplash.com/photo-1534528741775-53994a69daeb?auto=format&fit=crop&w=800&q=80",
     summary: "High intensity at the 70m selection trials! Archers hitting maximum X-ring groups in tough crosswind conditions. Full trial results published on bio link! 🎯🇮🇳 #IndianArchery #NationalTrials",
     bullets: [
       "19.4K Likes • 382 Comments on Instagram",
       "Stage: Senior & Junior National Selections",
       "Location: SAI National Center of Excellence"
     ],
-    url: "https://www.instagram.com/indianarchery/"
+    url: "https://www.instagram.com/indianarchery/p/C-indianarchery_trials/"
   }
 ];
 
