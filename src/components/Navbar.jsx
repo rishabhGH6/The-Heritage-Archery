@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { Target, Award, Calendar, MessageSquare, Shield, User, MapPin, Camera, Wrench, LogIn, LogOut, ChevronDown, UserPlus, Upload, HelpCircle, Key, CheckCircle2, Menu, X, Sparkles } from 'lucide-react';
+import { Target, Award, Calendar, MessageSquare, Shield, User, MapPin, Camera, Wrench, LogIn, LogOut, ChevronDown, UserPlus, Upload, HelpCircle, Key, CheckCircle2, Menu, X, Sparkles, Newspaper } from 'lucide-react';
 import { defaultArchers } from '../data/initialData';
 
 export default function Navbar({ activeTab, setActiveTab, currentUser, archers, pendingArchers = [], coach, onSwitchUser, onAddArcher, onRequestAddArcher, onUpdateArcher }) {
@@ -241,6 +241,9 @@ export default function Navbar({ activeTab, setActiveTab, currentUser, archers, 
           <button className={`nav-tab ${activeTab === 'gallery' ? 'active' : ''}`} onClick={() => handleTabClick('gallery')}>
             <Camera size={17} /> Gallery
           </button>
+          <button className={`nav-tab ${activeTab === 'news' ? 'active' : ''}`} onClick={() => handleTabClick('news')}>
+            <Newspaper size={17} color="#38bdf8" /> Archery News 📰
+          </button>
           <button className={`nav-tab ${activeTab === 'ai-coach' ? 'active' : ''}`} onClick={() => handleTabClick('ai-coach')}>
             <Sparkles size={17} color="#fbbf24" /> AI Coach ✨
           </button>
@@ -404,6 +407,9 @@ export default function Navbar({ activeTab, setActiveTab, currentUser, archers, 
             </button>
             <button className={`mobile-nav-item ${activeTab === 'gallery' ? 'active' : ''}`} onClick={() => handleTabClick('gallery')}>
               <Camera size={18} /> Photo Gallery
+            </button>
+            <button className={`mobile-nav-item ${activeTab === 'news' ? 'active' : ''}`} onClick={() => handleTabClick('news')}>
+              <Newspaper size={18} color="#38bdf8" /> Archery News 📰
             </button>
             <button className={`mobile-nav-item ${activeTab === 'ai-coach' ? 'active' : ''}`} onClick={() => handleTabClick('ai-coach')}>
               <Sparkles size={18} color="#fbbf24" /> AI Performance Coach ✨

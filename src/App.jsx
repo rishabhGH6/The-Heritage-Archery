@@ -11,6 +11,7 @@ import GalleryInstagram from './components/GalleryInstagram';
 import CoachPortal from './components/CoachPortal';
 import MyProfile from './components/MyProfile';
 import AiArcheryCoach from './components/AiArcheryCoach';
+import ArcheryNews from './components/ArcheryNews';
 import AdminControl from './components/AdminControl';
 import CinematicIntro from './components/CinematicIntro';
 
@@ -443,6 +444,10 @@ export default function App() {
             archers={appData.archers}
             equipmentData={appData.equipment}
           />
+        )}
+
+        {activeTab === 'news' && (
+          <ArcheryNews />
         )}
 
         {activeTab === 'admin' && (appData.currentUser.role === 'admin' || (appData.currentUser.name && appData.currentUser.name.trim().toLowerCase() === 'rishabh kumar sinha')) && (
