@@ -263,15 +263,35 @@ export default function InteractiveScoring({ currentUser, archers = [], scoreLog
     alert(`Scorecard saved successfully! Grand Total: ${grandTotal}/360 points.`);
   };
 
-  // Requirement 5: PDF Export containing 6 rounds arrow-by-arrow data in a presentable format
-  const handleExportPDF = () => {
+  // PDF Export containing 6 rounds arrow-by-arrow data, round totals, and session notes
+  const handleExportPDF = (targetLog = null) => {
     try {
       const doc = new jsPDF('p', 'pt', 'a4');
-      const selectedArcher = selectedArcherId === 'coach' ? { name: 'Coach Jayanta Chakraborty' } : (archers.find(a => a.id === selectedArcherId) || currentUser);
-      const archerName = selectedArcher?.name || "Archer";
-      const todayDate = new Date().toLocaleDateString('en-US', { year: 'numeric', month: 'short', day: 'numeric' });
-      const grandTotal = getGrandTotal();
-      const totalX = getTotalXCount();
+
+      // Determine log source (from modal targetLog OR active session state)
+      const logToExport = targetLog || {
+        archerName: (selectedArcherId === 'coach' ? 'Coach Jayanta Chakraborty' : (archers.find(a => a.id === selectedArcherId) || currentUser)?.name) || "Archer",
+        distance: distance,
+        date: new Date().toISOString().split('T')[0],
+        rounds: roundsData.map((r, idx) => ({
+          roundNumber: idx + 1,
+          arrows: r.arrows,
+          total: getRoundTotal(r),
+          note: roundNotes[idx + 1] || ""
+        })),
+        totalScore: getGrandTotal(),
+        sessionNotes: sessionNotes || "",
+        groupingAnalysis: calculateGrouping(roundsData.flatMap(r => r.arrows))
+      };
+
+      const archerName = logToExport.archerName || "Archer";
+      const targetDistance = logToExport.distance || "70m";
+      const dateStr = logToExport.date || new Date().toISOString().split('T')[0];
+      const grandTotal = logToExport.totalScore ?? 0;
+      
+      const roundsList = logToExport.rounds || [];
+      const allArrows = roundsList.flatMap(r => r.arrows || []);
+      const totalX = allArrows.filter(a => a && a.isX).length;
 
       // 1. Dark Header Banner
       doc.setFillColor(15, 23, 42); // #0f172a
@@ -294,14 +314,14 @@ export default function InteractiveScoring({ currentUser, archers = [], scoreLog
       doc.setFontSize(11);
       doc.setTextColor(15, 23, 42);
       doc.text(`Archer: ${archerName}`, 55, 120);
-      doc.text(`Target Distance: ${distance}`, 55, 140);
+      doc.text(`Target Distance: ${targetDistance}`, 55, 140);
 
-      doc.text(`Date: ${todayDate}`, 240, 120);
+      doc.text(`Date: ${dateStr}`, 240, 120);
       doc.text(`X Counts: ${totalX}`, 240, 140);
 
       doc.setFontSize(14);
       doc.setTextColor(217, 119, 6); // #d97706
-      doc.text(`Grand Total: ${grandTotal} / 360`, 390, 130);
+      doc.text(`Grand Total: ${grandTotal} / 360`, 380, 130);
 
       // 3. 6 Rounds Per-Arrow Scoring Table Header
       let startY = 175;
@@ -313,21 +333,23 @@ export default function InteractiveScoring({ currentUser, archers = [], scoreLog
       doc.setFont('helvetica', 'bold');
       doc.text("Round", 50, startY + 17);
       doc.text("Arrow 1", 110, startY + 17);
-      doc.text("Arrow 2", 160, startY + 17);
-      doc.text("Arrow 3", 210, startY + 17);
-      doc.text("Arrow 4", 260, startY + 17);
-      doc.text("Arrow 5", 310, startY + 17);
-      doc.text("Arrow 6", 360, startY + 17);
-      doc.text("Round Pts", 415, startY + 17);
-      doc.text("Running Total", 475, startY + 17);
+      doc.text("Arrow 2", 155, startY + 17);
+      doc.text("Arrow 3", 200, startY + 17);
+      doc.text("Arrow 4", 245, startY + 17);
+      doc.text("Arrow 5", 290, startY + 17);
+      doc.text("Arrow 6", 335, startY + 17);
+      doc.text("Round Pts", 385, startY + 17);
+      doc.text("Running Total", 470, startY + 17);
 
       // 4. Rows for Rounds 1 to 6
       let runningSum = 0;
       doc.setFont('helvetica', 'normal');
 
-      roundsData.forEach((r, idx) => {
+      for (let idx = 0; idx < 6; idx++) {
+        const r = roundsList[idx] || { roundNumber: idx + 1, arrows: [], total: 0 };
         const rowY = startY + 26 + idx * 28;
-        const rTotal = getRoundTotal(r);
+        const arrowsArr = r.arrows || [];
+        const rTotal = r.total !== undefined ? r.total : arrowsArr.reduce((s, a) => s + (a?.score || 0), 0);
         runningSum += rTotal;
 
         // Alternate row background
@@ -347,9 +369,9 @@ export default function InteractiveScoring({ currentUser, archers = [], scoreLog
         // 6 Arrows per round
         doc.setFont('helvetica', 'normal');
         for (let aIdx = 0; aIdx < 6; aIdx++) {
-          const arr = r.arrows[aIdx];
-          const valStr = arr ? (arr.isX ? 'X' : String(arr.score)) : '-';
-          const posX = 115 + aIdx * 50;
+          const arr = arrowsArr[aIdx];
+          const valStr = arr ? (arr.isX ? 'X' : (arr.score === 0 ? 'M' : String(arr.score))) : '-';
+          const posX = 115 + aIdx * 45;
 
           if (arr && (arr.isX || arr.score >= 9)) {
             doc.setTextColor(217, 119, 6);
@@ -365,11 +387,11 @@ export default function InteractiveScoring({ currentUser, archers = [], scoreLog
         // Round Total & Running Total
         doc.setTextColor(5, 150, 105);
         doc.setFont('helvetica', 'bold');
-        doc.text(String(rTotal), 425, rowY + 18);
+        doc.text(String(rTotal), 395, rowY + 18);
 
         doc.setTextColor(217, 119, 6);
-        doc.text(String(runningSum), 490, rowY + 18);
-      });
+        doc.text(String(runningSum), 485, rowY + 18);
+      }
 
       // 5. Total Summary Box
       const summaryY = startY + 26 + 6 * 28 + 15;
@@ -381,16 +403,34 @@ export default function InteractiveScoring({ currentUser, archers = [], scoreLog
       doc.setFont('helvetica', 'bold');
       doc.text(`CUMULATIVE SCORE: ${grandTotal} / 360  |  TOTAL X COUNTS: ${totalX}`, 60, summaryY + 28);
 
-      // 6. Grouping Analytics Footer
-      const allArrows = roundsData.flatMap(r => r.arrows);
-      const grouping = calculateGrouping(allArrows);
+      // 6. Session Notes Box if present
+      let currentY = summaryY + 60;
+      if (logToExport.sessionNotes) {
+        doc.setFillColor(241, 245, 249);
+        doc.roundedRect(40, currentY, 515, 45, 6, 6, 'F');
+        
+        doc.setFontSize(9);
+        doc.setTextColor(217, 119, 6);
+        doc.setFont('helvetica', 'bold');
+        doc.text("SESSION TAKEAWAYS & EQUIPMENT NOTES:", 50, currentY + 18);
+
+        doc.setFont('helvetica', 'normal');
+        doc.setTextColor(15, 23, 42);
+        const splitText = doc.splitTextToSize(logToExport.sessionNotes, 495);
+        doc.text(splitText, 50, currentY + 32);
+
+        currentY += 55;
+      }
+
+      // 7. Grouping Analytics Footer
+      const grouping = logToExport.groupingAnalysis || calculateGrouping(allArrows);
       if (grouping) {
         doc.setFontSize(9);
         doc.setTextColor(100, 116, 139);
-        doc.text(`Shot Grouping Pattern: ${grouping.tightness} (${grouping.bias})`, 40, summaryY + 70);
+        doc.text(`Shot Grouping Pattern: ${grouping.tightness} (${grouping.bias})`, 40, currentY + 15);
       }
 
-      doc.save(`Heritage_Archery_Scorecard_${archerName.replace(/\s+/g, '_')}_${new Date().toISOString().split('T')[0]}.pdf`);
+      doc.save(`Heritage_Archery_Scorecard_${archerName.replace(/\s+/g, '_')}_${dateStr}.pdf`);
     } catch (err) {
       console.error("PDF Export error:", err);
       alert("Error generating PDF. Please try again.");
@@ -1082,7 +1122,7 @@ export default function InteractiveScoring({ currentUser, archers = [], scoreLog
             {/* Modal Actions */}
             <div style={{ display: 'flex', justifyContent: 'flex-end', gap: '10px' }}>
               <button onClick={() => setSelectedScorecardDetail(null)} className="btn-ghost">Close</button>
-              <button onClick={handleExportPDF} className="btn-emerald">
+              <button onClick={() => handleExportPDF(selectedScorecardDetail)} className="btn-emerald">
                 <Download size={14} /> Export PDF
               </button>
             </div>
