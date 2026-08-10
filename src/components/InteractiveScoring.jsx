@@ -24,10 +24,19 @@ export default function InteractiveScoring({ currentUser, archers = [], scoreLog
     { roundNumber: 6, arrows: [] }
   ]);
 
-  // Selected arrow state for bullet tagging
+  // Selected arrow state for bullet tagging and score editing
   const [activeArrowIndex, setActiveArrowIndex] = useState(null);
   const [tempTags, setTempTags] = useState([]);
   const [tempComment, setTempComment] = useState("");
+  const [tempScoreVal, setTempScoreVal] = useState(null);
+  const [tempIsX, setTempIsX] = useState(false);
+
+  // Per-round notes & session final notes
+  const [roundNotes, setRoundNotes] = useState({ 1: '', 2: '', 3: '', 4: '', 5: '', 6: '' });
+  const [sessionNotes, setSessionNotes] = useState('');
+
+  // Detailed Modal view for saved scorecards (arrow-by-arrow & round-by-round)
+  const [selectedScorecardDetail, setSelectedScorecardDetail] = useState(null);
 
   const scorecardRef = useRef(null);
 
@@ -194,17 +203,35 @@ export default function InteractiveScoring({ currentUser, archers = [], scoreLog
   const activeRoundGrouping = calculateGrouping(activeRoundArrows);
   const selectedArcher = (archers && archers.find(a => a.id === selectedArcherId)) || archers?.[0] || { id: currentUser.id, name: currentUser.name || "Archer", category: "Recurve" };
 
-  // Save current bullet tags to arrow
-  const handleSaveArrowTags = () => {
+  // Save current bullet tags AND score edits to arrow if modified
+  const handleSaveArrowDetails = () => {
     if (activeArrowIndex === null) return;
     const updatedRounds = [...roundsData];
-    updatedRounds[currentRound - 1].arrows[activeArrowIndex].tags = tempTags;
-    updatedRounds[currentRound - 1].arrows[activeArrowIndex].comment = tempComment;
+    const targetArrow = updatedRounds[currentRound - 1].arrows[activeArrowIndex];
+    if (!targetArrow) return;
+
+    targetArrow.tags = tempTags;
+    targetArrow.comment = tempComment;
+    
+    if (tempScoreVal !== null) {
+      targetArrow.score = tempScoreVal;
+      targetArrow.isX = tempIsX;
+      targetArrow.ringName = tempIsX ? 'X' : (tempScoreVal === 0 ? 'M' : String(tempScoreVal));
+    }
+
     setRoundsData(updatedRounds);
     setActiveArrowIndex(null);
   };
 
-  // Save whole scorecard
+  // Delete specific arrow from current round if mistakenly clicked
+  const handleDeleteArrowIndex = (indexToDelete) => {
+    const updatedRounds = [...roundsData];
+    updatedRounds[currentRound - 1].arrows.splice(indexToDelete, 1);
+    setRoundsData(updatedRounds);
+    setActiveArrowIndex(null);
+  };
+
+  // Save whole scorecard with round notes and session notes
   const handleSaveSession = () => {
     if (currentUser.role === 'guest') {
       alert("🔒 Guest Mode: Please log in or register your archer account to save scorecards!");
@@ -223,8 +250,11 @@ export default function InteractiveScoring({ currentUser, archers = [], scoreLog
       rounds: roundsData.map((r, idx) => ({
         roundNumber: idx + 1,
         arrows: r.arrows,
-        total: getRoundTotal(r)
+        total: getRoundTotal(r),
+        note: roundNotes[idx + 1] || ""
       })),
+      roundNotes: roundNotes,
+      sessionNotes: sessionNotes || "",
       totalScore: grandTotal,
       groupingAnalysis: sessionGrouping || { tightness: "Standard Practice", spreadRadius: "4.0 cm", bias: "Center" }
     };
@@ -396,6 +426,21 @@ export default function InteractiveScoring({ currentUser, archers = [], scoreLog
         </div>
       </div>
 
+      {/* Session Takeaways & Equipment Notes Input */}
+      <div className="glass-card" style={{ padding: '14px 18px', marginBottom: '20px', background: 'rgba(15, 23, 42, 0.75)', border: '1px solid rgba(251, 191, 36, 0.3)' }}>
+        <label style={{ fontSize: '0.85rem', fontWeight: 700, color: '#fbbf24', display: 'flex', alignItems: 'center', gap: '6px', marginBottom: '6px' }}>
+          <FileText size={16} /> Session Takeaways & Equipment Notes (Saved with Scorecard)
+        </label>
+        <textarea
+          className="input-glass"
+          rows={2}
+          placeholder="Note overall takeaways, sight pin settings, weather conditions, or back tension feeling (e.g., Felt solid back tension on ends 4-6, sight mark 34.2m)..."
+          value={sessionNotes}
+          onChange={(e) => setSessionNotes(e.target.value)}
+          style={{ width: '100%', fontSize: '0.85rem', resize: 'vertical' }}
+        />
+      </div>
+
       {/* Target Setup Configuration Controls */}
       <div className="glass-card" style={{ padding: '16px 20px', marginBottom: '24px', display: 'flex', alignItems: 'center', justifyContent: 'space-between', flexWrap: 'wrap', gap: '16px' }}>
         
@@ -453,7 +498,7 @@ export default function InteractiveScoring({ currentUser, archers = [], scoreLog
       <RangeWhistleControl />
 
       {/* Round Selection Tabs (1 to 6) */}
-      <div style={{ display: 'flex', gap: '10px', marginBottom: '20px', overflowX: 'auto', paddingBottom: '4px' }}>
+      <div style={{ display: 'flex', gap: '10px', marginBottom: '12px', overflowX: 'auto', paddingBottom: '4px' }}>
         {[1, 2, 3, 4, 5, 6].map(rNum => {
           const rObj = roundsData[rNum - 1];
           const rTotal = getRoundTotal(rObj);
@@ -488,6 +533,21 @@ export default function InteractiveScoring({ currentUser, archers = [], scoreLog
             </button>
           );
         })}
+      </div>
+
+      {/* Per-Round Notes & Observation Input */}
+      <div className="glass-card" style={{ padding: '10px 16px', marginBottom: '20px', display: 'flex', alignItems: 'center', gap: '12px', border: '1px solid rgba(56, 189, 248, 0.3)' }}>
+        <span style={{ fontSize: '0.82rem', fontWeight: 700, color: '#38bdf8', whiteSpace: 'nowrap' }}>
+          📝 Round {currentRound} Notes:
+        </span>
+        <input
+          type="text"
+          className="input-glass"
+          placeholder={`Add notes for Round ${currentRound} (e.g. Wind 10km/h right to left, adjusted sight pin 34.2m)...`}
+          value={roundNotes[currentRound] || ''}
+          onChange={(e) => setRoundNotes({ ...roundNotes, [currentRound]: e.target.value })}
+          style={{ flex: 1, fontSize: '0.84rem', padding: '6px 12px' }}
+        />
       </div>
 
       {/* Main Interactive Grid */}
@@ -739,16 +799,76 @@ export default function InteractiveScoring({ currentUser, archers = [], scoreLog
 
       </div>
 
-      {/* Arrow Bullet Tagging Modal */}
+      {/* Arrow Bullet Tagging & Score Editor Modal */}
       {activeArrowIndex !== null && (
         <div className="modal-overlay" onClick={() => setActiveArrowIndex(null)}>
-          <div className="modal-content" onClick={e => e.stopPropagation()} style={{ maxWidth: '420px' }}>
-            <h3 style={{ fontSize: '1.1rem', fontWeight: 700, color: '#f8fafc', marginBottom: '16px' }}>
-              🏷️ Bullet Tags for Arrow #{activeArrowIndex + 1}
-            </h3>
+          <div className="modal-content" onClick={e => e.stopPropagation()} style={{ maxWidth: '440px' }}>
+            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '14px' }}>
+              <h3 style={{ fontSize: '1.15rem', fontWeight: 800, color: '#f8fafc', margin: 0 }}>
+                🎯 Arrow #{activeArrowIndex + 1} Editor & Bullet Tags
+              </h3>
+              <button
+                type="button"
+                onClick={() => handleDeleteArrowIndex(activeArrowIndex)}
+                style={{ background: 'rgba(239, 68, 68, 0.15)', border: '1px solid rgba(239, 68, 68, 0.3)', color: '#ef4444', padding: '4px 10px', borderRadius: '8px', fontSize: '0.75rem', fontWeight: 700, cursor: 'pointer' }}
+              >
+                Delete Arrow 🗑️
+              </button>
+            </div>
+
+            {/* Quick Score Editing Grid */}
+            <div style={{ background: 'rgba(15, 23, 42, 0.7)', padding: '12px', borderRadius: '12px', marginBottom: '16px', border: '1px solid rgba(251, 191, 36, 0.3)' }}>
+              <label style={{ fontSize: '0.78rem', color: '#fbbf24', fontWeight: 700, display: 'block', marginBottom: '8px', textTransform: 'uppercase' }}>
+                ✏️ Correct Recorded Score (if mistakenly clicked)
+              </label>
+              <div style={{ display: 'grid', gridTemplateColumns: 'repeat(4, 1fr)', gap: '6px' }}>
+                {[
+                  { label: 'X (10)', score: 10, isX: true },
+                  { label: '10', score: 10, isX: false },
+                  { label: '9', score: 9, isX: false },
+                  { label: '8', score: 8, isX: false },
+                  { label: '7', score: 7, isX: false },
+                  { label: '6', score: 6, isX: false },
+                  { label: '5', score: 5, isX: false },
+                  { label: '4', score: 4, isX: false },
+                  { label: '3', score: 3, isX: false },
+                  { label: '2', score: 2, isX: false },
+                  { label: '1', score: 1, isX: false },
+                  { label: 'M (0)', score: 0, isX: false }
+                ].map(item => {
+                  const currentArr = roundsData[currentRound - 1]?.arrows?.[activeArrowIndex];
+                  const isCurrent = tempScoreVal !== null 
+                    ? (tempScoreVal === item.score && tempIsX === item.isX)
+                    : (currentArr?.score === item.score && currentArr?.isX === item.isX);
+
+                  return (
+                    <button
+                      key={item.label}
+                      type="button"
+                      onClick={() => {
+                        setTempScoreVal(item.score);
+                        setTempIsX(item.isX);
+                      }}
+                      style={{
+                        padding: '7px 4px',
+                        borderRadius: '8px',
+                        fontSize: '0.8rem',
+                        fontWeight: 800,
+                        border: isCurrent ? '2px solid #fbbf24' : '1px solid rgba(255,255,255,0.1)',
+                        background: isCurrent ? 'rgba(217, 119, 6, 0.4)' : 'rgba(15, 23, 42, 0.8)',
+                        color: isCurrent ? '#ffffff' : '#94a3b8',
+                        cursor: 'pointer'
+                      }}
+                    >
+                      {item.label}
+                    </button>
+                  );
+                })}
+              </div>
+            </div>
 
             <div style={{ display: 'flex', flexDirection: 'column', gap: '12px', marginBottom: '16px' }}>
-              <label style={{ fontSize: '0.82rem', color: '#94a3b8', fontWeight: 600 }}>Quick Tags</label>
+              <label style={{ fontSize: '0.82rem', color: '#94a3b8', fontWeight: 600 }}>Quick Bullet Tags</label>
               <div style={{ display: 'flex', gap: '8px', flexWrap: 'wrap' }}>
                 {['Good shot', 'Bad release', 'New arrow', 'Wind drift', 'Clicker premature'].map(tag => {
                   const isSelected = tempTags.includes(tag);
@@ -777,8 +897,8 @@ export default function InteractiveScoring({ currentUser, archers = [], scoreLog
                 })}
               </div>
 
-              <label style={{ fontSize: '0.82rem', color: '#94a3b8', fontWeight: 600, marginTop: '8px' }}>
-                Comment / Note for this Bullet
+              <label style={{ fontSize: '0.82rem', color: '#94a3b8', fontWeight: 600, marginTop: '4px' }}>
+                Comment / Note for this Arrow
               </label>
               <input
                 type="text"
@@ -790,8 +910,8 @@ export default function InteractiveScoring({ currentUser, archers = [], scoreLog
             </div>
 
             <div style={{ display: 'flex', justifyContent: 'flex-end', gap: '10px' }}>
-              <button onClick={() => setActiveArrowIndex(null)} className="btn-ghost">Done</button>
-              <button onClick={handleSaveArrowTags} className="btn-emerald">Save Tags</button>
+              <button onClick={() => setActiveArrowIndex(null)} className="btn-ghost">Cancel</button>
+              <button onClick={handleSaveArrowDetails} className="btn-emerald">Save Changes</button>
             </div>
           </div>
         </div>
@@ -815,11 +935,7 @@ export default function InteractiveScoring({ currentUser, archers = [], scoreLog
                   <FileText size={20} color="#fbbf24" /> Saved Score History Log
                 </h3>
                 <p style={{ color: '#94a3b8', fontSize: '0.82rem', margin: '4px 0 0 0' }}>
-                  {currentUser.role === 'coach' 
-                    ? "Showing all saved team scorecard logs (Head Coach Access)." 
-                    : currentUser.role === 'archer'
-                      ? `Showing private scorecard logs for ${currentUser.name}.`
-                      : "Score logs are private. Log in as an Archer or Coach to view history."}
+                  Click on any scorecard row to view full arrow-by-arrow scores and round notes!
                 </p>
               </div>
 
@@ -844,11 +960,17 @@ export default function InteractiveScoring({ currentUser, archers = [], scoreLog
                       <th style={{ padding: '10px' }}>Distance</th>
                       <th style={{ padding: '10px' }}>Total Score</th>
                       <th style={{ padding: '10px' }}>Grouping</th>
+                      <th style={{ padding: '10px', textAlign: 'right' }}>Action</th>
                     </tr>
                   </thead>
                   <tbody>
                     {visibleScoreLogs.map(log => (
-                      <tr key={log.id} style={{ borderBottom: '1px solid rgba(255,255,255,0.05)', color: '#f8fafc' }}>
+                      <tr
+                        key={log.id}
+                        onClick={() => setSelectedScorecardDetail(log)}
+                        className="hover-row"
+                        style={{ borderBottom: '1px solid rgba(255,255,255,0.05)', color: '#f8fafc', cursor: 'pointer' }}
+                      >
                         <td style={{ padding: '10px' }}>{log.date}</td>
                         <td style={{ padding: '10px', fontWeight: 600 }}>{log.archerName}</td>
                         <td style={{ padding: '10px' }}>{log.distance}</td>
@@ -857,6 +979,11 @@ export default function InteractiveScoring({ currentUser, archers = [], scoreLog
                         </td>
                         <td style={{ padding: '10px', color: '#34d399' }}>
                           {log.groupingAnalysis?.tightness} ({log.groupingAnalysis?.bias})
+                        </td>
+                        <td style={{ padding: '10px', textAlign: 'right' }}>
+                          <span style={{ background: 'rgba(56, 189, 248, 0.15)', border: '1px solid rgba(56, 189, 248, 0.3)', color: '#38bdf8', fontSize: '0.72rem', padding: '4px 10px', borderRadius: '8px', fontWeight: 700 }}>
+                            View Details 🔍
+                          </span>
                         </td>
                       </tr>
                     ))}
@@ -867,6 +994,102 @@ export default function InteractiveScoring({ currentUser, archers = [], scoreLog
           </div>
         );
       })()}
+
+      {/* Saved Scorecard Detail Breakdown Modal */}
+      {selectedScorecardDetail && (
+        <div className="modal-overlay" onClick={() => setSelectedScorecardDetail(null)}>
+          <div className="modal-content" onClick={e => e.stopPropagation()} style={{ maxWidth: '680px', width: '92%' }}>
+            
+            {/* Modal Header */}
+            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '16px', borderBottom: '1px solid rgba(255,255,255,0.1)', paddingBottom: '12px' }}>
+              <div>
+                <span className="badge-emerald" style={{ fontSize: '0.72rem' }}>Detailed Arrow-by-Arrow Scorecard</span>
+                <h3 style={{ fontSize: '1.35rem', fontWeight: 800, color: '#f8fafc', margin: '4px 0 0 0' }}>
+                  {selectedScorecardDetail.archerName} — {selectedScorecardDetail.distance}
+                </h3>
+                <div style={{ fontSize: '0.78rem', color: '#94a3b8' }}>
+                  Logged Date: {selectedScorecardDetail.date}
+                </div>
+              </div>
+
+              <div style={{ textAlign: 'right' }}>
+                <div style={{ fontSize: '1.8rem', fontWeight: 800, color: '#fbbf24', lineHeight: 1 }}>
+                  {selectedScorecardDetail.totalScore} <span style={{ fontSize: '0.9rem', color: '#64748b' }}>/ 360</span>
+                </div>
+                <div style={{ fontSize: '0.72rem', color: '#34d399', fontWeight: 700 }}>
+                  {selectedScorecardDetail.groupingAnalysis?.tightness}
+                </div>
+              </div>
+            </div>
+
+            {/* Round-by-Round & Arrow-by-Arrow Table */}
+            <div style={{ overflowX: 'auto', marginBottom: '16px' }}>
+              <table style={{ width: '100%', borderCollapse: 'collapse', fontSize: '0.84rem' }}>
+                <thead>
+                  <tr style={{ borderBottom: '1px solid rgba(255,255,255,0.1)', color: '#94a3b8', textAlign: 'left' }}>
+                    <th style={{ padding: '8px' }}>Round</th>
+                    <th style={{ padding: '8px' }}>Arrow Scores (6 Arrows)</th>
+                    <th style={{ padding: '8px' }}>Total</th>
+                    <th style={{ padding: '8px' }}>Round Notes</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {(selectedScorecardDetail.rounds || []).map((r, rIdx) => (
+                    <tr key={rIdx} style={{ borderBottom: '1px solid rgba(255,255,255,0.05)', color: '#f8fafc' }}>
+                      <td style={{ padding: '8px', fontWeight: 800, color: '#38bdf8' }}>
+                        Round {r.roundNumber || rIdx + 1}
+                      </td>
+                      <td style={{ padding: '8px' }}>
+                        <div style={{ display: 'flex', gap: '4px', flexWrap: 'wrap' }}>
+                          {(r.arrows || []).map((arr, aIdx) => (
+                            <span key={aIdx} style={{
+                              background: arr.isX ? '#d97706' : arr.score >= 9 ? '#059669' : arr.score >= 7 ? '#e4002b' : '#0072ce',
+                              color: '#fff',
+                              fontWeight: 800,
+                              fontSize: '0.78rem',
+                              padding: '2px 6px',
+                              borderRadius: '4px'
+                            }}>
+                              {arr.isX ? 'X' : arr.score}
+                            </span>
+                          ))}
+                        </div>
+                      </td>
+                      <td style={{ padding: '8px', fontWeight: 800, color: '#34d399' }}>
+                        {r.total} pts
+                      </td>
+                      <td style={{ padding: '8px', color: '#cbd5e1', fontSize: '0.78rem', fontStyle: r.note ? 'normal' : 'italic' }}>
+                        {r.note || (selectedScorecardDetail.roundNotes && selectedScorecardDetail.roundNotes[rIdx + 1]) || "No round note"}
+                      </td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            </div>
+
+            {/* Session Notes */}
+            {selectedScorecardDetail.sessionNotes && (
+              <div style={{ background: 'rgba(15, 23, 42, 0.6)', padding: '12px 14px', borderRadius: '10px', border: '1px solid rgba(251, 191, 36, 0.2)', marginBottom: '16px' }}>
+                <div style={{ fontSize: '0.75rem', fontWeight: 700, color: '#fbbf24', textTransform: 'uppercase', marginBottom: '4px' }}>
+                  📝 Session Takeaways & Equipment Notes:
+                </div>
+                <div style={{ fontSize: '0.85rem', color: '#f8fafc', lineHeight: 1.4 }}>
+                  {selectedScorecardDetail.sessionNotes}
+                </div>
+              </div>
+            )}
+
+            {/* Modal Actions */}
+            <div style={{ display: 'flex', justifyContent: 'flex-end', gap: '10px' }}>
+              <button onClick={() => setSelectedScorecardDetail(null)} className="btn-ghost">Close</button>
+              <button onClick={handleExportPDF} className="btn-emerald">
+                <Download size={14} /> Export PDF
+              </button>
+            </div>
+
+          </div>
+        </div>
+      )}
 
     </div>
   );

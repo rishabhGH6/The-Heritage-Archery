@@ -1,0 +1,46 @@
+
+other as archers
+	login using name and password
+	photo 
+	name
+	number of states played
+	bolpur
+	rajgunj
+	kalimpong
+	others mention
+	aim
+	summary
+	dob private
+	category
+	current occupation student / higher studies / working professional
+	currently practising
+	wanna add some photos
+	
+sir
+	photo
+	name will be pre included
+	password
+	Few motivating lines 
+	tagline
+
+practice days streak leaderboard
+group chat and dm
+announcements
+photos
+practice , scoring ,history of scoring ,private 
+	bullets 
+		good shot
+		bad release
+		new arrow
+		comments for all bullets 
+				
+practice timing and venue update anyone can update ,will be visible who updates
+Instagram
+
+supabase The-Heritage-Archery
+Archer@THA_26
+Archer@THA my pwd
+vishalpathak2023
+Vishalpathak@21
+	
+	
