@@ -146,47 +146,139 @@ export default function RangeWhistleControl() {
     }
   };
 
-  // Timer Machine Effect
-  useEffect(() => {
-    let interval = null;
+  // Refs for off-screen background timer persistence, Wake Lock & Timestamp Sync
+  const targetEndTimeRef = useRef(null);
+  const wakeLockRef = useRef(null);
+  const keepAliveAudioCtxRef = useRef(null);
 
-    if ((phase === 'LINE_ACCESS' || phase === 'SHOOTING') && timerSeconds > 0) {
-      interval = setInterval(() => {
-        setTimerSeconds(prev => prev - 1);
-      }, 1000);
-    } else if (timerSeconds === 0) {
-      if (phase === 'LINE_ACCESS') {
-        // 10s Line Access countdown complete! Automatically sound 1 whistle and start shooting timer (90s or 180s)!
-        setPhase('SHOOTING');
-        setTimerSeconds(timerMax);
-        setActiveSignal({
-          code: "1 WHISTLE (🔊)",
-          label: "COMMENCE SHOOTING 🏹",
-          description: `Shooting active! ${timerMax}s countdown running.`,
-          color: "#34d399"
-        });
-        triggerWhistleSignal(1);
-      } else if (phase === 'SHOOTING') {
-        // Shooting timer complete! Automatically sound 3 whistles (Collect & Score Arrows)!
-        setPhase('COLLECT');
-        setActiveSignal({
-          code: "3 WHISTLES (🔊🔊🔊)",
-          label: "CEASE FIRE & COLLECT ARROWS 🎯",
-          description: "Shooting end complete! Step forward to targets to score & retrieve arrows.",
-          color: "#38bdf8"
-        });
-        triggerWhistleSignal(3);
+  // Request Screen Wake Lock to prevent screen from dimming/turning off during range shooting
+  const requestWakeLock = async () => {
+    try {
+      if ('wakeLock' in navigator && !wakeLockRef.current) {
+        wakeLockRef.current = await navigator.wakeLock.request('screen');
+        console.log("🛡️ Screen Wake Lock active for range timer.");
       }
+    } catch (err) {
+      console.warn("Screen Wake Lock notice:", err);
+    }
+  };
+
+  // Release Screen Wake Lock when timer finishes or stops
+  const releaseWakeLock = () => {
+    if (wakeLockRef.current) {
+      wakeLockRef.current.release().then(() => {
+        wakeLockRef.current = null;
+        console.log("🔓 Screen Wake Lock released.");
+      }).catch(e => console.warn(e));
+    }
+  };
+
+  // Web Audio Background Keep-Alive stream to keep browser process active when screen turns off
+  const startBackgroundAudioKeepAlive = () => {
+    try {
+      const AudioCtx = window.AudioContext || window.webkitAudioContext;
+      if (AudioCtx && !keepAliveAudioCtxRef.current) {
+        const ctx = new AudioCtx();
+        keepAliveAudioCtxRef.current = ctx;
+        // Ultra-low inaudible oscillator (0.00001 gain) to maintain background process priority
+        const osc = ctx.createOscillator();
+        const gain = ctx.createGain();
+        gain.gain.value = 0.00001;
+        osc.connect(gain);
+        gain.connect(ctx.destination);
+        osc.start();
+      }
+    } catch (e) {
+      console.warn("Keep-alive audio notice:", e);
+    }
+  };
+
+  const stopBackgroundAudioKeepAlive = () => {
+    if (keepAliveAudioCtxRef.current) {
+      try {
+        keepAliveAudioCtxRef.current.close();
+      } catch (e) {}
+      keepAliveAudioCtxRef.current = null;
+    }
+  };
+
+  // Off-Screen Timestamp Sync Timer Engine (Uses Date.now() so timer continues accurately even when screen is locked/off)
+  useEffect(() => {
+    let timerInterval = null;
+
+    const checkTimerSync = () => {
+      if (!targetEndTimeRef.current || (phase !== 'LINE_ACCESS' && phase !== 'SHOOTING')) {
+        return;
+      }
+
+      const now = Date.now();
+      const remainingMs = targetEndTimeRef.current - now;
+      const remainingSecs = Math.max(0, Math.ceil(remainingMs / 1000));
+
+      setTimerSeconds(remainingSecs);
+
+      if (remainingMs <= 0) {
+        if (phase === 'LINE_ACCESS') {
+          // 10s Line Access countdown complete! Automatically sound 1 whistle and start shooting timer (90s or 180s)!
+          const newEndTime = Date.now() + timerMax * 1000;
+          targetEndTimeRef.current = newEndTime;
+          setPhase('SHOOTING');
+          setTimerSeconds(timerMax);
+          setActiveSignal({
+            code: "1 WHISTLE (🔊)",
+            label: "COMMENCE SHOOTING 🏹",
+            description: `Shooting active! ${timerMax}s countdown running.`,
+            color: "#34d399"
+          });
+          triggerWhistleSignal(1);
+        } else if (phase === 'SHOOTING') {
+          // Shooting timer complete! Automatically sound 3 whistles (Collect & Score Arrows)!
+          targetEndTimeRef.current = null;
+          setPhase('COLLECT');
+          setTimerSeconds(0);
+          setActiveSignal({
+            code: "3 WHISTLES (🔊🔊🔊)",
+            label: "CEASE FIRE & COLLECT ARROWS 🎯",
+            description: "Shooting end complete! Step forward to targets to score & retrieve arrows.",
+            color: "#38bdf8"
+          });
+          triggerWhistleSignal(3);
+          releaseWakeLock();
+          stopBackgroundAudioKeepAlive();
+        }
+      }
+    };
+
+    if (phase === 'LINE_ACCESS' || phase === 'SHOOTING') {
+      requestWakeLock();
+      startBackgroundAudioKeepAlive();
+      timerInterval = setInterval(checkTimerSync, 250); // Check 4x per second for instant precision
+    } else {
+      releaseWakeLock();
+      stopBackgroundAudioKeepAlive();
     }
 
-    return () => clearInterval(interval);
-  }, [phase, timerSeconds, timerMax]);
+    // Handle mobile visibility change (e.g. screen turned off and on, or app re-opened)
+    const handleVisibilityChange = () => {
+      if (document.visibilityState === 'visible') {
+        checkTimerSync();
+      }
+    };
+
+    document.addEventListener('visibilitychange', handleVisibilityChange);
+
+    return () => {
+      if (timerInterval) clearInterval(timerInterval);
+      document.removeEventListener('visibilitychange', handleVisibilityChange);
+    };
+  }, [phase, timerMax]);
 
   // 1. Archers to Line (2 Whistles + 10s Pre-Shoot Countdown)
   const handleTwoWhistles = () => {
     setEmergencyAlert(false);
     setPhase('LINE_ACCESS');
-    setTimerSeconds(10); // 10 seconds pre-shoot line access timer
+    setTimerSeconds(10);
+    targetEndTimeRef.current = Date.now() + 10 * 1000; // Set exact target timestamp 10s in future
     setActiveSignal({
       code: "2 WHISTLES (🔊🔊)",
       label: "ARCHERS TO THE SHOOTING LINE",
@@ -201,6 +293,7 @@ export default function RangeWhistleControl() {
     setEmergencyAlert(false);
     setPhase('SHOOTING');
     setTimerSeconds(timerMax);
+    targetEndTimeRef.current = Date.now() + timerMax * 1000; // Set exact target timestamp timerMax in future
     setActiveSignal({
       code: "1 WHISTLE (🔊)",
       label: "COMMENCE SHOOTING 🏹",
@@ -214,6 +307,8 @@ export default function RangeWhistleControl() {
   const handleThreeWhistles = () => {
     setEmergencyAlert(false);
     setPhase('COLLECT');
+    targetEndTimeRef.current = null;
+    setTimerSeconds(0);
     setActiveSignal({
       code: "3 WHISTLES (🔊🔊🔊)",
       label: "CEASE FIRE & COLLECT ARROWS 🎯",
@@ -221,12 +316,16 @@ export default function RangeWhistleControl() {
       color: "#38bdf8"
     });
     triggerWhistleSignal(3);
+    releaseWakeLock();
+    stopBackgroundAudioKeepAlive();
   };
 
   // 4. Emergency Cease Fire (Continuous Whistles)
   const handleEmergencyCeasefire = () => {
     setPhase('EMERGENCY');
     setEmergencyAlert(true);
+    targetEndTimeRef.current = null;
+    setTimerSeconds(0);
     setActiveSignal({
       code: "4+ CONTINUOUS WHISTLES (🚨🚨🚨)",
       label: "EMERGENCY CEASE FIRE!",
@@ -234,12 +333,14 @@ export default function RangeWhistleControl() {
       color: "#ef4444"
     });
     triggerWhistleSignal(5, true);
+    releaseWakeLock();
+    stopBackgroundAudioKeepAlive();
   };
 
   const handleSelectTimerMax = (secs) => {
     setTimerMax(secs);
-    setTimerSeconds(secs);
     if (phase !== 'LINE_ACCESS' && phase !== 'SHOOTING') {
+      setTimerSeconds(secs);
       setPhase('IDLE');
     }
   };
