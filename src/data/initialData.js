@@ -83,9 +83,14 @@ export const defaultArchers = [
 
 export const defaultStreaks = {
   archer_rishabh: {
-    count: 8,
-    lastChecked: "2026-08-05",
-    history: ["2026-07-29", "2026-07-30", "2026-07-31", "2026-08-01", "2026-08-02", "2026-08-03", "2026-08-04", "2026-08-05"]
+    count: 15,
+    lastChecked: "2026-08-12",
+    history: ["2026-07-29", "2026-07-30", "2026-07-31", "2026-08-01", "2026-08-02", "2026-08-03", "2026-08-04", "2026-08-05", "2026-08-06", "2026-08-07", "2026-08-08", "2026-08-09", "2026-08-10", "2026-08-11", "2026-08-12"]
+  },
+  archer_1785297210984: {
+    count: 15,
+    lastChecked: "2026-08-12",
+    history: ["2026-07-29", "2026-07-30", "2026-07-31", "2026-08-01", "2026-08-02", "2026-08-03", "2026-08-04", "2026-08-05", "2026-08-06", "2026-08-07", "2026-08-08", "2026-08-09", "2026-08-10", "2026-08-11", "2026-08-12"]
   },
   archer_rishiraj: {
     count: 0,
@@ -184,14 +189,14 @@ export const savePersistentSession = (userObj) => {
 // Helper function to load data from LocalStorage or initialize default
 export const loadAppData = () => {
   const guestUser = { id: "guest", role: "guest", name: "Guest" };
-  const saved = localStorage.getItem("heritage_archery_clean_v6") || localStorage.getItem("heritage_archery_clean_v5");
+  const saved = localStorage.getItem("heritage_archery_clean_v7") || localStorage.getItem("heritage_archery_clean_v6");
   if (saved) {
     try {
       const parsed = JSON.parse(saved);
       return {
         ...parsed,
         archers: (parsed.archers && parsed.archers.length > 0) ? parsed.archers : defaultArchers,
-        streaks: (parsed.streaks && Object.keys(parsed.streaks).length > 0) ? parsed.streaks : defaultStreaks,
+        streaks: defaultStreaks,
         currentUser: guestUser
       };
     } catch (e) {
@@ -206,7 +211,7 @@ export const loadAppData = () => {
 
 export const saveAppData = (data) => {
   try {
-    localStorage.setItem("heritage_archery_clean_v6", JSON.stringify(data));
+    localStorage.setItem("heritage_archery_clean_v7", JSON.stringify(data));
   } catch (e) {
     try {
       // QuotaExceededError fallback: strip heavy base64 strings from photos array before saving
@@ -218,7 +223,7 @@ export const saveAppData = (data) => {
           photos: []
         }))
       };
-      localStorage.setItem("heritage_archery_clean_v6", JSON.stringify(lightweightData));
+      localStorage.setItem("heritage_archery_clean_v7", JSON.stringify(lightweightData));
     } catch (err) {
       console.warn("Storage quota exceeded, continuing with memory state:", err);
     }
