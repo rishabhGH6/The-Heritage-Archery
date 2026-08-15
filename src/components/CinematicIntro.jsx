@@ -2,9 +2,9 @@ import React, { useState, useEffect } from 'react';
 import { ArrowRight } from 'lucide-react';
 
 export default function CinematicIntro({ onComplete }) {
-  // Phase 1: Text 'WELCOME' (0.4s - 2.8s)
-  // Phase 2: Text 'to the official portal of' (3.0s - 5.4s)
-  // Phase 3: Golden Shiny Arrow + 'THE HERITAGE ARCHERY' + 'College Team Portal' + ENTER PORTAL (5.6s - end)
+  // Phase 1: Text 'WELCOME' (0.4s - 2.8s) with Fade In & Fade Out
+  // Phase 2: Text 'to the official portal of' (3.0s - 5.4s) with Fade In & Fade Out
+  // Phase 3: Golden Shiny Arrow (Straight Feather Lines) + 'THE HERITAGE ARCHERY' + 'College Team Portal' + ENTER PORTAL (5.6s - end)
   const [phase, setPhase] = useState(1);
 
   useEffect(() => {
@@ -16,9 +16,9 @@ export default function CinematicIntro({ onComplete }) {
     // Phase 2: 'to the official portal of'
     const t2 = setTimeout(() => {
       setPhase(2);
-    }, 2800);
+    }, 2900);
 
-    // Phase 3: Title + Golden Shiny Arrow
+    // Phase 3: Title + Golden Arrow
     const t3 = setTimeout(() => {
       setPhase(3);
     }, 5400);
@@ -105,9 +105,9 @@ export default function CinematicIntro({ onComplete }) {
         textAlign: 'center'
       }}>
 
-        {/* Phase 1: WELCOME */}
+        {/* Phase 1: WELCOME (with Fade In & Fade Out) */}
         {phase === 1 && (
-          <div>
+          <div className="intro-text-fade">
             <h1 style={{
               fontSize: '3.6rem',
               fontWeight: 900,
@@ -124,9 +124,9 @@ export default function CinematicIntro({ onComplete }) {
           </div>
         )}
 
-        {/* Phase 2: to the official portal of */}
+        {/* Phase 2: to the official portal of (with Fade In & Fade Out) */}
         {phase === 2 && (
-          <div>
+          <div className="intro-text-fade">
             <p style={{
               fontSize: '2rem',
               fontWeight: 500,
@@ -141,11 +141,11 @@ export default function CinematicIntro({ onComplete }) {
           </div>
         )}
 
-        {/* Phase 3: GOLDEN SHINY ARROW + THE HERITAGE ARCHERY */}
+        {/* Phase 3: GOLDEN SHINY ARROW (Straight Feather Lines) + THE HERITAGE ARCHERY */}
         {phase === 3 && (
           <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '20px', zIndex: 20 }}>
             
-            {/* ELEGANT STUNNING GOLDEN SHINY ARCHERY ARROW (STATIC - FEATHERS ON LEFT, POINT ON RIGHT) */}
+            {/* ELEGANT STUNNING GOLDEN SHINY ARCHERY ARROW (STRAIGHT LINE FEATHERS ON LEFT, POINT ON RIGHT) */}
             <div style={{ position: 'relative', width: '420px', height: '60px', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
               <svg width="420" height="60" viewBox="0 0 440 70" style={{ filter: 'drop-shadow(0 10px 25px rgba(217, 119, 6, 0.6))' }}>
                 <defs>
@@ -171,45 +171,34 @@ export default function CinematicIntro({ onComplete }) {
                   </pattern>
                 </defs>
 
-                {/* 1. Golden Feather Fletchings at Tail (Left Side) */}
+                {/* 1. Golden Feather Fletchings in STRAIGHT LINES at Tail (Left Side) */}
                 <g transform="translate(10, 10)">
-                  {/* Upper Feather Vane */}
-                  <path 
-                    d="M 0 25 C 20 2, 75 0, 105 25 L 100 29 C 70 12, 20 14, 0 25 Z" 
-                    fill="url(#goldHighlightShine)" 
-                    stroke="#78350f" 
-                    strokeWidth="1"
-                  />
-                  {/* Feather Ribs Texture Lines */}
+                  {/* Upper Straight Vane */}
+                  <polygon points="0,25 90,0 80,25" fill="url(#goldHighlightShine)" stroke="#78350f" strokeWidth="1" />
+                  {/* Lower Straight Vane */}
+                  <polygon points="0,25 90,50 80,25" fill="url(#goldHighlightShine)" stroke="#78350f" strokeWidth="1" />
+                  
+                  {/* Straight Feather Ribs Texture Lines */}
                   {[...Array(14)].map((_, i) => (
                     <line 
                       key={i} 
-                      x1={10 + i * 7} 
-                      y1={22 - (i > 7 ? 14 - i : i * 1.5)} 
-                      x2={14 + i * 7} 
+                      x1={10 + i * 5} 
+                      y1={i < 7 ? 22 - i * 2.5 : 22 - (14 - i) * 2.5} 
+                      x2={14 + i * 5} 
                       y2={25} 
                       stroke="#92400e" 
-                      strokeWidth="1" 
+                      strokeWidth="0.8" 
                     />
                   ))}
-
-                  {/* Lower Feather Vane */}
-                  <path 
-                    d="M 0 25 C 20 48, 75 50, 105 25 L 100 21 C 70 38, 20 36, 0 25 Z" 
-                    fill="url(#goldHighlightShine)" 
-                    stroke="#78350f" 
-                    strokeWidth="1"
-                  />
-                  {/* Lower Feather Ribs Texture Lines */}
                   {[...Array(14)].map((_, i) => (
                     <line 
                       key={`b-${i}`} 
-                      x1={10 + i * 7} 
-                      y1={28 + (i > 7 ? 14 - i : i * 1.5)} 
-                      x2={14 + i * 7} 
+                      x1={10 + i * 5} 
+                      y1={i < 7 ? 28 + i * 2.5 : 28 + (14 - i) * 2.5} 
+                      x2={14 + i * 5} 
                       y2={25} 
                       stroke="#92400e" 
-                      strokeWidth="1" 
+                      strokeWidth="0.8" 
                     />
                   ))}
                 </g>
@@ -317,6 +306,20 @@ export default function CinematicIntro({ onComplete }) {
         )}
 
       </div>
+
+      {/* Text Fade In & Fade Out Keyframe Animations */}
+      <style>{`
+        @keyframes textFadeInOut {
+          0% { opacity: 0; transform: translateY(10px) scale(0.96); }
+          25% { opacity: 1; transform: translateY(0px) scale(1); }
+          75% { opacity: 1; transform: translateY(0px) scale(1); }
+          100% { opacity: 0; transform: translateY(-10px) scale(1.02); }
+        }
+
+        .intro-text-fade {
+          animation: textFadeInOut 2.5s cubic-bezier(0.4, 0, 0.2, 1) forwards;
+        }
+      `}</style>
 
     </div>
   );
