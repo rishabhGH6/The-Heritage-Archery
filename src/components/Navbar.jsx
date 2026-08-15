@@ -5,7 +5,7 @@ import { defaultArchers } from '../data/initialData';
 export default function Navbar({ activeTab, setActiveTab, currentUser, archers, pendingArchers = [], coach, onSwitchUser, onAddArcher, onRequestAddArcher, onUpdateArcher }) {
   const displayArchers = (archers && archers.length > 0) ? archers : defaultArchers;
   const [showRoleModal, setShowRoleModal] = useState(false);
-  const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
+  const [sideMenuOpen, setSideMenuOpen] = useState(false);
   const [selectedRole, setSelectedRole] = useState(currentUser.role); // 'coach', 'archer', 'new_archer', 'forgot_password'
   const [selectedArcherId, setSelectedArcherId] = useState(displayArchers[0]?.id || '');
   const [inputArcherName, setInputArcherName] = useState('');
@@ -31,7 +31,7 @@ export default function Navbar({ activeTab, setActiveTab, currentUser, archers, 
   const handleSignOut = () => {
     onSwitchUser({ role: 'guest', id: 'guest', name: 'Guest' });
     setShowRoleModal(false);
-    setMobileMenuOpen(false);
+    setSideMenuOpen(false);
   };
 
   const handleLoginSubmit = (e) => {
@@ -185,93 +185,49 @@ export default function Navbar({ activeTab, setActiveTab, currentUser, archers, 
 
   const handleTabClick = (tabKey) => {
     setActiveTab(tabKey);
-    setMobileMenuOpen(false);
+    setSideMenuOpen(false);
   };
 
   return (
     <header className="app-sticky-header">
-      <div style={{ maxWidth: '1280px', margin: '0 auto', padding: '12px 20px', display: 'flex', alignItems: 'center', justifyContent: 'space-between', flexWrap: 'wrap', gap: '12px' }}>
+      <div style={{ maxWidth: '1280px', margin: '0 auto', padding: '12px 20px', display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: '16px' }}>
         
-        {/* Brand Logo */}
-        <div style={{ display: 'flex', alignItems: 'center', gap: '12px', cursor: 'pointer' }} onClick={() => handleTabClick('home')}>
-          <div style={{
-            background: 'linear-gradient(135deg, #059669, #d97706)',
-            padding: '10px',
-            borderRadius: '12px',
-            boxShadow: '0 4px 15px rgba(5, 150, 105, 0.4)',
-            display: 'flex',
-            alignItems: 'center',
-            justifyContent: 'center'
-          }}>
-            <Target size={26} color="#ffffff" />
-          </div>
-          <div>
-            <h1 style={{ fontSize: '1.25rem', fontWeight: 800, background: 'linear-gradient(90deg, #f8fafc, #fbbf24)', WebkitBackgroundClip: 'text', WebkitTextFillColor: 'transparent', lineHeight: 1.1 }}>
-              THE HERITAGE ARCHERY
-            </h1>
-            <span style={{ fontSize: '0.68rem', color: '#94a3b8', fontWeight: 600, letterSpacing: '0.08em', textTransform: 'uppercase' }}>
-              College Team Portal
-            </span>
+        {/* Left Side: Side Menu Trigger Button + Brand Logo */}
+        <div style={{ display: 'flex', alignItems: 'center', gap: '14px' }}>
+          <button 
+            className="side-menu-trigger-btn"
+            onClick={() => setSideMenuOpen(true)}
+            aria-label="Open side navigation menu"
+          >
+            <Menu size={20} />
+            <span>Menu</span>
+          </button>
+
+          <div style={{ display: 'flex', alignItems: 'center', gap: '12px', cursor: 'pointer' }} onClick={() => handleTabClick('home')}>
+            <div style={{
+              background: 'linear-gradient(135deg, #059669, #d97706)',
+              padding: '10px',
+              borderRadius: '12px',
+              boxShadow: '0 4px 15px rgba(5, 150, 105, 0.4)',
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'center'
+            }}>
+              <Target size={26} color="#ffffff" />
+            </div>
+            <div>
+              <h1 style={{ fontSize: '1.25rem', fontWeight: 800, background: 'linear-gradient(90deg, #f8fafc, #fbbf24)', WebkitBackgroundClip: 'text', WebkitTextFillColor: 'transparent', lineHeight: 1.1 }}>
+                THE HERITAGE ARCHERY
+              </h1>
+              <span style={{ fontSize: '0.68rem', color: '#94a3b8', fontWeight: 600, letterSpacing: '0.08em', textTransform: 'uppercase' }}>
+                College Team Portal
+              </span>
+            </div>
           </div>
         </div>
 
-        {/* Desktop Navigation Tabs */}
-        <nav className="desktop-nav">
-          <button className={`nav-tab ${activeTab === 'home' ? 'active' : ''}`} onClick={() => handleTabClick('home')}>
-            <Target size={17} /> Home
-          </button>
-          <button className={`nav-tab ${activeTab === 'leaderboard' ? 'active' : ''}`} onClick={() => handleTabClick('leaderboard')}>
-            <Award size={17} /> Leaderboard
-          </button>
-          <button className={`nav-tab ${activeTab === 'scoring' ? 'active' : ''}`} onClick={() => handleTabClick('scoring')}>
-            <Target size={17} /> Scoring
-          </button>
-          <button className={`nav-tab ${activeTab === 'equipment' ? 'active' : ''}`} onClick={() => handleTabClick('equipment')}>
-            <Wrench size={17} /> Equipment
-          </button>
-          <button className={`nav-tab ${activeTab === 'archers' ? 'active' : ''}`} onClick={() => handleTabClick('archers')}>
-            <User size={17} /> Team Roster
-          </button>
-          <button className={`nav-tab ${activeTab === 'venue' ? 'active' : ''}`} onClick={() => handleTabClick('venue')}>
-            <MapPin size={17} /> Venue
-          </button>
-          <button className={`nav-tab ${activeTab === 'chat' ? 'active' : ''}`} onClick={() => handleTabClick('chat')}>
-            <MessageSquare size={17} /> Chat & DMs
-          </button>
-          <button className={`nav-tab ${activeTab === 'gallery' ? 'active' : ''}`} onClick={() => handleTabClick('gallery')}>
-            <Camera size={17} /> Gallery
-          </button>
-          <button className={`nav-tab ${activeTab === 'news' ? 'active' : ''}`} onClick={() => handleTabClick('news')}>
-            <Newspaper size={17} color="#38bdf8" /> Archery News 📰
-          </button>
-          <button className={`nav-tab ${activeTab === 'ai-coach' ? 'active' : ''}`} onClick={() => handleTabClick('ai-coach')}>
-            <Sparkles size={17} color="#fbbf24" /> AI Coach ✨
-          </button>
-          {currentUser.role === 'archer' && (
-            <button className={`nav-tab ${activeTab === 'profile' ? 'active' : ''}`} onClick={() => handleTabClick('profile')}>
-              <User size={17} /> My Profile
-            </button>
-          )}
-          {(currentUser.role === 'admin' || (currentUser.name && currentUser.name.trim().toLowerCase() === 'rishabh kumar sinha')) && (
-            <button className={`nav-tab ${activeTab === 'admin' ? 'active' : ''}`} onClick={() => handleTabClick('admin')} style={{ borderColor: 'rgba(239, 68, 68, 0.4)' }}>
-              <Shield size={17} color="#ef4444" /> Admin Control
-              {pendingArchers && pendingArchers.length > 0 && (
-                <span style={{ background: '#ef4444', color: '#ffffff', fontSize: '0.68rem', padding: '1px 6px', borderRadius: '10px', fontWeight: 800, marginLeft: '4px' }}>
-                  {pendingArchers.length}
-                </span>
-              )}
-            </button>
-          )}
-          {currentUser.role === 'coach' && (
-            <button className={`nav-tab ${activeTab === 'coach' ? 'active' : ''}`} onClick={() => handleTabClick('coach')}>
-              <Shield size={17} /> Coach Dashboard
-            </button>
-          )}
-        </nav>
-
-        {/* Right Bar: Login Badge + Hamburger Button */}
+        {/* Right Side: Account Switch Badge + Sign Out */}
         <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
-          
           {currentUser.role === 'guest' ? (
             <button 
               onClick={() => setShowRoleModal(true)}
@@ -370,74 +326,144 @@ export default function Navbar({ activeTab, setActiveTab, currentUser, archers, 
               </button>
             </div>
           )}
-
-          {/* Mobile Hamburger Menu Toggle Button */}
-          <button 
-            className="mobile-hamburger-btn"
-            onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
-            aria-label="Toggle navigation menu"
-          >
-            {mobileMenuOpen ? <X size={22} /> : <Menu size={22} />}
-          </button>
         </div>
 
-        {/* Mobile Navigation Drawer (Visible on narrow screens when menu is open) */}
-        {mobileMenuOpen && (
-          <div className="mobile-menu-drawer">
-            <button className={`mobile-nav-item ${activeTab === 'home' ? 'active' : ''}`} onClick={() => handleTabClick('home')}>
-              <Target size={18} /> Home
-            </button>
-            <button className={`mobile-nav-item ${activeTab === 'leaderboard' ? 'active' : ''}`} onClick={() => handleTabClick('leaderboard')}>
-              <Award size={18} /> Streak Leaderboard
-            </button>
-            <button className={`mobile-nav-item ${activeTab === 'scoring' ? 'active' : ''}`} onClick={() => handleTabClick('scoring')}>
-              <Target size={18} /> Interactive Scoring
-            </button>
-            <button className={`mobile-nav-item ${activeTab === 'equipment' ? 'active' : ''}`} onClick={() => handleTabClick('equipment')}>
-              <Wrench size={18} /> Equipment Tuner
-            </button>
-            <button className={`mobile-nav-item ${activeTab === 'archers' ? 'active' : ''}`} onClick={() => handleTabClick('archers')}>
-              <User size={18} /> Team Roster & Performance
-            </button>
-            <button className={`mobile-nav-item ${activeTab === 'venue' ? 'active' : ''}`} onClick={() => handleTabClick('venue')}>
-              <MapPin size={18} /> Practice Venue & Schedule
-            </button>
-            <button className={`mobile-nav-item ${activeTab === 'chat' ? 'active' : ''}`} onClick={() => handleTabClick('chat')}>
-              <MessageSquare size={18} /> Team Chat & Private DMs
-            </button>
-            <button className={`mobile-nav-item ${activeTab === 'gallery' ? 'active' : ''}`} onClick={() => handleTabClick('gallery')}>
-              <Camera size={18} /> Photo Gallery
-            </button>
-            <button className={`mobile-nav-item ${activeTab === 'news' ? 'active' : ''}`} onClick={() => handleTabClick('news')}>
-              <Newspaper size={18} color="#38bdf8" /> Archery News 📰
-            </button>
-            <button className={`mobile-nav-item ${activeTab === 'ai-coach' ? 'active' : ''}`} onClick={() => handleTabClick('ai-coach')}>
-              <Sparkles size={18} color="#fbbf24" /> AI Performance Coach ✨
-            </button>
-            {currentUser.role === 'archer' && (
-              <button className={`mobile-nav-item ${activeTab === 'profile' ? 'active' : ''}`} onClick={() => handleTabClick('profile')}>
-                <User size={18} /> My Archer Profile
-              </button>
-            )}
-            {(currentUser.role === 'admin' || (currentUser.name && currentUser.name.trim().toLowerCase() === 'rishabh kumar sinha')) && (
-              <button className={`mobile-nav-item ${activeTab === 'admin' ? 'active' : ''}`} onClick={() => handleTabClick('admin')} style={{ borderColor: 'rgba(239, 68, 68, 0.4)' }}>
-                <Shield size={18} color="#ef4444" /> Admin Control Panel
-                {pendingArchers && pendingArchers.length > 0 && (
-                  <span style={{ background: '#ef4444', color: '#ffffff', fontSize: '0.72rem', padding: '2px 8px', borderRadius: '10px', fontWeight: 800, marginLeft: 'auto' }}>
-                    {pendingArchers.length} Pending
-                  </span>
-                )}
-              </button>
-            )}
-            {currentUser.role === 'coach' && (
-              <button className={`mobile-nav-item ${activeTab === 'coach' ? 'active' : ''}`} onClick={() => handleTabClick('coach')}>
-                <Shield size={18} /> Coach Dashboard
-              </button>
-            )}
-          </div>
-        )}
-
       </div>
+
+      {/* Left Slide-Out Navigation Drawer */}
+      {sideMenuOpen && (
+        <>
+          <div className="side-drawer-overlay" onClick={() => setSideMenuOpen(false)} />
+          <div className="side-drawer-container">
+            
+            {/* Drawer Header */}
+            <div className="side-drawer-header">
+              <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
+                <div style={{
+                  background: 'linear-gradient(135deg, #059669, #d97706)',
+                  padding: '8px',
+                  borderRadius: '10px',
+                  display: 'flex',
+                  alignItems: 'center',
+                  justifyContent: 'center'
+                }}>
+                  <Target size={22} color="#ffffff" />
+                </div>
+                <div>
+                  <div style={{ fontSize: '1rem', fontWeight: 800, color: '#f8fafc', lineHeight: 1.1 }}>
+                    THE HERITAGE ARCHERY
+                  </div>
+                  <div style={{ fontSize: '0.65rem', color: '#94a3b8', fontWeight: 600 }}>
+                    Navigation Menu
+                  </div>
+                </div>
+              </div>
+              <button 
+                onClick={() => setSideMenuOpen(false)}
+                className="btn-ghost"
+                style={{ padding: '6px', borderRadius: '8px' }}
+                aria-label="Close menu"
+              >
+                <X size={20} />
+              </button>
+            </div>
+
+            {/* Drawer Body Options */}
+            <div className="side-drawer-body">
+              <div className="side-drawer-section-label">Main Navigation</div>
+
+              <button className={`side-drawer-item ${activeTab === 'home' ? 'active' : ''}`} onClick={() => handleTabClick('home')}>
+                <Target size={18} /> Home
+              </button>
+              <button className={`side-drawer-item ${activeTab === 'leaderboard' ? 'active' : ''}`} onClick={() => handleTabClick('leaderboard')}>
+                <Award size={18} /> Streak Leaderboard
+              </button>
+              <button className={`side-drawer-item ${activeTab === 'scoring' ? 'active' : ''}`} onClick={() => handleTabClick('scoring')}>
+                <Target size={18} /> Interactive Scoring
+              </button>
+              <button className={`side-drawer-item ${activeTab === 'equipment' ? 'active' : ''}`} onClick={() => handleTabClick('equipment')}>
+                <Wrench size={18} /> Equipment Tuner
+              </button>
+              <button className={`side-drawer-item ${activeTab === 'archers' ? 'active' : ''}`} onClick={() => handleTabClick('archers')}>
+                <User size={18} /> Team Roster & Performance
+              </button>
+              <button className={`side-drawer-item ${activeTab === 'venue' ? 'active' : ''}`} onClick={() => handleTabClick('venue')}>
+                <MapPin size={18} /> Practice Venue & Schedule
+              </button>
+              <button className={`side-drawer-item ${activeTab === 'chat' ? 'active' : ''}`} onClick={() => handleTabClick('chat')}>
+                <MessageSquare size={18} /> Team Chat & Private DMs
+              </button>
+              <button className={`side-drawer-item ${activeTab === 'gallery' ? 'active' : ''}`} onClick={() => handleTabClick('gallery')}>
+                <Camera size={18} /> Photo Gallery
+              </button>
+              <button className={`side-drawer-item ${activeTab === 'news' ? 'active' : ''}`} onClick={() => handleTabClick('news')}>
+                <Newspaper size={18} color="#38bdf8" /> Archery News 📰
+              </button>
+              <button className={`side-drawer-item ${activeTab === 'ai-coach' ? 'active' : ''}`} onClick={() => handleTabClick('ai-coach')}>
+                <Sparkles size={18} color="#fbbf24" /> AI Performance Coach ✨
+              </button>
+
+              <div className="side-drawer-section-label">User Portals</div>
+
+              {currentUser.role === 'archer' && (
+                <button className={`side-drawer-item ${activeTab === 'profile' ? 'active' : ''}`} onClick={() => handleTabClick('profile')}>
+                  <User size={18} /> My Archer Profile
+                </button>
+              )}
+
+              {(currentUser.role === 'admin' || (currentUser.name && currentUser.name.trim().toLowerCase() === 'rishabh kumar sinha')) && (
+                <button className={`side-drawer-item ${activeTab === 'admin' ? 'active' : ''}`} onClick={() => handleTabClick('admin')}>
+                  <Shield size={18} color="#ef4444" /> Admin Control Panel
+                  {pendingArchers && pendingArchers.length > 0 && (
+                    <span style={{ background: '#ef4444', color: '#ffffff', fontSize: '0.7rem', padding: '2px 8px', borderRadius: '10px', fontWeight: 800, marginLeft: 'auto' }}>
+                      {pendingArchers.length} Pending
+                    </span>
+                  )}
+                </button>
+              )}
+
+              {currentUser.role === 'coach' && (
+                <button className={`side-drawer-item ${activeTab === 'coach' ? 'active' : ''}`} onClick={() => handleTabClick('coach')}>
+                  <Shield size={18} /> Coach Dashboard
+                </button>
+              )}
+            </div>
+
+            {/* Drawer Footer */}
+            <div className="side-drawer-footer">
+              <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
+                <div>
+                  <div style={{ fontSize: '0.85rem', fontWeight: 700, color: '#f8fafc' }}>
+                    {currentUser.name}
+                  </div>
+                  <div style={{ fontSize: '0.72rem', color: currentUser.role === 'coach' ? '#fbbf24' : currentUser.role === 'archer' ? '#34d399' : '#94a3b8', fontWeight: 600 }}>
+                    {currentUser.role === 'coach' ? 'Head Coach' : currentUser.role === 'archer' ? 'Archer Member' : 'Guest Mode'}
+                  </div>
+                </div>
+
+                {currentUser.role === 'guest' ? (
+                  <button 
+                    onClick={() => { setSideMenuOpen(false); setShowRoleModal(true); }}
+                    className="btn-gold"
+                    style={{ padding: '6px 12px', fontSize: '0.78rem' }}
+                  >
+                    Login
+                  </button>
+                ) : (
+                  <button
+                    onClick={() => { setSideMenuOpen(false); handleSignOut(); }}
+                    className="btn-ghost"
+                    style={{ padding: '6px 12px', fontSize: '0.78rem', color: '#ef4444', borderColor: 'rgba(239, 68, 68, 0.3)' }}
+                  >
+                    Sign Out
+                  </button>
+                )}
+              </div>
+            </div>
+
+          </div>
+        </>
+      )}
 
       {/* Role Switch / Login / Sign Up / Sign Out Modal */}
       {showRoleModal && (

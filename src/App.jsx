@@ -61,10 +61,7 @@ export default function App() {
         return {
           ...remoteData,
           archers: loadedArchers,
-          streaks: {
-            ...defaultStreaks,
-            ...(remoteData.streaks || {})
-          },
+          streaks: (remoteData.streaks && Object.keys(remoteData.streaks).length > 0) ? remoteData.streaks : (prev.streaks && Object.keys(prev.streaks).length > 0 ? prev.streaks : defaultStreaks),
           currentUser: activeUser
         };
       });

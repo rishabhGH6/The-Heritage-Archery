@@ -319,70 +319,139 @@ h1, h2, h3, h4, h5, h6 {
   box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.8);
 }
 
-/* Responsive Mobile Navigation & Layout Styles */
-.desktop-nav {
+/* Side Drawer Navigation Menu Styles */
+.side-menu-trigger-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  background: rgba(15, 23, 42, 0.8);
+  border: 1px solid rgba(255, 255, 255, 0.12);
+  color: var(--text-main);
+  padding: 8px 14px;
+  border-radius: var(--radius-md);
+  font-size: 0.88rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.25s ease;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
+}
+.side-menu-trigger-btn:hover {
+  background: rgba(30, 41, 59, 0.9);
+  border-color: var(--emerald-500);
+  color: var(--gold-400);
+  transform: translateY(-1px);
+}
+
+.side-drawer-overlay {
+  position: fixed;
+  inset: 0;
+  background: rgba(3, 7, 18, 0.75);
+  backdrop-filter: blur(8px);
+  -webkit-backdrop-filter: blur(8px);
+  z-index: 2000;
+  animation: overlayFadeIn 0.25s ease-out;
+}
+
+@keyframes overlayFadeIn {
+  from { opacity: 0; }
+  to { opacity: 1; }
+}
+
+.side-drawer-container {
+  position: fixed;
+  top: 0;
+  left: 0;
+  bottom: 0;
+  width: 320px;
+  max-width: 85vw;
+  background: linear-gradient(180deg, #0f172a 0%, #060b13 100%);
+  border-right: 1px solid rgba(255, 255, 255, 0.12);
+  box-shadow: 10px 0 40px rgba(0, 0, 0, 0.75);
+  z-index: 2001;
+  display: flex;
+  flex-direction: column;
+  animation: slideInLeft 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+  overflow: hidden;
+}
+
+@keyframes slideInLeft {
+  from { transform: translateX(-100%); }
+  to { transform: translateX(0); }
+}
+
+.side-drawer-header {
+  padding: 20px 18px;
   display: flex;
   align-items: center;
-  gap: 4px;
-  overflow-x: auto;
-  padding: 4px 0;
+  justify-content: space-between;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+  background: rgba(15, 23, 42, 0.9);
 }
 
-.mobile-hamburger-btn {
-  display: none;
-  background: rgba(15, 23, 42, 0.8);
-  border: 1px solid var(--border-glass);
-  color: var(--text-main);
-  padding: 8px 12px;
+.side-drawer-body {
+  flex: 1;
+  padding: 16px 14px;
+  overflow-y: auto;
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.side-drawer-section-label {
+  font-size: 0.7rem;
+  font-weight: 800;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: #64748b;
+  padding: 8px 10px 4px 10px;
+  margin-top: 6px;
+}
+
+.side-drawer-item {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  width: 100%;
+  padding: 11px 14px;
   border-radius: var(--radius-md);
+  background: rgba(255, 255, 255, 0.02);
+  border: 1px solid transparent;
+  color: #cbd5e1;
+  font-size: 0.92rem;
+  font-weight: 600;
   cursor: pointer;
   transition: all 0.2s ease;
+  text-align: left;
 }
 
-.mobile-menu-drawer {
-  display: none;
+.side-drawer-item:hover {
+  background: rgba(255, 255, 255, 0.07);
+  color: #ffffff;
+  border-color: rgba(255, 255, 255, 0.1);
+  transform: translateX(4px);
 }
 
-@media (max-width: 960px) {
-  .desktop-nav {
-    display: none !important;
-  }
-  .mobile-hamburger-btn {
-    display: flex !important;
-    align-items: center;
-    justify-content: center;
-  }
-  .mobile-menu-drawer {
-    display: flex !important;
-    flex-direction: column;
-    gap: 6px;
-    width: 100%;
-    padding: 16px 0 8px 0;
-    border-top: 1px solid var(--border-glass);
-    margin-top: 12px;
-    animation: fadeIn 0.2s ease-out;
-  }
-  .mobile-nav-item {
-    width: 100%;
-    padding: 12px 16px;
-    border-radius: var(--radius-md);
-    background: rgba(15, 23, 42, 0.6);
-    border: 1px solid var(--border-glass);
-    color: var(--text-main);
-    font-weight: 600;
-    font-size: 0.95rem;
-    display: flex;
-    align-items: center;
-    gap: 12px;
-    cursor: pointer;
-  }
-  .mobile-nav-item.active {
-    background: rgba(217, 119, 6, 0.2);
-    border-color: var(--border-gold);
-    color: var(--gold-400);
-    font-weight: 700;
-  }
+.side-drawer-item.active {
+  background: linear-gradient(135deg, rgba(217, 119, 6, 0.2), rgba(5, 150, 105, 0.15));
+  border-color: var(--border-gold);
+  color: var(--gold-400);
+  font-weight: 700;
+  box-shadow: 0 4px 15px rgba(217, 119, 6, 0.15);
 }
+
+.side-drawer-item.active svg {
+  color: var(--gold-400) !important;
+}
+
+.side-drawer-footer {
+  padding: 16px 18px;
+  border-top: 1px solid rgba(255, 255, 255, 0.08);
+  background: rgba(9, 13, 22, 0.95);
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
 
 /* Component Mobile Breakpoints */
 @media (max-width: 850px) {
