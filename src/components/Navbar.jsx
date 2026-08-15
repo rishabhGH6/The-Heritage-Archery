@@ -207,16 +207,16 @@ export default function Navbar({ activeTab, setActiveTab, currentUser, archers, 
 
           <div style={{ display: 'flex', alignItems: 'center', gap: '12px', cursor: 'pointer' }} onClick={() => handleTabClick('home')}>
             <div style={{
-              background: 'radial-gradient(circle at 50% 45%, #0f172a 0%, #060b13 100%)',
-              padding: '2px 6px',
+              background: 'linear-gradient(135deg, rgba(217, 119, 6, 0.2), rgba(5, 150, 105, 0.2))',
+              padding: '8px',
               borderRadius: '12px',
-              border: '1px solid rgba(251, 191, 36, 0.3)',
+              border: '1px solid rgba(251, 191, 36, 0.4)',
               boxShadow: '0 4px 15px rgba(217, 119, 6, 0.35)',
               display: 'flex',
               alignItems: 'center',
               justifyContent: 'center'
             }}>
-              <HeritageLogo size={36} />
+              <Target size={26} color="#fbbf24" />
             </div>
             <div>
               <h1 style={{ fontSize: '1.25rem', fontWeight: 800, background: 'linear-gradient(90deg, #f8fafc, #fbbf24)', WebkitBackgroundClip: 'text', WebkitTextFillColor: 'transparent', lineHeight: 1.1 }}>

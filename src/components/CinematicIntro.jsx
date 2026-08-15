@@ -1,11 +1,10 @@
 import React, { useState, useEffect } from 'react';
 import { ArrowRight } from 'lucide-react';
-import HeritageLogo from './HeritageLogo';
 
 export default function CinematicIntro({ onComplete }) {
   // Phase 1: Text 'WELCOME' (0.4s - 2.8s) with Fade In & Fade Out
   // Phase 2: Text 'to the official portal of' (3.0s - 5.4s) with Fade In & Fade Out
-  // Phase 3: Perfect Heritage Archery Logo + 'THE HERITAGE ARCHERY' + 'College Team Portal' + ENTER PORTAL (5.6s - end)
+  // Phase 3: 'THE HERITAGE ARCHERY' + 'College Team Portal' + ENTER PORTAL (5.6s - end)
   const [phase, setPhase] = useState(1);
 
   useEffect(() => {
@@ -19,7 +18,7 @@ export default function CinematicIntro({ onComplete }) {
       setPhase(2);
     }, 2900);
 
-    // Phase 3: Title + Official Logo
+    // Phase 3: Title & CTA Reveal
     const t3 = setTimeout(() => {
       setPhase(3);
     }, 5400);
@@ -142,35 +141,33 @@ export default function CinematicIntro({ onComplete }) {
           </div>
         )}
 
-        {/* Phase 3: PERFECT HIGH-PRECISION OFFICIAL HERITAGE ARCHERY LOGO + TITLE */}
+        {/* Phase 3: TITLE + SUBTITLE + CTA */}
         {phase === 3 && (
-          <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '16px', zIndex: 20 }}>
+          <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '22px', zIndex: 20 }}>
             
-            {/* HERITAGE LOGO COMPONENT */}
-            <HeritageLogo size={190} />
-
             {/* Title: THE HERITAGE ARCHERY */}
             <h1 className="metallic-text-shine" style={{
-              fontSize: '3.3rem',
+              fontSize: '3.6rem',
               fontWeight: 900,
               letterSpacing: '0.08em',
               textTransform: 'uppercase',
               margin: 0,
-              lineHeight: 1.1
+              lineHeight: 1.1,
+              filter: 'drop-shadow(0 8px 30px rgba(217, 119, 6, 0.4))'
             }}>
               THE HERITAGE ARCHERY
             </h1>
 
             {/* Subtitle: College Team Portal */}
             <div style={{
-              fontSize: '1rem',
+              fontSize: '1.05rem',
               fontWeight: 700,
               color: '#34d399',
               letterSpacing: '0.22em',
               textTransform: 'uppercase',
               background: 'rgba(5, 150, 105, 0.15)',
               border: '1px solid rgba(5, 150, 105, 0.4)',
-              padding: '5px 20px',
+              padding: '6px 24px',
               borderRadius: '9999px',
               boxShadow: '0 4px 20px rgba(5, 150, 105, 0.25)'
             }}>
@@ -179,7 +176,7 @@ export default function CinematicIntro({ onComplete }) {
 
             {/* Tagline: Made by Archers for Archers */}
             <p style={{
-              fontSize: '1rem',
+              fontSize: '1.05rem',
               fontWeight: 700,
               color: '#fbbf24',
               letterSpacing: '0.18em',
@@ -187,11 +184,11 @@ export default function CinematicIntro({ onComplete }) {
               margin: 0,
               display: 'flex',
               alignItems: 'center',
-              gap: '14px'
+              gap: '16px'
             }}>
-              <span style={{ height: '1px', width: '36px', background: 'rgba(251, 191, 36, 0.4)' }} />
+              <span style={{ height: '1px', width: '45px', background: 'rgba(251, 191, 36, 0.4)' }} />
               Made by Archers for Archers
-              <span style={{ height: '1px', width: '36px', background: 'rgba(251, 191, 36, 0.4)' }} />
+              <span style={{ height: '1px', width: '45px', background: 'rgba(251, 191, 36, 0.4)' }} />
             </p>
 
             {/* ENTER PORTAL Button */}
@@ -199,19 +196,19 @@ export default function CinematicIntro({ onComplete }) {
               onClick={onComplete}
               className="btn-gold"
               style={{
-                marginTop: '6px',
-                padding: '14px 44px',
-                fontSize: '1.05rem',
+                marginTop: '12px',
+                padding: '16px 52px',
+                fontSize: '1.1rem',
                 borderRadius: '9999px',
                 boxShadow: '0 10px 35px rgba(217, 119, 6, 0.5)',
                 cursor: 'pointer',
                 display: 'flex',
                 alignItems: 'center',
-                gap: '10px',
+                gap: '12px',
                 fontWeight: 800
               }}
             >
-              ENTER PORTAL <ArrowRight size={20} />
+              ENTER PORTAL <ArrowRight size={22} />
             </button>
 
           </div>
