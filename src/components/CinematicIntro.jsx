@@ -4,7 +4,7 @@ import { ArrowRight } from 'lucide-react';
 export default function CinematicIntro({ onComplete }) {
   // Phase 1: Text 'WELCOME' (0.4s - 2.8s) with Fade In & Fade Out
   // Phase 2: Text 'to the official portal of' (3.0s - 5.4s) with Fade In & Fade Out
-  // Phase 3: Official Heritage Archery Logo + 'THE HERITAGE ARCHERY' + 'College Team Portal' + ENTER PORTAL (5.6s - end)
+  // Phase 3: Perfect Heritage Archery Logo + 'THE HERITAGE ARCHERY' + 'College Team Portal' + ENTER PORTAL (5.6s - end)
   const [phase, setPhase] = useState(1);
 
   useEffect(() => {
@@ -18,7 +18,7 @@ export default function CinematicIntro({ onComplete }) {
       setPhase(2);
     }, 2900);
 
-    // Phase 3: Title + Official Logo
+    // Phase 3: Title + Perfect Logo
     const t3 = setTimeout(() => {
       setPhase(3);
     }, 5400);
@@ -141,68 +141,70 @@ export default function CinematicIntro({ onComplete }) {
           </div>
         )}
 
-        {/* Phase 3: RESTORED OFFICIAL HERITAGE ARCHERY LOGO + THE HERITAGE ARCHERY */}
+        {/* Phase 3: PERFECT HIGH-PRECISION OFFICIAL HERITAGE ARCHERY LOGO + TITLE */}
         {phase === 3 && (
           <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '16px', zIndex: 20 }}>
             
-            {/* RESTORED OFFICIAL 3D GOLDEN ARCHER LOGO (Matching Image 1) */}
+            {/* PERFECT HIGH-PRECISION 3D GOLDEN ARCHER LOGO */}
             <div style={{ position: 'relative', width: '190px', height: '190px', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
               <svg width="190" height="190" viewBox="0 0 200 200" style={{ filter: 'drop-shadow(0 12px 35px rgba(251, 191, 36, 0.55))' }}>
                 <defs>
-                  {/* Metallic Golden Orange Radial Gradient for Head */}
-                  <radialGradient id="headGold" cx="35%" cy="35%" r="65%">
+                  {/* 3D Sphere Head Radial Gradient */}
+                  <radialGradient id="logoHeadSphere" cx="35%" cy="30%" r="70%">
                     <stop offset="0%" stopColor="#fef08a" />
-                    <stop offset="40%" stopColor="#fbbf24" />
-                    <stop offset="75%" stopColor="#d97706" />
-                    <stop offset="100%" stopColor="#92400e" />
+                    <stop offset="35%" stopColor="#f59e0b" />
+                    <stop offset="70%" stopColor="#d97706" />
+                    <stop offset="100%" stopColor="#78350f" />
                   </radialGradient>
 
-                  {/* Metallic Golden Linear Gradient for Ribbon Bow & Limbs */}
-                  <linearGradient id="bodyGold" x1="0%" y1="0%" x2="100%" y2="100%">
+                  {/* Metallic Golden Body Linear Gradient */}
+                  <linearGradient id="logoBodyGold" x1="0%" y1="0%" x2="100%" y2="100%">
                     <stop offset="0%" stopColor="#fef08a" />
-                    <stop offset="25%" stopColor="#f59e0b" />
-                    <stop offset="65%" stopColor="#d97706" />
-                    <stop offset="100%" stopColor="#78350f" />
+                    <stop offset="30%" stopColor="#fbbf24" />
+                    <stop offset="70%" stopColor="#d97706" />
+                    <stop offset="100%" stopColor="#92400e" />
                   </linearGradient>
 
-                  {/* Crisp White Specular Highlight */}
-                  <linearGradient id="whiteHighlight" x1="0%" y1="0%" x2="100%" y2="100%">
+                  {/* Pure Crisp White Arrow & String Gradient */}
+                  <linearGradient id="whiteArrowGrad" x1="0%" y1="0%" x2="100%" y2="100%">
                     <stop offset="0%" stopColor="#ffffff" />
-                    <stop offset="100%" stopColor="#cbd5e1" />
+                    <stop offset="100%" stopColor="#e2e8f0" />
                   </linearGradient>
                 </defs>
 
                 {/* Ambient Soft Gold Background Glow Circle */}
                 <circle cx="100" cy="100" r="85" fill="rgba(251, 191, 36, 0.08)" filter="blur(15px)" />
 
-                {/* 1. Golden Spherical Head */}
-                <circle cx="122" cy="55" r="14" fill="url(#headGold)" filter="drop-shadow(0 4px 10px rgba(0,0,0,0.5))" />
+                {/* 1. Glossy 3D Golden Spherical Head (Top Right) */}
+                <circle cx="130" cy="50" r="16" fill="url(#logoHeadSphere)" filter="drop-shadow(0 4px 8px rgba(0,0,0,0.4))" />
 
-                {/* 2. Golden Curved Ribbon Bow Limb (Left Arc) */}
+                {/* 2. Golden Torso / Chest Shell */}
                 <path 
-                  d="M 104 32 C 75 45, 60 85, 82 145 C 80 148, 77 150, 75 145 C 50 85, 70 42, 104 32 Z" 
-                  fill="url(#bodyGold)" 
+                  d="M 115 65 C 130 68, 145 80, 140 92 C 125 90, 100 82, 90 75 C 95 68, 105 65, 115 65 Z" 
+                  fill="url(#logoBodyGold)" 
                 />
 
-                {/* 3. Golden Upper Arm & Torso Band */}
+                {/* 3. Golden Curved Recurve Bow Limb (Left Side Crescent) */}
                 <path 
-                  d="M 85 75 C 95 65, 115 50, 140 70 C 120 85, 100 80, 85 75 Z" 
-                  fill="url(#bodyGold)" 
+                  d="M 100 25 C 55 55, 50 120, 85 165 C 75 125, 70 65, 100 25 Z" 
+                  fill="url(#logoBodyGold)" 
                 />
 
-                {/* 4. White Taut Bowstring & Nocked Arrowhead */}
-                <line x1="104" y1="32" x2="82" y2="145" stroke="url(#whiteHighlight)" strokeWidth="2.5" />
-                <path d="M 66 50 L 80 40 L 78 54 Z" fill="#ffffff" />
-                <line x1="72" y1="46" x2="135" y2="78" stroke="url(#whiteHighlight)" strokeWidth="3" strokeLinecap="round" />
+                {/* 4. White Taut Bowstring (Connecting Top Bow Tip to Bottom Bow Tip) */}
+                <line x1="100" y1="25" x2="85" y2="165" stroke="url(#whiteArrowGrad)" strokeWidth="3" strokeLinecap="round" />
 
-                {/* 5. Two Flowing Golden Ribbon Lower Cape/Legs */}
+                {/* 5. White Arrow Resting on Bow (Pointing Top-Left) */}
+                <polygon points="50,60 66,50 64,68" fill="#ffffff" />
+                <line x1="58" y1="58" x2="135" y2="92" stroke="url(#whiteArrowGrad)" strokeWidth="3.5" strokeLinecap="round" />
+
+                {/* 6. Two Tapered Flowing Golden Legs (Lower Body) */}
                 <path 
-                  d="M 108 95 C 102 125, 95 155, 92 178 C 96 172, 105 140, 115 105 Z" 
-                  fill="url(#bodyGold)" 
+                  d="M 105 85 C 98 120, 92 155, 88 190 C 94 182, 104 140, 112 92 Z" 
+                  fill="url(#logoBodyGold)" 
                 />
                 <path 
-                  d="M 115 92 C 125 125, 135 155, 120 188 C 130 170, 142 135, 128 90 Z" 
-                  fill="url(#bodyGold)" 
+                  d="M 116 88 C 122 120, 130 155, 126 195 C 132 175, 136 130, 122 86 Z" 
+                  fill="url(#logoBodyGold)" 
                 />
               </svg>
             </div>
