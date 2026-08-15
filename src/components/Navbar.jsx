@@ -219,7 +219,7 @@ export default function Navbar({ activeTab, setActiveTab, currentUser, archers, 
               <Target size={26} color="#fbbf24" />
             </div>
             <div>
-              <h1 style={{ fontSize: '1.25rem', fontWeight: 800, background: 'linear-gradient(90deg, #f8fafc, #fbbf24)', WebkitBackgroundClip: 'text', WebkitTextFillColor: 'transparent', lineHeight: 1.1 }}>
+              <h1 style={{ fontSize: '1.25rem', fontWeight: 800, background: 'linear-gradient(90deg, #f8fafc, #fbbf24)', WebkitBackgroundClip: 'text', WebkitTextFillColor: 'transparent', lineHeight: 1.1, whiteSpace: 'nowrap' }}>
                 THE HERITAGE ARCHERY
               </h1>
               <span style={{ fontSize: '0.68rem', color: '#94a3b8', fontWeight: 600, letterSpacing: '0.08em', textTransform: 'uppercase' }}>

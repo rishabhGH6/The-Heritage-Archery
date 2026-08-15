@@ -145,14 +145,15 @@ export default function CinematicIntro({ onComplete }) {
         {phase === 3 && (
           <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '22px', zIndex: 20 }}>
             
-            {/* Title: THE HERITAGE ARCHERY */}
+            {/* Title: THE HERITAGE ARCHERY (Stays on 1 Single Line) */}
             <h1 className="metallic-text-shine" style={{
-              fontSize: '3.6rem',
+              fontSize: 'clamp(1.6rem, 5.5vw, 3.4rem)',
               fontWeight: 900,
-              letterSpacing: '0.08em',
+              letterSpacing: '0.06em',
               textTransform: 'uppercase',
               margin: 0,
-              lineHeight: 1.1,
+              lineHeight: 1,
+              whiteSpace: 'nowrap',
               filter: 'drop-shadow(0 8px 30px rgba(217, 119, 6, 0.4))'
             }}>
               THE HERITAGE ARCHERY
