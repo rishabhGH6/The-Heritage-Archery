@@ -4,7 +4,7 @@ import { ArrowRight } from 'lucide-react';
 export default function CinematicIntro({ onComplete }) {
   // Phase 1: Text 'WELCOME' (0.4s - 2.8s)
   // Phase 2: Text 'to the official portal of' (3.0s - 5.4s)
-  // Phase 3: Simple Arrow + 'THE HERITAGE ARCHERY' + 'College Team Portal' + ENTER PORTAL (5.6s - end)
+  // Phase 3: Golden Shiny Arrow + 'THE HERITAGE ARCHERY' + 'College Team Portal' + ENTER PORTAL (5.6s - end)
   const [phase, setPhase] = useState(1);
 
   useEffect(() => {
@@ -18,7 +18,7 @@ export default function CinematicIntro({ onComplete }) {
       setPhase(2);
     }, 2800);
 
-    // Phase 3: Title + Simple Arrow
+    // Phase 3: Title + Golden Shiny Arrow
     const t3 = setTimeout(() => {
       setPhase(3);
     }, 5400);
@@ -79,13 +79,13 @@ export default function CinematicIntro({ onComplete }) {
         Skip Intro ✕
       </button>
 
-      {/* Ambient Radial Glow */}
+      {/* Ambient Gold Radial Glow */}
       <div style={{
         position: 'absolute',
-        width: '700px',
-        height: '700px',
+        width: '750px',
+        height: '750px',
         background: phase === 3
-          ? 'radial-gradient(circle, rgba(5, 150, 105, 0.15) 0%, rgba(217, 119, 6, 0.12) 40%, transparent 70%)'
+          ? 'radial-gradient(circle, rgba(251, 191, 36, 0.2) 0%, rgba(5, 150, 105, 0.12) 40%, transparent 70%)'
           : 'radial-gradient(circle, rgba(5, 150, 105, 0.1) 0%, rgba(217, 119, 6, 0.06) 45%, transparent 70%)',
         borderRadius: '50%',
         filter: 'blur(70px)',
@@ -141,77 +141,109 @@ export default function CinematicIntro({ onComplete }) {
           </div>
         )}
 
-        {/* Phase 3: SIMPLE ARROW + THE HERITAGE ARCHERY */}
+        {/* Phase 3: GOLDEN SHINY ARROW + THE HERITAGE ARCHERY */}
         {phase === 3 && (
           <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '20px', zIndex: 20 }}>
             
-            {/* SIMPLE DARK SLATE FORGED BODKIN ARROW (STATIC - NO ANIMATIONS) */}
+            {/* ELEGANT STUNNING GOLDEN SHINY ARCHERY ARROW (STATIC - FEATHERS ON LEFT, POINT ON RIGHT) */}
             <div style={{ position: 'relative', width: '420px', height: '60px', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
-              <svg width="420" height="60" viewBox="0 0 440 70" style={{ filter: 'drop-shadow(0 10px 25px rgba(0, 0, 0, 0.8))' }}>
+              <svg width="420" height="60" viewBox="0 0 440 70" style={{ filter: 'drop-shadow(0 10px 25px rgba(217, 119, 6, 0.6))' }}>
                 <defs>
-                  {/* Dark Slate Forged Iron Gradient */}
-                  <linearGradient id="simpleSlateMetal" x1="0%" y1="0%" x2="100%" y2="100%">
-                    <stop offset="0%" stopColor="#475569" />
-                    <stop offset="35%" stopColor="#334155" />
-                    <stop offset="70%" stopColor="#1e293b" />
-                    <stop offset="100%" stopColor="#0f172a" />
+                  {/* Rich Metallic Gold Gradient */}
+                  <linearGradient id="goldShineMetal" x1="0%" y1="0%" x2="100%" y2="100%">
+                    <stop offset="0%" stopColor="#fef08a" />
+                    <stop offset="30%" stopColor="#f59e0b" />
+                    <stop offset="65%" stopColor="#d97706" />
+                    <stop offset="100%" stopColor="#78350f" />
                   </linearGradient>
 
-                  {/* Steel Highlight Edge */}
-                  <linearGradient id="simpleSlateEdge" x1="0%" y1="0%" x2="0%" y2="100%">
-                    <stop offset="0%" stopColor="#cbd5e1" stopOpacity="0.9" />
-                    <stop offset="50%" stopColor="#475569" stopOpacity="0.8" />
-                    <stop offset="100%" stopColor="#0f172a" stopOpacity="1" />
+                  {/* Specular Highlight Sheen Gradient */}
+                  <linearGradient id="goldHighlightShine" x1="0%" y1="0%" x2="0%" y2="100%">
+                    <stop offset="0%" stopColor="#ffffff" stopOpacity="0.95" />
+                    <stop offset="45%" stopColor="#fbbf24" stopOpacity="0.9" />
+                    <stop offset="100%" stopColor="#b45309" stopOpacity="1" />
                   </linearGradient>
+
+                  {/* Cross-Hatch Grip Pattern */}
+                  <pattern id="goldCrossHatch" width="8" height="8" patternUnits="userSpaceOnUse">
+                    <line x1="0" y1="0" x2="8" y2="8" stroke="#78350f" strokeWidth="1.2" />
+                    <line x1="8" y1="0" x2="0" y2="8" stroke="#78350f" strokeWidth="1.2" />
+                  </pattern>
                 </defs>
 
-                {/* 1. Angular Dark Feather Fletchings at Tail */}
+                {/* 1. Golden Feather Fletchings at Tail (Left Side) */}
                 <g transform="translate(10, 10)">
-                  <polygon points="0,25 90,0 80,25" fill="url(#simpleSlateMetal)" stroke="#64748b" strokeWidth="1" />
-                  <polygon points="0,25 90,50 80,25" fill="url(#simpleSlateMetal)" stroke="#64748b" strokeWidth="1" />
-                  
+                  {/* Upper Feather Vane */}
+                  <path 
+                    d="M 0 25 C 20 2, 75 0, 105 25 L 100 29 C 70 12, 20 14, 0 25 Z" 
+                    fill="url(#goldHighlightShine)" 
+                    stroke="#78350f" 
+                    strokeWidth="1"
+                  />
+                  {/* Feather Ribs Texture Lines */}
                   {[...Array(14)].map((_, i) => (
                     <line 
                       key={i} 
-                      x1={10 + i * 5} 
-                      y1={i < 7 ? 22 - i * 2.5 : 22 - (14 - i) * 2.5} 
-                      x2={14 + i * 5} 
+                      x1={10 + i * 7} 
+                      y1={22 - (i > 7 ? 14 - i : i * 1.5)} 
+                      x2={14 + i * 7} 
                       y2={25} 
-                      stroke="#94a3b8" 
-                      strokeWidth="0.8" 
-                      opacity="0.7"
+                      stroke="#92400e" 
+                      strokeWidth="1" 
                     />
                   ))}
+
+                  {/* Lower Feather Vane */}
+                  <path 
+                    d="M 0 25 C 20 48, 75 50, 105 25 L 100 21 C 70 38, 20 36, 0 25 Z" 
+                    fill="url(#goldHighlightShine)" 
+                    stroke="#78350f" 
+                    strokeWidth="1"
+                  />
+                  {/* Lower Feather Ribs Texture Lines */}
                   {[...Array(14)].map((_, i) => (
                     <line 
                       key={`b-${i}`} 
-                      x1={10 + i * 5} 
-                      y1={i < 7 ? 28 + i * 2.5 : 28 + (14 - i) * 2.5} 
-                      x2={14 + i * 5} 
+                      x1={10 + i * 7} 
+                      y1={28 + (i > 7 ? 14 - i : i * 1.5)} 
+                      x2={14 + i * 7} 
                       y2={25} 
-                      stroke="#94a3b8" 
-                      strokeWidth="0.8" 
-                      opacity="0.7"
+                      stroke="#92400e" 
+                      strokeWidth="1" 
                     />
                   ))}
                 </g>
 
-                {/* 2. Double-Ridged Collar Rings */}
-                <g transform="translate(100, 27)">
-                  <rect x="0" y="0" width="6" height="16" rx="2" fill="url(#simpleSlateEdge)" stroke="#0f172a" strokeWidth="0.8" />
-                  <rect x="9" y="0" width="6" height="16" rx="2" fill="url(#simpleSlateEdge)" stroke="#0f172a" strokeWidth="0.8" />
-                  <rect x="18" y="0" width="6" height="16" rx="2" fill="url(#simpleSlateEdge)" stroke="#0f172a" strokeWidth="0.8" />
+                {/* 2. Golden Metallic Shaft (Middle) */}
+                <rect x="95" y="32" width="240" height="6" rx="3" fill="url(#goldHighlightShine)" stroke="#78350f" strokeWidth="0.8" />
+                <line x1="95" y1="33" x2="335" y2="33" stroke="#ffffff" strokeWidth="1.5" strokeOpacity="0.9" />
+
+                {/* 3. Ornamental Cross-Hatched Collar Ring */}
+                <g transform="translate(185, 27)">
+                  <rect x="0" y="0" width="35" height="16" rx="3" fill="url(#goldShineMetal)" stroke="#78350f" strokeWidth="1" />
+                  <rect x="2" y="2" width="31" height="12" fill="url(#goldCrossHatch)" opacity="0.85" />
+                  <line x1="0" y1="0" x2="0" y2="16" stroke="#fef08a" strokeWidth="2" />
+                  <line x1="35" y1="0" x2="35" y2="16" stroke="#fef08a" strokeWidth="2" />
                 </g>
 
-                {/* 3. Dark Matte Forged Iron Shaft */}
-                <rect x="130" y="32" width="230" height="6" rx="2" fill="url(#simpleSlateMetal)" stroke="#0f172a" strokeWidth="1" />
-                <line x1="130" y1="33" x2="360" y2="33" stroke="#cbd5e1" strokeWidth="1" opacity="0.6" />
+                {/* 4. Collar Neck Rings near Arrowhead */}
+                <g transform="translate(330, 28)">
+                  <rect x="0" y="0" width="4" height="14" rx="1" fill="#fde047" stroke="#78350f" strokeWidth="0.8" />
+                  <rect x="6" y="0" width="4" height="14" rx="1" fill="#fde047" stroke="#78350f" strokeWidth="0.8" />
+                  <rect x="12" y="0" width="4" height="14" rx="1" fill="#fde047" stroke="#78350f" strokeWidth="0.8" />
+                </g>
 
-                {/* 4. Conical Steel Armor-Piercing Bodkin Point */}
-                <g transform="translate(360, 28)">
-                  <path d="M 0 0 L 22 7 L 0 14 Z" fill="url(#simpleSlateEdge)" stroke="#0f172a" strokeWidth="1" />
-                  <polygon points="22,2 50,7 22,12" fill="url(#simpleSlateEdge)" stroke="#ffffff" strokeWidth="0.8" />
-                  <line x1="22" y1="7" x2="50" y2="7" stroke="#ffffff" strokeWidth="1" />
+                {/* 5. Broadhead Arrowhead Tip (Right Side Head) */}
+                <g transform="translate(350, 15)">
+                  <path 
+                    d="M 0 20 L 22 0 L 70 20 L 22 40 Z" 
+                    fill="url(#goldHighlightShine)" 
+                    stroke="#78350f" 
+                    strokeWidth="1.5"
+                  />
+                  {/* Arrowhead Center Ridge Line & Specular Highlight */}
+                  <line x1="0" y1="20" x2="70" y2="20" stroke="#ffffff" strokeWidth="1.8" />
+                  <path d="M 22 0 L 70 20 L 22 20 Z" fill="rgba(255, 255, 255, 0.35)" />
                 </g>
               </svg>
             </div>
