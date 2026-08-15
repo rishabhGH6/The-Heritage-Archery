@@ -4,7 +4,7 @@ import { ArrowRight } from 'lucide-react';
 export default function CinematicIntro({ onComplete }) {
   // Phase 1: Text 'WELCOME' (0.4s - 2.8s) with Fade In & Fade Out
   // Phase 2: Text 'to the official portal of' (3.0s - 5.4s) with Fade In & Fade Out
-  // Phase 3: Golden Shiny Arrow (Straight Feather Lines) + 'THE HERITAGE ARCHERY' + 'College Team Portal' + ENTER PORTAL (5.6s - end)
+  // Phase 3: Archer with Bow Crest + 'THE HERITAGE ARCHERY' + 'College Team Portal' + ENTER PORTAL (5.6s - end)
   const [phase, setPhase] = useState(1);
 
   useEffect(() => {
@@ -18,7 +18,7 @@ export default function CinematicIntro({ onComplete }) {
       setPhase(2);
     }, 2900);
 
-    // Phase 3: Title + Golden Arrow
+    // Phase 3: Title + Archer with Bow Emblem
     const t3 = setTimeout(() => {
       setPhase(3);
     }, 5400);
@@ -85,7 +85,7 @@ export default function CinematicIntro({ onComplete }) {
         width: '750px',
         height: '750px',
         background: phase === 3
-          ? 'radial-gradient(circle, rgba(251, 191, 36, 0.2) 0%, rgba(5, 150, 105, 0.12) 40%, transparent 70%)'
+          ? 'radial-gradient(circle, rgba(251, 191, 36, 0.22) 0%, rgba(5, 150, 105, 0.15) 40%, transparent 70%)'
           : 'radial-gradient(circle, rgba(5, 150, 105, 0.1) 0%, rgba(217, 119, 6, 0.06) 45%, transparent 70%)',
         borderRadius: '50%',
         filter: 'blur(70px)',
@@ -97,7 +97,7 @@ export default function CinematicIntro({ onComplete }) {
         position: 'relative',
         width: '100%',
         maxWidth: '750px',
-        minHeight: '360px',
+        minHeight: '380px',
         display: 'flex',
         flexDirection: 'column',
         alignItems: 'center',
@@ -141,98 +141,64 @@ export default function CinematicIntro({ onComplete }) {
           </div>
         )}
 
-        {/* Phase 3: GOLDEN SHINY ARROW (Straight Feather Lines) + THE HERITAGE ARCHERY */}
+        {/* Phase 3: HERO ARCHER WITH BOW CREST + THE HERITAGE ARCHERY */}
         {phase === 3 && (
-          <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '20px', zIndex: 20 }}>
+          <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '16px', zIndex: 20 }}>
             
-            {/* ELEGANT STUNNING GOLDEN SHINY ARCHERY ARROW (STRAIGHT LINE FEATHERS ON LEFT, POINT ON RIGHT) */}
-            <div style={{ position: 'relative', width: '420px', height: '60px', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
-              <svg width="420" height="60" viewBox="0 0 440 70" style={{ filter: 'drop-shadow(0 10px 25px rgba(217, 119, 6, 0.6))' }}>
+            {/* HERO ARCHER WITH BOW SILHOUETTE CREST (Matching user image) */}
+            <div style={{ position: 'relative', width: '180px', height: '180px', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+              <svg width="180" height="180" viewBox="0 0 200 200" style={{ filter: 'drop-shadow(0 10px 30px rgba(217, 119, 6, 0.65))' }}>
                 <defs>
                   {/* Rich Metallic Gold Gradient */}
-                  <linearGradient id="goldShineMetal" x1="0%" y1="0%" x2="100%" y2="100%">
+                  <linearGradient id="archerGoldMetal" x1="0%" y1="0%" x2="100%" y2="100%">
                     <stop offset="0%" stopColor="#fef08a" />
-                    <stop offset="30%" stopColor="#f59e0b" />
-                    <stop offset="65%" stopColor="#d97706" />
+                    <stop offset="35%" stopColor="#fbbf24" />
+                    <stop offset="70%" stopColor="#d97706" />
                     <stop offset="100%" stopColor="#78350f" />
                   </linearGradient>
 
-                  {/* Specular Highlight Sheen Gradient */}
-                  <linearGradient id="goldHighlightShine" x1="0%" y1="0%" x2="0%" y2="100%">
-                    <stop offset="0%" stopColor="#ffffff" stopOpacity="0.95" />
-                    <stop offset="45%" stopColor="#fbbf24" stopOpacity="0.9" />
-                    <stop offset="100%" stopColor="#b45309" stopOpacity="1" />
+                  <linearGradient id="bowGleam" x1="0%" y1="0%" x2="100%" y2="0%">
+                    <stop offset="0%" stopColor="#ffffff" stopOpacity="0.9" />
+                    <stop offset="50%" stopColor="#fbbf24" stopOpacity="1" />
+                    <stop offset="100%" stopColor="#b45309" stopOpacity="0.9" />
                   </linearGradient>
-
-                  {/* Cross-Hatch Grip Pattern */}
-                  <pattern id="goldCrossHatch" width="8" height="8" patternUnits="userSpaceOnUse">
-                    <line x1="0" y1="0" x2="8" y2="8" stroke="#78350f" strokeWidth="1.2" />
-                    <line x1="8" y1="0" x2="0" y2="8" stroke="#78350f" strokeWidth="1.2" />
-                  </pattern>
                 </defs>
 
-                {/* 1. Golden Feather Fletchings in STRAIGHT LINES at Tail (Left Side) */}
-                <g transform="translate(10, 10)">
-                  {/* Upper Straight Vane */}
-                  <polygon points="0,25 90,0 80,25" fill="url(#goldHighlightShine)" stroke="#78350f" strokeWidth="1" />
-                  {/* Lower Straight Vane */}
-                  <polygon points="0,25 90,50 80,25" fill="url(#goldHighlightShine)" stroke="#78350f" strokeWidth="1" />
+                {/* Archer Body & Bow Silhouette Emblem Group */}
+                <g fill="url(#archerGoldMetal)">
                   
-                  {/* Straight Feather Ribs Texture Lines */}
-                  {[...Array(14)].map((_, i) => (
-                    <line 
-                      key={i} 
-                      x1={10 + i * 5} 
-                      y1={i < 7 ? 22 - i * 2.5 : 22 - (14 - i) * 2.5} 
-                      x2={14 + i * 5} 
-                      y2={25} 
-                      stroke="#92400e" 
-                      strokeWidth="0.8" 
-                    />
-                  ))}
-                  {[...Array(14)].map((_, i) => (
-                    <line 
-                      key={`b-${i}`} 
-                      x1={10 + i * 5} 
-                      y1={i < 7 ? 28 + i * 2.5 : 28 + (14 - i) * 2.5} 
-                      x2={14 + i * 5} 
-                      y2={25} 
-                      stroke="#92400e" 
-                      strokeWidth="0.8" 
-                    />
-                  ))}
-                </g>
-
-                {/* 2. Golden Metallic Shaft (Middle) */}
-                <rect x="95" y="32" width="240" height="6" rx="3" fill="url(#goldHighlightShine)" stroke="#78350f" strokeWidth="0.8" />
-                <line x1="95" y1="33" x2="335" y2="33" stroke="#ffffff" strokeWidth="1.5" strokeOpacity="0.9" />
-
-                {/* 3. Ornamental Cross-Hatched Collar Ring */}
-                <g transform="translate(185, 27)">
-                  <rect x="0" y="0" width="35" height="16" rx="3" fill="url(#goldShineMetal)" stroke="#78350f" strokeWidth="1" />
-                  <rect x="2" y="2" width="31" height="12" fill="url(#goldCrossHatch)" opacity="0.85" />
-                  <line x1="0" y1="0" x2="0" y2="16" stroke="#fef08a" strokeWidth="2" />
-                  <line x1="35" y1="0" x2="35" y2="16" stroke="#fef08a" strokeWidth="2" />
-                </g>
-
-                {/* 4. Collar Neck Rings near Arrowhead */}
-                <g transform="translate(330, 28)">
-                  <rect x="0" y="0" width="4" height="14" rx="1" fill="#fde047" stroke="#78350f" strokeWidth="0.8" />
-                  <rect x="6" y="0" width="4" height="14" rx="1" fill="#fde047" stroke="#78350f" strokeWidth="0.8" />
-                  <rect x="12" y="0" width="4" height="14" rx="1" fill="#fde047" stroke="#78350f" strokeWidth="0.8" />
-                </g>
-
-                {/* 5. Broadhead Arrowhead Tip (Right Side Head) */}
-                <g transform="translate(350, 15)">
+                  {/* 1. Recurve Bow Curve Limbs */}
                   <path 
-                    d="M 0 20 L 22 0 L 70 20 L 22 40 Z" 
-                    fill="url(#goldHighlightShine)" 
-                    stroke="#78350f" 
-                    strokeWidth="1.5"
+                    d="M 95 20 Q 40 45, 45 140 Q 42 148, 48 145 C 55 100, 75 55, 95 20 Z" 
+                    fill="url(#bowGleam)" 
                   />
-                  {/* Arrowhead Center Ridge Line & Specular Highlight */}
-                  <line x1="0" y1="20" x2="70" y2="20" stroke="#ffffff" strokeWidth="1.8" />
-                  <path d="M 22 0 L 70 20 L 22 20 Z" fill="rgba(255, 255, 255, 0.35)" />
+                  <path 
+                    d="M 45 145 Q 60 110, 120 70 L 115 65 Q 55 105, 45 145 Z" 
+                    fill="url(#archerGoldMetal)" 
+                  />
+
+                  {/* 2. Taut Bowstring */}
+                  <line x1="95" y1="20" x2="120" y2="70" stroke="#fde047" strokeWidth="2.5" />
+                  <line x1="45" y1="145" x2="120" y2="70" stroke="#fde047" strokeWidth="2.5" />
+
+                  {/* 3. Nocked Arrow (Pointing Upwards-Left along Bow Aim) */}
+                  <path d="M 22 25 L 34 37 L 28 41 Z" fill="#ffffff" />
+                  <line x1="28" y1="31" x2="135" y2="85" stroke="#ffffff" strokeWidth="3" />
+
+                  {/* 4. Archer Head & Neck */}
+                  <circle cx="125" cy="62" r="16" />
+
+                  {/* 5. Archer Torso, Shoulder & Arms in Full Draw Stance */}
+                  {/* Bow Arm extending to bow handle */}
+                  <path d="M 115 72 C 90 60, 65 50, 50 45 C 45 43, 40 48, 45 52 C 60 58, 85 70, 110 82 Z" />
+                  
+                  {/* Drawing Arm pulling back string to anchor point */}
+                  <path d="M 135 68 C 150 78, 165 92, 175 98 C 178 100, 182 95, 178 90 C 168 82, 150 70, 132 60 Z" />
+
+                  {/* Muscular Back & Torso contours */}
+                  <path d="M 110 78 Q 115 105, 100 135 C 95 145, 90 160, 80 170 C 85 168, 95 150, 105 130 C 115 110, 128 90, 125 75 Z" />
+                  <path d="M 125 75 C 138 90, 155 115, 145 135 C 135 155, 120 175, 110 180 C 122 170, 145 145, 155 120 C 165 98, 145 78, 125 75 Z" />
+
                 </g>
               </svg>
             </div>
@@ -287,7 +253,7 @@ export default function CinematicIntro({ onComplete }) {
               onClick={onComplete}
               className="btn-gold"
               style={{
-                marginTop: '10px',
+                marginTop: '6px',
                 padding: '14px 44px',
                 fontSize: '1.05rem',
                 borderRadius: '9999px',
