@@ -2,7 +2,7 @@ import React, { useState } from 'react';
 import { Target, Award, Calendar, MessageSquare, Shield, User, MapPin, Camera, Wrench, LogIn, LogOut, ChevronDown, ChevronRight, UserPlus, Upload, HelpCircle, Key, CheckCircle2, Menu, X, Sparkles, Newspaper } from 'lucide-react';
 import { defaultArchers } from '../data/initialData';
 
-export default function Navbar({ activeTab, setActiveTab, currentUser, archers, pendingArchers = [], coach, onSwitchUser, onAddArcher, onRequestAddArcher, onUpdateArcher }) {
+export default function Navbar({ activeTab, setActiveTab, currentUser, archers, pendingArchers = [], coach, onSwitchUser, onAddArcher, onRequestAddArcher, onUpdateArcher, onReplayIntro }) {
   const displayArchers = (archers && archers.length > 0) ? archers : defaultArchers;
   const [showRoleModal, setShowRoleModal] = useState(false);
   const [sideMenuOpen, setSideMenuOpen] = useState(false);
@@ -454,6 +454,30 @@ export default function Navbar({ activeTab, setActiveTab, currentUser, archers, 
 
             {/* Drawer Footer */}
             <div className="side-drawer-footer">
+              {onReplayIntro && (
+                <button
+                  onClick={() => { setSideMenuOpen(false); onReplayIntro(); }}
+                  style={{
+                    width: '100%',
+                    background: 'rgba(251, 191, 36, 0.1)',
+                    border: '1px solid rgba(251, 191, 36, 0.3)',
+                    color: '#fbbf24',
+                    padding: '8px 12px',
+                    borderRadius: '10px',
+                    fontSize: '0.8rem',
+                    fontWeight: 700,
+                    cursor: 'pointer',
+                    display: 'flex',
+                    alignItems: 'center',
+                    justifyContent: 'center',
+                    gap: '6px',
+                    transition: 'all 0.2s ease'
+                  }}
+                >
+                  🎬 Replay 3D Intro Animation
+                </button>
+              )}
+
               <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
                 <div>
                   <div style={{ fontSize: '0.85rem', fontWeight: 700, color: '#f8fafc' }}>

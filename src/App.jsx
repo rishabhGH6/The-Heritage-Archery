@@ -315,10 +315,11 @@ export default function App() {
         onAddArcher={handleAddArcher}
         onRequestAddArcher={handleRequestAddArcher}
         onUpdateArcher={handleUpdateArcher}
+        onReplayIntro={() => setShowIntro(true)}
       />
 
-      {/* Main App Container */}
-      <main style={{ maxWidth: '1280px', width: '100%', margin: '0 auto', padding: '24px 20px', flex: 1 }}>
+      {/* Main App Container with Smooth Entrance Transitions */}
+      <main className="fade-in-up" key={activeTab} style={{ maxWidth: '1280px', width: '100%', margin: '0 auto', padding: '24px 20px', flex: 1 }}>
         
         {/* Render Tab Contents */}
         {activeTab === 'home' && (
