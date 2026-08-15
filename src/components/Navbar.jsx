@@ -206,15 +206,39 @@ export default function Navbar({ activeTab, setActiveTab, currentUser, archers, 
 
           <div style={{ display: 'flex', alignItems: 'center', gap: '12px', cursor: 'pointer' }} onClick={() => handleTabClick('home')}>
             <div style={{
-              background: 'linear-gradient(135deg, #059669, #d97706)',
-              padding: '10px',
+              background: 'radial-gradient(circle at 50% 45%, #0f172a 0%, #060b13 100%)',
+              padding: '4px 8px',
               borderRadius: '12px',
-              boxShadow: '0 4px 15px rgba(5, 150, 105, 0.4)',
+              border: '1px solid rgba(251, 191, 36, 0.3)',
+              boxShadow: '0 4px 15px rgba(217, 119, 6, 0.35)',
               display: 'flex',
               alignItems: 'center',
               justifyContent: 'center'
             }}>
-              <Target size={26} color="#ffffff" />
+              <svg width="34" height="34" viewBox="0 0 200 200">
+                <defs>
+                  <radialGradient id="navHeadGold" cx="35%" cy="35%" r="65%">
+                    <stop offset="0%" stopColor="#fef08a" />
+                    <stop offset="40%" stopColor="#fbbf24" />
+                    <stop offset="75%" stopColor="#d97706" />
+                    <stop offset="100%" stopColor="#92400e" />
+                  </radialGradient>
+                  <linearGradient id="navBodyGold" x1="0%" y1="0%" x2="100%" y2="100%">
+                    <stop offset="0%" stopColor="#fef08a" />
+                    <stop offset="25%" stopColor="#f59e0b" />
+                    <stop offset="65%" stopColor="#d97706" />
+                    <stop offset="100%" stopColor="#78350f" />
+                  </linearGradient>
+                </defs>
+                <circle cx="122" cy="55" r="14" fill="url(#navHeadGold)" />
+                <path d="M 104 32 C 75 45, 60 85, 82 145 C 80 148, 77 150, 75 145 C 50 85, 70 42, 104 32 Z" fill="url(#navBodyGold)" />
+                <path d="M 85 75 C 95 65, 115 50, 140 70 C 120 85, 100 80, 85 75 Z" fill="url(#navBodyGold)" />
+                <line x1="104" y1="32" x2="82" y2="145" stroke="#ffffff" strokeWidth="2.5" />
+                <path d="M 66 50 L 80 40 L 78 54 Z" fill="#ffffff" />
+                <line x1="72" y1="46" x2="135" y2="78" stroke="#ffffff" strokeWidth="3" strokeLinecap="round" />
+                <path d="M 108 95 C 102 125, 95 155, 92 178 C 96 172, 105 140, 115 105 Z" fill="url(#navBodyGold)" />
+                <path d="M 115 92 C 125 125, 135 155, 120 188 C 130 170, 142 135, 128 90 Z" fill="url(#navBodyGold)" />
+              </svg>
             </div>
             <div>
               <h1 style={{ fontSize: '1.25rem', fontWeight: 800, background: 'linear-gradient(90deg, #f8fafc, #fbbf24)', WebkitBackgroundClip: 'text', WebkitTextFillColor: 'transparent', lineHeight: 1.1 }}>
