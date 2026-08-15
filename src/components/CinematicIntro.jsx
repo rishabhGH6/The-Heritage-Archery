@@ -1,10 +1,10 @@
 import React, { useState, useEffect } from 'react';
-import { ArrowRight, Sparkles } from 'lucide-react';
+import { ArrowRight, Zap, Sparkles } from 'lucide-react';
 
 export default function CinematicIntro({ onComplete }) {
   // Phase 1: Text 'WELCOME' (0.6s - 3.2s)
   // Phase 2: Text 'to the official portal of' (3.4s - 6.0s)
-  // Phase 3: Text 'THE HERITAGE ARCHERY' + Stunning Metallic Shiny Arrow flight entrance (6.2s - end)
+  // Phase 3: Text 'THE HERITAGE ARCHERY' + Golden Vintage Metallic Arrow with Electric Shock flies in from left (6.2s - end)
   const [phase, setPhase] = useState(1);
 
   useEffect(() => {
@@ -18,10 +18,10 @@ export default function CinematicIntro({ onComplete }) {
       setPhase(2);
     }, 3200);
 
-    // Phase 3: 'THE HERITAGE ARCHERY' + Stunning Metallic Arrow Flight
+    // Phase 3: 'THE HERITAGE ARCHERY' + Electric Arrow Flight from Left
     const t3 = setTimeout(() => {
       setPhase(3);
-      playSwooshSound();
+      playElectricSound();
     }, 6000);
 
     return () => {
@@ -31,25 +31,26 @@ export default function CinematicIntro({ onComplete }) {
     };
   }, []);
 
-  // Web Audio Synthesizer for Crisp Metallic Arrow Swoosh & Release
-  const playSwooshSound = () => {
+  // Web Audio Synthesizer for Electric Shock + Metallic Flight Sound
+  const playElectricSound = () => {
     try {
       const AudioCtx = window.AudioContext || window.webkitAudioContext;
       if (!AudioCtx) return;
       const ctx = new AudioCtx();
 
-      // Metallic swoosh oscillator
+      // Electric buzz / zap sound
       const osc = ctx.createOscillator();
       const gain = ctx.createGain();
-      osc.type = 'sine';
-      osc.frequency.setValueAtTime(320, ctx.currentTime);
-      osc.frequency.exponentialRampToValueAtTime(80, ctx.currentTime + 0.35);
-      gain.gain.setValueAtTime(0.5, ctx.currentTime);
-      gain.gain.exponentialRampToValueAtTime(0.001, ctx.currentTime + 0.35);
+      osc.type = 'sawtooth';
+      osc.frequency.setValueAtTime(440, ctx.currentTime);
+      osc.frequency.linearRampToValueAtTime(880, ctx.currentTime + 0.1);
+      osc.frequency.linearRampToValueAtTime(220, ctx.currentTime + 0.4);
+      gain.gain.setValueAtTime(0.4, ctx.currentTime);
+      gain.gain.exponentialRampToValueAtTime(0.001, ctx.currentTime + 0.4);
       osc.connect(gain);
       gain.connect(ctx.destination);
       osc.start();
-      osc.stop(ctx.currentTime + 0.35);
+      osc.stop(ctx.currentTime + 0.4);
     } catch (e) {
       // Ignore if muted
     }
@@ -110,7 +111,7 @@ export default function CinematicIntro({ onComplete }) {
         width: '750px',
         height: '750px',
         background: phase === 3
-          ? 'radial-gradient(circle, rgba(251, 191, 36, 0.22) 0%, rgba(5, 150, 105, 0.18) 35%, transparent 70%)'
+          ? 'radial-gradient(circle, rgba(56, 189, 248, 0.2) 0%, rgba(251, 191, 36, 0.2) 35%, transparent 70%)'
           : 'radial-gradient(circle, rgba(5, 150, 105, 0.12) 0%, rgba(217, 119, 6, 0.08) 45%, transparent 70%)',
         borderRadius: '50%',
         filter: 'blur(70px)',
@@ -167,65 +168,131 @@ export default function CinematicIntro({ onComplete }) {
           </div>
         )}
 
-        {/* Phase 3: THE HERITAGE ARCHERY + Stunning Metallic Shiny Arrow */}
+        {/* Phase 3: THE HERITAGE ARCHERY + Electric Golden Vintage Metallic Arrow */}
         {phase === 3 && (
-          <div className="intro-full-reveal" style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '22px', zIndex: 20 }}>
+          <div className="intro-full-reveal" style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '20px', zIndex: 20 }}>
             
-            {/* STUNNING METALLIC SHINY ARROW (Flies into position when title appears) */}
-            <div className="metallic-arrow-entrance" style={{ position: 'relative', width: '380px', height: '24px', display: 'flex', alignItems: 'center' }}>
+            {/* VINTAGE GOLDEN METALLIC ARROW WITH ELECTRIC SHOCK FLYING IN FROM LEFT AND STOPPING ABOVE TEXT */}
+            <div className="electric-arrow-fly-left" style={{ position: 'relative', width: '420px', height: '60px', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
               
-              {/* Arrow Speed Sparkle Trail */}
+              {/* Electric Shock Aura Glow */}
               <div style={{
                 position: 'absolute',
-                left: '-40px',
-                width: '260px',
-                height: '4px',
-                background: 'linear-gradient(90deg, transparent, rgba(52, 211, 153, 0.8), rgba(251, 191, 36, 0.95))',
+                inset: '-10px',
+                background: 'radial-gradient(ellipse at center, rgba(56, 189, 248, 0.4) 0%, rgba(251, 191, 36, 0.3) 50%, transparent 80%)',
                 borderRadius: '9999px',
-                filter: 'blur(3px)',
-                opacity: 0.8
+                filter: 'blur(8px)',
+                animation: 'electricPulse 0.15s infinite alternate'
               }} />
 
-              {/* Metallic Gold & Emerald Fletchings / Feathers */}
-              <div style={{ display: 'flex', gap: '3px', position: 'relative', zIndex: 2 }}>
-                <div style={{
-                  width: '36px',
-                  height: '16px',
-                  background: 'linear-gradient(135deg, #d97706, #fbbf24, #fef08a)',
-                  clipPath: 'polygon(0 0, 100% 30%, 80% 100%, 0 100%)',
-                  boxShadow: '0 0 12px rgba(251, 191, 36, 0.8)'
-                }} />
-                <div style={{
-                  width: '36px',
-                  height: '16px',
-                  background: 'linear-gradient(135deg, #059669, #34d399, #6ee7b7)',
-                  clipPath: 'polygon(0 30%, 100% 0, 80% 100%, 0 100%)',
-                  boxShadow: '0 0 12px rgba(52, 211, 153, 0.8)',
-                  transform: 'translateY(-3px)'
-                }} />
+              {/* Electric Spark / Lightning Bolts SVG Overlays */}
+              <div className="electric-arcs-overlay">
+                <Zap size={24} color="#38bdf8" style={{ position: 'absolute', top: '-12px', left: '25%', filter: 'drop-shadow(0 0 8px #38bdf8)' }} />
+                <Zap size={20} color="#fde047" style={{ position: 'absolute', bottom: '-10px', left: '55%', filter: 'drop-shadow(0 0 8px #fde047)' }} />
+                <Zap size={26} color="#38bdf8" style={{ position: 'absolute', top: '-14px', right: '20%', filter: 'drop-shadow(0 0 10px #38bdf8)' }} />
               </div>
 
-              {/* High-Gloss Chrome Carbon Shaft with Metallic Shimmer */}
-              <div style={{
-                flex: 1,
-                height: '6px',
-                background: 'linear-gradient(90deg, #1e293b 0%, #cbd5e1 30%, #ffffff 50%, #64748b 75%, #0f172a 100%)',
-                boxShadow: '0 0 10px rgba(255, 255, 255, 0.5), inset 0 1px 2px rgba(255, 255, 255, 0.8)',
-                borderRadius: '2px',
-                position: 'relative',
-                overflow: 'hidden'
-              }}>
-                <div className="arrow-shaft-shimmer" />
-              </div>
+              {/* SVG HIGH-DETAIL GOLDEN METALLIC ARCHERY ARROW (matching user image) */}
+              <svg width="420" height="60" viewBox="0 0 420 60" style={{ filter: 'drop-shadow(0 10px 25px rgba(217, 119, 6, 0.6))' }}>
+                <defs>
+                  {/* Metallic Gold Gradient */}
+                  <linearGradient id="goldMetal" x1="0%" y1="0%" x2="100%" y2="100%">
+                    <stop offset="0%" stopColor="#fef08a" />
+                    <stop offset="35%" stopColor="#f59e0b" />
+                    <stop offset="70%" stopColor="#d97706" />
+                    <stop offset="100%" stopColor="#78350f" />
+                  </linearGradient>
 
-              {/* Razor Steel Chrome Bullet Arrowhead Tip */}
-              <div style={{
-                width: '24px',
-                height: '10px',
-                background: 'linear-gradient(135deg, #ffffff 0%, #cbd5e1 40%, #64748b 80%, #334155 100%)',
-                clipPath: 'polygon(0 15%, 100% 50%, 0 85%)',
-                boxShadow: '0 0 20px rgba(255, 255, 255, 0.9), 0 0 8px #fbbf24'
-              }} />
+                  {/* High Specular Highlight Gradient */}
+                  <linearGradient id="goldHighlight" x1="0%" y1="0%" x2="0%" y2="100%">
+                    <stop offset="0%" stopColor="#ffffff" stopOpacity="0.9" />
+                    <stop offset="40%" stopColor="#fbbf24" stopOpacity="0.8" />
+                    <stop offset="100%" stopColor="#b45309" stopOpacity="1" />
+                  </linearGradient>
+
+                  {/* Cross-Hatch Grip Pattern */}
+                  <pattern id="crossHatch" width="8" height="8" patternUnits="userSpaceOnUse">
+                    <line x1="0" y1="0" x2="8" y2="8" stroke="#78350f" strokeWidth="1.2" />
+                    <line x1="8" y1="0" x2="0" y2="8" stroke="#78350f" strokeWidth="1.2" />
+                  </pattern>
+                </defs>
+
+                {/* 1. Feather Fletchings at Tail (Golden Detailed Vanes) */}
+                <g transform="translate(10, 10)">
+                  {/* Upper Feather Vane */}
+                  <path 
+                    d="M 0 20 C 15 2, 70 0, 100 20 L 95 24 C 65 10, 15 12, 0 20 Z" 
+                    fill="url(#goldHighlight)" 
+                    stroke="#78350f" 
+                    strokeWidth="1"
+                  />
+                  {/* Feather Ribs Texture */}
+                  {[...Array(12)].map((_, i) => (
+                    <line 
+                      key={i} 
+                      x1={10 + i * 7} 
+                      y1={18 - (i > 6 ? 12 - i : i * 1.5)} 
+                      x2={14 + i * 7} 
+                      y2={20} 
+                      stroke="#92400e" 
+                      strokeWidth="1" 
+                    />
+                  ))}
+
+                  {/* Lower Feather Vane */}
+                  <path 
+                    d="M 0 20 C 15 38, 70 40, 100 20 L 95 16 C 65 30, 15 28, 0 20 Z" 
+                    fill="url(#goldHighlight)" 
+                    stroke="#78350f" 
+                    strokeWidth="1"
+                  />
+                  {/* Lower Feather Ribs Texture */}
+                  {[...Array(12)].map((_, i) => (
+                    <line 
+                      key={i} 
+                      x1={10 + i * 7} 
+                      y1={22 + (i > 6 ? 12 - i : i * 1.5)} 
+                      x2={14 + i * 7} 
+                      y2={20} 
+                      stroke="#92400e" 
+                      strokeWidth="1" 
+                    />
+                  ))}
+                </g>
+
+                {/* 2. Main Solid Golden Shaft */}
+                <rect x="90" y="27" width="240" height="6" rx="3" fill="url(#goldHighlight)" stroke="#78350f" strokeWidth="0.8" />
+                <line x1="90" y1="29" x2="330" y2="29" stroke="#ffffff" strokeWidth="1" strokeOpacity="0.8" />
+
+                {/* 3. Decorative Metallic Collar with Cross-Hatch Ornamentation */}
+                <g transform="translate(180, 22)">
+                  <rect x="0" y="0" width="35" height="16" rx="3" fill="url(#goldMetal)" stroke="#78350f" strokeWidth="1" />
+                  <rect x="2" y="2" width="31" height="12" fill="url(#crossHatch)" opacity="0.8" />
+                  <line x1="0" y1="0" x2="0" y2="16" stroke="#fef08a" strokeWidth="2" />
+                  <line x1="35" y1="0" x2="35" y2="16" stroke="#fef08a" strokeWidth="2" />
+                </g>
+
+                {/* 4. Collar Neck Rings near Arrowhead */}
+                <g transform="translate(325, 23)">
+                  <rect x="0" y="0" width="4" height="14" rx="1" fill="#fde047" stroke="#78350f" strokeWidth="0.8" />
+                  <rect x="6" y="0" width="4" height="14" rx="1" fill="#fde047" stroke="#78350f" strokeWidth="0.8" />
+                  <rect x="12" y="0" width="4" height="14" rx="1" fill="#fde047" stroke="#78350f" strokeWidth="0.8" />
+                </g>
+
+                {/* 5. Broadhead Arrowhead Spear Tip (Pointing Right) */}
+                <g transform="translate(345, 10)">
+                  <path 
+                    d="M 0 20 L 20 0 L 65 20 L 20 40 Z" 
+                    fill="url(#goldHighlight)" 
+                    stroke="#78350f" 
+                    strokeWidth="1.5"
+                  />
+                  {/* Arrowhead Center Ridge Line */}
+                  <line x1="0" y1="20" x2="65" y2="20" stroke="#ffffff" strokeWidth="1.5" />
+                  {/* Arrowhead Bevel Side Highlights */}
+                  <path d="M 20 0 L 65 20 L 20 20 Z" fill="rgba(255, 255, 255, 0.25)" />
+                </g>
+              </svg>
 
             </div>
 
@@ -299,7 +366,7 @@ export default function CinematicIntro({ onComplete }) {
 
       </div>
 
-      {/* Keyframes for Metallic Arrow Entrance & Shimmer */}
+      {/* Keyframes for Electric Arrow Flight from Left & Electric Shock Pulse */}
       <style>{`
         @keyframes textFadeInOut {
           0% { opacity: 0; transform: translateY(12px) scale(0.96); }
@@ -312,14 +379,14 @@ export default function CinematicIntro({ onComplete }) {
           animation: textFadeInOut 2.7s cubic-bezier(0.4, 0, 0.2, 1) forwards;
         }
 
-        @keyframes metallicArrowEntrance {
+        @keyframes electricArrowFlyLeft {
           0% {
             opacity: 0;
-            transform: translateX(-240px) scale(0.8);
+            transform: translateX(-120vw) scale(0.8);
           }
           70% {
             opacity: 1;
-            transform: translateX(15px) scale(1.05);
+            transform: translateX(18px) scale(1.06);
           }
           100% {
             opacity: 1;
@@ -327,20 +394,20 @@ export default function CinematicIntro({ onComplete }) {
           }
         }
 
-        .metallic-arrow-entrance {
-          animation: metallicArrowEntrance 0.85s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+        .electric-arrow-fly-left {
+          animation: electricArrowFlyLeft 0.8s cubic-bezier(0.16, 1, 0.3, 1) forwards;
         }
 
-        @keyframes arrowShaftShimmer {
-          0% { transform: translateX(-100%); }
-          100% { transform: translateX(100%); }
+        @keyframes electricPulse {
+          0% { opacity: 0.6; transform: scale(0.98); }
+          100% { opacity: 1; transform: scale(1.04); }
         }
 
-        .arrow-shaft-shimmer {
+        .electric-arcs-overlay {
           position: absolute;
           inset: 0;
-          background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.9), transparent);
-          animation: arrowShaftShimmer 2s infinite ease-in-out;
+          pointer-events: none;
+          animation: electricPulse 0.12s infinite alternate;
         }
 
         @keyframes fullRevealFadeIn {
