@@ -2,9 +2,9 @@ import React, { useState, useEffect } from 'react';
 import { ArrowRight } from 'lucide-react';
 
 export default function CinematicIntro({ onComplete }) {
-  // Phase 1: Text 'WELCOME' (0.6s - 3.2s)
-  // Phase 2: Text 'to the official portal of' (3.4s - 6.0s)
-  // Phase 3: Text 'THE HERITAGE ARCHERY' + Dark Slate Metallic Bodkin Arrow Hypersonic Flight (6.2s - end)
+  // Phase 1: Text 'WELCOME' (0.4s - 2.8s)
+  // Phase 2: Text 'to the official portal of' (3.0s - 5.4s)
+  // Phase 3: Simple Arrow + 'THE HERITAGE ARCHERY' + 'College Team Portal' + ENTER PORTAL (5.6s - end)
   const [phase, setPhase] = useState(1);
 
   useEffect(() => {
@@ -16,13 +16,12 @@ export default function CinematicIntro({ onComplete }) {
     // Phase 2: 'to the official portal of'
     const t2 = setTimeout(() => {
       setPhase(2);
-    }, 3200);
+    }, 2800);
 
-    // Phase 3: 'THE HERITAGE ARCHERY' + Dark Slate Hypersonic Arrow
+    // Phase 3: Title + Simple Arrow
     const t3 = setTimeout(() => {
       setPhase(3);
-      playSonicBoomSound();
-    }, 6000);
+    }, 5400);
 
     return () => {
       clearTimeout(t1);
@@ -30,30 +29,6 @@ export default function CinematicIntro({ onComplete }) {
       clearTimeout(t3);
     };
   }, []);
-
-  // Web Audio Synthesizer for Hypersonic Sonic Snap / Friction Swoosh
-  const playSonicBoomSound = () => {
-    try {
-      const AudioCtx = window.AudioContext || window.webkitAudioContext;
-      if (!AudioCtx) return;
-      const ctx = new AudioCtx();
-
-      // Atmospheric friction hypersonic swoosh
-      const osc = ctx.createOscillator();
-      const gain = ctx.createGain();
-      osc.type = 'sawtooth';
-      osc.frequency.setValueAtTime(600, ctx.currentTime);
-      osc.frequency.exponentialRampToValueAtTime(80, ctx.currentTime + 0.3);
-      gain.gain.setValueAtTime(0.5, ctx.currentTime);
-      gain.gain.exponentialRampToValueAtTime(0.001, ctx.currentTime + 0.3);
-      osc.connect(gain);
-      gain.connect(ctx.destination);
-      osc.start();
-      osc.stop(ctx.currentTime + 0.3);
-    } catch (e) {
-      // Ignore if muted
-    }
-  };
 
   return (
     <div style={{
@@ -104,17 +79,16 @@ export default function CinematicIntro({ onComplete }) {
         Skip Intro ✕
       </button>
 
-      {/* Ambient Hypersonic Friction Glow */}
+      {/* Ambient Radial Glow */}
       <div style={{
         position: 'absolute',
-        width: '750px',
-        height: '750px',
+        width: '700px',
+        height: '700px',
         background: phase === 3
-          ? 'radial-gradient(circle, rgba(56, 189, 248, 0.18) 0%, rgba(251, 191, 36, 0.15) 35%, transparent 70%)'
-          : 'radial-gradient(circle, rgba(5, 150, 105, 0.12) 0%, rgba(217, 119, 6, 0.08) 45%, transparent 70%)',
+          ? 'radial-gradient(circle, rgba(5, 150, 105, 0.15) 0%, rgba(217, 119, 6, 0.12) 40%, transparent 70%)'
+          : 'radial-gradient(circle, rgba(5, 150, 105, 0.1) 0%, rgba(217, 119, 6, 0.06) 45%, transparent 70%)',
         borderRadius: '50%',
         filter: 'blur(70px)',
-        transition: 'all 0.8s ease',
         pointerEvents: 'none'
       }} />
 
@@ -123,7 +97,7 @@ export default function CinematicIntro({ onComplete }) {
         position: 'relative',
         width: '100%',
         maxWidth: '750px',
-        minHeight: '380px',
+        minHeight: '360px',
         display: 'flex',
         flexDirection: 'column',
         alignItems: 'center',
@@ -133,7 +107,7 @@ export default function CinematicIntro({ onComplete }) {
 
         {/* Phase 1: WELCOME */}
         {phase === 1 && (
-          <div className="intro-text-fade">
+          <div>
             <h1 style={{
               fontSize: '3.6rem',
               fontWeight: 900,
@@ -152,7 +126,7 @@ export default function CinematicIntro({ onComplete }) {
 
         {/* Phase 2: to the official portal of */}
         {phase === 2 && (
-          <div className="intro-text-fade">
+          <div>
             <p style={{
               fontSize: '2rem',
               fontWeight: 500,
@@ -167,42 +141,16 @@ export default function CinematicIntro({ onComplete }) {
           </div>
         )}
 
-        {/* Phase 3: THE HERITAGE ARCHERY + HYPERSONIC ESCAPE-VELOCITY DARK SLATE ARROW */}
+        {/* Phase 3: SIMPLE ARROW + THE HERITAGE ARCHERY */}
         {phase === 3 && (
-          <div className="intro-full-reveal" style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '20px', zIndex: 20 }}>
+          <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '20px', zIndex: 20 }}>
             
-            {/* HYPERSONIC ESCAPE-VELOCITY SLATE ARROW CONTAINER */}
-            <div className="hypersonic-arrow-fly-in" style={{ position: 'relative', width: '440px', height: '70px', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
-              
-              {/* Atmospheric Plasma Friction Heat Streak (Escape Velocity Trail) */}
-              <div style={{
-                position: 'absolute',
-                left: '-80px',
-                width: '320px',
-                height: '6px',
-                background: 'linear-gradient(90deg, transparent, rgba(56, 189, 248, 0.9), rgba(251, 191, 36, 0.95), #ffffff)',
-                borderRadius: '9999px',
-                filter: 'blur(4px)',
-                opacity: 0.9
-              }} />
-
-              {/* Mach Mach-Speed Lines */}
-              <div style={{
-                position: 'absolute',
-                left: '-60px',
-                width: '280px',
-                height: '24px',
-                background: 'repeating-linear-gradient(90deg, transparent, transparent 15px, rgba(255,255,255,0.4) 15px, rgba(255,255,255,0.4) 25px)',
-                filter: 'blur(2px)',
-                opacity: 0.7,
-                animation: 'machLinesPulse 0.1s infinite alternate'
-              }} />
-
-              {/* SVG DARK SLATE FORGED IRON BODKIN ARROW (Matching user image) */}
-              <svg width="440" height="70" viewBox="0 0 440 70" style={{ filter: 'drop-shadow(0 12px 30px rgba(0, 0, 0, 0.9))' }}>
+            {/* SIMPLE DARK SLATE FORGED BODKIN ARROW (STATIC - NO ANIMATIONS) */}
+            <div style={{ position: 'relative', width: '420px', height: '60px', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+              <svg width="420" height="60" viewBox="0 0 440 70" style={{ filter: 'drop-shadow(0 10px 25px rgba(0, 0, 0, 0.8))' }}>
                 <defs>
                   {/* Dark Slate Forged Iron Gradient */}
-                  <linearGradient id="slateMetal" x1="0%" y1="0%" x2="100%" y2="100%">
+                  <linearGradient id="simpleSlateMetal" x1="0%" y1="0%" x2="100%" y2="100%">
                     <stop offset="0%" stopColor="#475569" />
                     <stop offset="35%" stopColor="#334155" />
                     <stop offset="70%" stopColor="#1e293b" />
@@ -210,21 +158,18 @@ export default function CinematicIntro({ onComplete }) {
                   </linearGradient>
 
                   {/* Steel Highlight Edge */}
-                  <linearGradient id="slateEdge" x1="0%" y1="0%" x2="0%" y2="100%">
+                  <linearGradient id="simpleSlateEdge" x1="0%" y1="0%" x2="0%" y2="100%">
                     <stop offset="0%" stopColor="#cbd5e1" stopOpacity="0.9" />
                     <stop offset="50%" stopColor="#475569" stopOpacity="0.8" />
                     <stop offset="100%" stopColor="#0f172a" stopOpacity="1" />
                   </linearGradient>
                 </defs>
 
-                {/* 1. Angular Dark Feather Fletchings at Tail (Matching user image) */}
+                {/* 1. Angular Dark Feather Fletchings at Tail */}
                 <g transform="translate(10, 10)">
-                  {/* Upper Dark Vane */}
-                  <polygon points="0,25 90,0 80,25" fill="url(#slateMetal)" stroke="#64748b" strokeWidth="1" />
-                  {/* Lower Dark Vane */}
-                  <polygon points="0,25 90,50 80,25" fill="url(#slateMetal)" stroke="#64748b" strokeWidth="1" />
+                  <polygon points="0,25 90,0 80,25" fill="url(#simpleSlateMetal)" stroke="#64748b" strokeWidth="1" />
+                  <polygon points="0,25 90,50 80,25" fill="url(#simpleSlateMetal)" stroke="#64748b" strokeWidth="1" />
                   
-                  {/* Feather Ribs Texture */}
                   {[...Array(14)].map((_, i) => (
                     <line 
                       key={i} 
@@ -251,29 +196,24 @@ export default function CinematicIntro({ onComplete }) {
                   ))}
                 </g>
 
-                {/* 2. Double-Ridged Collar Rings near Fletching */}
+                {/* 2. Double-Ridged Collar Rings */}
                 <g transform="translate(100, 27)">
-                  <rect x="0" y="0" width="6" height="16" rx="2" fill="url(#slateEdge)" stroke="#0f172a" strokeWidth="0.8" />
-                  <rect x="9" y="0" width="6" height="16" rx="2" fill="url(#slateEdge)" stroke="#0f172a" strokeWidth="0.8" />
-                  <rect x="18" y="0" width="6" height="16" rx="2" fill="url(#slateEdge)" stroke="#0f172a" strokeWidth="0.8" />
+                  <rect x="0" y="0" width="6" height="16" rx="2" fill="url(#simpleSlateEdge)" stroke="#0f172a" strokeWidth="0.8" />
+                  <rect x="9" y="0" width="6" height="16" rx="2" fill="url(#simpleSlateEdge)" stroke="#0f172a" strokeWidth="0.8" />
+                  <rect x="18" y="0" width="6" height="16" rx="2" fill="url(#simpleSlateEdge)" stroke="#0f172a" strokeWidth="0.8" />
                 </g>
 
                 {/* 3. Dark Matte Forged Iron Shaft */}
-                <rect x="130" y="32" width="230" height="6" rx="2" fill="url(#slateMetal)" stroke="#0f172a" strokeWidth="1" />
+                <rect x="130" y="32" width="230" height="6" rx="2" fill="url(#simpleSlateMetal)" stroke="#0f172a" strokeWidth="1" />
                 <line x1="130" y1="33" x2="360" y2="33" stroke="#cbd5e1" strokeWidth="1" opacity="0.6" />
 
                 {/* 4. Conical Steel Armor-Piercing Bodkin Point */}
                 <g transform="translate(360, 28)">
-                  <path d="M 0 0 L 22 7 L 0 14 Z" fill="url(#slateEdge)" stroke="#0f172a" strokeWidth="1" />
-                  {/* Conical Bodkin Tip */}
-                  <polygon points="22,2 50,7 22,12" fill="url(#slateEdge)" stroke="#ffffff" strokeWidth="0.8" />
+                  <path d="M 0 0 L 22 7 L 0 14 Z" fill="url(#simpleSlateEdge)" stroke="#0f172a" strokeWidth="1" />
+                  <polygon points="22,2 50,7 22,12" fill="url(#simpleSlateEdge)" stroke="#ffffff" strokeWidth="0.8" />
                   <line x1="22" y1="7" x2="50" y2="7" stroke="#ffffff" strokeWidth="1" />
                 </g>
-
-                {/* Hypersonic Plasma Friction Cone at Arrowhead Tip */}
-                <path d="M 410 35 L 435 20 L 440 35 L 435 50 Z" fill="rgba(56, 189, 248, 0.8)" filter="blur(2px)" />
               </svg>
-
             </div>
 
             {/* Title: THE HERITAGE ARCHERY */}
@@ -345,53 +285,6 @@ export default function CinematicIntro({ onComplete }) {
         )}
 
       </div>
-
-      {/* CSS Keyframes for Hypersonic Flight & Deceleration */}
-      <style>{`
-        @keyframes textFadeInOut {
-          0% { opacity: 0; transform: translateY(12px) scale(0.96); }
-          25% { opacity: 1; transform: translateY(0px) scale(1); }
-          75% { opacity: 1; transform: translateY(0px) scale(1); }
-          100% { opacity: 0; transform: translateY(-12px) scale(1.02); }
-        }
-
-        .intro-text-fade {
-          animation: textFadeInOut 2.7s cubic-bezier(0.4, 0, 0.2, 1) forwards;
-        }
-
-        @keyframes hypersonicArrowFlyIn {
-          0% {
-            opacity: 0;
-            transform: translateX(-150vw) scale(0.7);
-          }
-          75% {
-            opacity: 1;
-            transform: translateX(20px) scale(1.05);
-          }
-          100% {
-            opacity: 1;
-            transform: translateX(0px) scale(1);
-          }
-        }
-
-        .hypersonic-arrow-fly-in {
-          animation: hypersonicArrowFlyIn 0.65s cubic-bezier(0.12, 1, 0.25, 1) forwards;
-        }
-
-        @keyframes machLinesPulse {
-          0% { opacity: 0.4; }
-          100% { opacity: 0.95; }
-        }
-
-        @keyframes fullRevealFadeIn {
-          0% { opacity: 0; transform: translateY(24px) scale(0.96); }
-          100% { opacity: 1; transform: translateY(0) scale(1); }
-        }
-
-        .intro-full-reveal {
-          animation: fullRevealFadeIn 0.65s cubic-bezier(0.16, 1, 0.3, 1) forwards;
-        }
-      `}</style>
 
     </div>
   );
