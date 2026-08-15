@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { ArrowRight } from 'lucide-react';
+import HeritageLogo from './HeritageLogo';
 
 export default function CinematicIntro({ onComplete }) {
   // Phase 1: Text 'WELCOME' (0.4s - 2.8s) with Fade In & Fade Out
@@ -18,7 +19,7 @@ export default function CinematicIntro({ onComplete }) {
       setPhase(2);
     }, 2900);
 
-    // Phase 3: Title + Perfect Logo
+    // Phase 3: Title + Official Logo
     const t3 = setTimeout(() => {
       setPhase(3);
     }, 5400);
@@ -145,69 +146,8 @@ export default function CinematicIntro({ onComplete }) {
         {phase === 3 && (
           <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '16px', zIndex: 20 }}>
             
-            {/* PERFECT HIGH-PRECISION 3D GOLDEN ARCHER LOGO */}
-            <div style={{ position: 'relative', width: '190px', height: '190px', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
-              <svg width="190" height="190" viewBox="0 0 200 200" style={{ filter: 'drop-shadow(0 12px 35px rgba(251, 191, 36, 0.55))' }}>
-                <defs>
-                  {/* 3D Sphere Head Radial Gradient */}
-                  <radialGradient id="logoHeadSphere" cx="35%" cy="30%" r="70%">
-                    <stop offset="0%" stopColor="#fef08a" />
-                    <stop offset="35%" stopColor="#f59e0b" />
-                    <stop offset="70%" stopColor="#d97706" />
-                    <stop offset="100%" stopColor="#78350f" />
-                  </radialGradient>
-
-                  {/* Metallic Golden Body Linear Gradient */}
-                  <linearGradient id="logoBodyGold" x1="0%" y1="0%" x2="100%" y2="100%">
-                    <stop offset="0%" stopColor="#fef08a" />
-                    <stop offset="30%" stopColor="#fbbf24" />
-                    <stop offset="70%" stopColor="#d97706" />
-                    <stop offset="100%" stopColor="#92400e" />
-                  </linearGradient>
-
-                  {/* Pure Crisp White Arrow & String Gradient */}
-                  <linearGradient id="whiteArrowGrad" x1="0%" y1="0%" x2="100%" y2="100%">
-                    <stop offset="0%" stopColor="#ffffff" />
-                    <stop offset="100%" stopColor="#e2e8f0" />
-                  </linearGradient>
-                </defs>
-
-                {/* Ambient Soft Gold Background Glow Circle */}
-                <circle cx="100" cy="100" r="85" fill="rgba(251, 191, 36, 0.08)" filter="blur(15px)" />
-
-                {/* 1. Glossy 3D Golden Spherical Head (Top Right) */}
-                <circle cx="130" cy="50" r="16" fill="url(#logoHeadSphere)" filter="drop-shadow(0 4px 8px rgba(0,0,0,0.4))" />
-
-                {/* 2. Golden Torso / Chest Shell */}
-                <path 
-                  d="M 115 65 C 130 68, 145 80, 140 92 C 125 90, 100 82, 90 75 C 95 68, 105 65, 115 65 Z" 
-                  fill="url(#logoBodyGold)" 
-                />
-
-                {/* 3. Golden Curved Recurve Bow Limb (Left Side Crescent) */}
-                <path 
-                  d="M 100 25 C 55 55, 50 120, 85 165 C 75 125, 70 65, 100 25 Z" 
-                  fill="url(#logoBodyGold)" 
-                />
-
-                {/* 4. White Taut Bowstring (Connecting Top Bow Tip to Bottom Bow Tip) */}
-                <line x1="100" y1="25" x2="85" y2="165" stroke="url(#whiteArrowGrad)" strokeWidth="3" strokeLinecap="round" />
-
-                {/* 5. White Arrow Resting on Bow (Pointing Top-Left) */}
-                <polygon points="50,60 66,50 64,68" fill="#ffffff" />
-                <line x1="58" y1="58" x2="135" y2="92" stroke="url(#whiteArrowGrad)" strokeWidth="3.5" strokeLinecap="round" />
-
-                {/* 6. Two Tapered Flowing Golden Legs (Lower Body) */}
-                <path 
-                  d="M 105 85 C 98 120, 92 155, 88 190 C 94 182, 104 140, 112 92 Z" 
-                  fill="url(#logoBodyGold)" 
-                />
-                <path 
-                  d="M 116 88 C 122 120, 130 155, 126 195 C 132 175, 136 130, 122 86 Z" 
-                  fill="url(#logoBodyGold)" 
-                />
-              </svg>
-            </div>
+            {/* HERITAGE LOGO COMPONENT */}
+            <HeritageLogo size={190} />
 
             {/* Title: THE HERITAGE ARCHERY */}
             <h1 className="metallic-text-shine" style={{

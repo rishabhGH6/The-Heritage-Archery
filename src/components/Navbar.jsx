@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import { Target, Award, Calendar, MessageSquare, Shield, User, MapPin, Camera, Wrench, LogIn, LogOut, ChevronDown, ChevronRight, UserPlus, Upload, HelpCircle, Key, CheckCircle2, Menu, X, Sparkles, Newspaper } from 'lucide-react';
 import { defaultArchers } from '../data/initialData';
+import HeritageLogo from './HeritageLogo';
 
 export default function Navbar({ activeTab, setActiveTab, currentUser, archers, pendingArchers = [], coach, onSwitchUser, onAddArcher, onRequestAddArcher, onUpdateArcher, onReplayIntro }) {
   const displayArchers = (archers && archers.length > 0) ? archers : defaultArchers;
@@ -207,7 +208,7 @@ export default function Navbar({ activeTab, setActiveTab, currentUser, archers, 
           <div style={{ display: 'flex', alignItems: 'center', gap: '12px', cursor: 'pointer' }} onClick={() => handleTabClick('home')}>
             <div style={{
               background: 'radial-gradient(circle at 50% 45%, #0f172a 0%, #060b13 100%)',
-              padding: '4px 8px',
+              padding: '2px 6px',
               borderRadius: '12px',
               border: '1px solid rgba(251, 191, 36, 0.3)',
               boxShadow: '0 4px 15px rgba(217, 119, 6, 0.35)',
@@ -215,30 +216,7 @@ export default function Navbar({ activeTab, setActiveTab, currentUser, archers, 
               alignItems: 'center',
               justifyContent: 'center'
             }}>
-              <svg width="36" height="36" viewBox="0 0 200 200">
-                <defs>
-                  <radialGradient id="navLogoHeadSphere" cx="35%" cy="30%" r="70%">
-                    <stop offset="0%" stopColor="#fef08a" />
-                    <stop offset="35%" stopColor="#f59e0b" />
-                    <stop offset="70%" stopColor="#d97706" />
-                    <stop offset="100%" stopColor="#78350f" />
-                  </radialGradient>
-                  <linearGradient id="navLogoBodyGold" x1="0%" y1="0%" x2="100%" y2="100%">
-                    <stop offset="0%" stopColor="#fef08a" />
-                    <stop offset="30%" stopColor="#fbbf24" />
-                    <stop offset="70%" stopColor="#d97706" />
-                    <stop offset="100%" stopColor="#92400e" />
-                  </linearGradient>
-                </defs>
-                <circle cx="130" cy="50" r="16" fill="url(#navLogoHeadSphere)" />
-                <path d="M 115 65 C 130 68, 145 80, 140 92 C 125 90, 100 82, 90 75 C 95 68, 105 65, 115 65 Z" fill="url(#navLogoBodyGold)" />
-                <path d="M 100 25 C 55 55, 50 120, 85 165 C 75 125, 70 65, 100 25 Z" fill="url(#navLogoBodyGold)" />
-                <line x1="100" y1="25" x2="85" y2="165" stroke="#ffffff" strokeWidth="3" strokeLinecap="round" />
-                <polygon points="50,60 66,50 64,68" fill="#ffffff" />
-                <line x1="58" y1="58" x2="135" y2="92" stroke="#ffffff" strokeWidth="3.5" strokeLinecap="round" />
-                <path d="M 105 85 C 98 120, 92 155, 88 190 C 94 182, 104 140, 112 92 Z" fill="url(#navLogoBodyGold)" />
-                <path d="M 116 88 C 122 120, 130 155, 126 195 C 132 175, 136 130, 122 86 Z" fill="url(#navLogoBodyGold)" />
-              </svg>
+              <HeritageLogo size={36} />
             </div>
             <div>
               <h1 style={{ fontSize: '1.25rem', fontWeight: 800, background: 'linear-gradient(90deg, #f8fafc, #fbbf24)', WebkitBackgroundClip: 'text', WebkitTextFillColor: 'transparent', lineHeight: 1.1 }}>
