@@ -1,11 +1,12 @@
 import React, { useState } from 'react';
-import { Target, Award, Calendar, MessageSquare, Shield, User, MapPin, Camera, Wrench, LogIn, LogOut, ChevronDown, UserPlus, Upload, HelpCircle, Key, CheckCircle2, Menu, X, Sparkles, Newspaper } from 'lucide-react';
+import { Target, Award, Calendar, MessageSquare, Shield, User, MapPin, Camera, Wrench, LogIn, LogOut, ChevronDown, ChevronRight, UserPlus, Upload, HelpCircle, Key, CheckCircle2, Menu, X, Sparkles, Newspaper } from 'lucide-react';
 import { defaultArchers } from '../data/initialData';
 
 export default function Navbar({ activeTab, setActiveTab, currentUser, archers, pendingArchers = [], coach, onSwitchUser, onAddArcher, onRequestAddArcher, onUpdateArcher }) {
   const displayArchers = (archers && archers.length > 0) ? archers : defaultArchers;
   const [showRoleModal, setShowRoleModal] = useState(false);
   const [sideMenuOpen, setSideMenuOpen] = useState(false);
+  const [practiceSubmenuOpen, setPracticeSubmenuOpen] = useState(true);
   const [selectedRole, setSelectedRole] = useState(currentUser.role); // 'coach', 'archer', 'new_archer', 'forgot_password'
   const [selectedArcherId, setSelectedArcherId] = useState(displayArchers[0]?.id || '');
   const [inputArcherName, setInputArcherName] = useState('');
@@ -378,17 +379,39 @@ export default function Navbar({ activeTab, setActiveTab, currentUser, archers, 
               <button className={`side-drawer-item ${activeTab === 'leaderboard' ? 'active' : ''}`} onClick={() => handleTabClick('leaderboard')}>
                 <Award size={18} /> Streak Leaderboard
               </button>
-              <button className={`side-drawer-item ${activeTab === 'scoring' ? 'active' : ''}`} onClick={() => handleTabClick('scoring')}>
-                <Target size={18} /> Interactive Scoring
-              </button>
-              <button className={`side-drawer-item ${activeTab === 'equipment' ? 'active' : ''}`} onClick={() => handleTabClick('equipment')}>
-                <Wrench size={18} /> Equipment Tuner
-              </button>
+
+              {/* Practice Now Expandable Parent Tab */}
+              <div>
+                <button 
+                  className={`side-drawer-item ${['scoring', 'equipment', 'venue'].includes(activeTab) ? 'active' : ''}`} 
+                  onClick={() => setPracticeSubmenuOpen(!practiceSubmenuOpen)}
+                  style={{ justifyContent: 'space-between' }}
+                >
+                  <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
+                    <Target size={18} color="#059669" />
+                    <span>Practice Now</span>
+                  </div>
+                  {practiceSubmenuOpen ? <ChevronDown size={16} color="#94a3b8" /> : <ChevronRight size={16} color="#94a3b8" />}
+                </button>
+
+                {/* Submenu containing the 3 clubbed options */}
+                {practiceSubmenuOpen && (
+                  <div className="side-drawer-submenu">
+                    <button className={`side-drawer-sub-item ${activeTab === 'scoring' ? 'active' : ''}`} onClick={() => handleTabClick('scoring')}>
+                      <Target size={16} /> Interactive Scoring
+                    </button>
+                    <button className={`side-drawer-sub-item ${activeTab === 'equipment' ? 'active' : ''}`} onClick={() => handleTabClick('equipment')}>
+                      <Wrench size={16} /> Equipment Tuner
+                    </button>
+                    <button className={`side-drawer-sub-item ${activeTab === 'venue' ? 'active' : ''}`} onClick={() => handleTabClick('venue')}>
+                      <MapPin size={16} /> Practice Venue & Schedule
+                    </button>
+                  </div>
+                )}
+              </div>
+
               <button className={`side-drawer-item ${activeTab === 'archers' ? 'active' : ''}`} onClick={() => handleTabClick('archers')}>
                 <User size={18} /> Team Roster & Performance
-              </button>
-              <button className={`side-drawer-item ${activeTab === 'venue' ? 'active' : ''}`} onClick={() => handleTabClick('venue')}>
-                <MapPin size={18} /> Practice Venue & Schedule
               </button>
               <button className={`side-drawer-item ${activeTab === 'chat' ? 'active' : ''}`} onClick={() => handleTabClick('chat')}>
                 <MessageSquare size={18} /> Team Chat & Private DMs
