@@ -32,14 +32,17 @@ import {
 } from './data/supabaseSync';
 import { Target, Megaphone, Trophy, Shield, Heart } from 'lucide-react';
 
+import { registerServiceWorker } from './lib/pushNotifications';
+
 export default function App() {
   const [appData, setAppData] = useState(loadAppData());
   const [activeTab, setActiveTab] = useState('home');
   const [showIntro, setShowIntro] = useState(true);
   const [broadcastNotice, setBroadcastNotice] = useState(null);
 
-  // Load from Supabase on mount using instant cache-first strategy
+  // Load from Supabase on mount & register Push Service Worker
   useEffect(() => {
+    registerServiceWorker();
     fetchSupabaseData(appData).then(remoteData => {
       setAppData(prev => {
         const loadedArchers = (remoteData.archers && remoteData.archers.length > 0) ? remoteData.archers : (prev.archers && prev.archers.length > 0 ? prev.archers : defaultArchers);
