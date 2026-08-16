@@ -420,6 +420,7 @@ export default function App() {
             coach={appData.coach}
             chatMessages={appData.chatMessages}
             onSendMessage={handleSendMessage}
+            onSwitchUser={handleSwitchUser}
           />
         )}
 
