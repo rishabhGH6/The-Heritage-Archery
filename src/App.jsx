@@ -14,6 +14,7 @@ import AiArcheryCoach from './components/AiArcheryCoach';
 import ArcheryNews from './components/ArcheryNews';
 import AdminControl from './components/AdminControl';
 import CinematicIntro from './components/CinematicIntro';
+import StreakNotificationBanner from './components/StreakNotificationBanner';
 
 import { defaultData, loadAppData, saveAppData, defaultArchers, defaultStreaks, getPersistentSession, savePersistentSession } from './data/initialData';
 import {
@@ -35,6 +36,7 @@ export default function App() {
   const [appData, setAppData] = useState(loadAppData());
   const [activeTab, setActiveTab] = useState('home');
   const [showIntro, setShowIntro] = useState(true);
+  const [broadcastNotice, setBroadcastNotice] = useState(null);
 
   // Load from Supabase on mount using instant cache-first strategy
   useEffect(() => {
@@ -297,6 +299,13 @@ export default function App() {
 
   const userStreak = appData.streaks[appData.currentUser.id] || { count: 0, lastChecked: null };
 
+  const handleBroadcastStreakReminder = (msgText) => {
+    setBroadcastNotice({
+      message: msgText || "Archers, practice time! Log your scorecard or check in now to keep our team streak alive! 🔥",
+      timestamp: new Date().toLocaleTimeString()
+    });
+  };
+
   return (
     <div style={{ minHeight: '100vh', display: 'flex', flexDirection: 'column' }}>
       
@@ -321,6 +330,15 @@ export default function App() {
       {/* Main App Container with Smooth Entrance Transitions */}
       <main className="fade-in-up" key={activeTab} style={{ maxWidth: '1280px', width: '100%', margin: '0 auto', padding: '24px 20px', flex: 1 }}>
         
+        {/* GLOBAL STREAK NOTIFICATION BANNER (For All Users) */}
+        <StreakNotificationBanner
+          currentUser={appData.currentUser}
+          userStreak={userStreak}
+          onCheckInStreak={handleCheckInStreak}
+          broadcastNotice={broadcastNotice}
+          onCloseBroadcast={() => setBroadcastNotice(null)}
+        />
+
         {/* Render Tab Contents */}
         {activeTab === 'home' && (
           <div>
@@ -333,6 +351,7 @@ export default function App() {
               onCheckInStreak={handleCheckInStreak}
               userStreak={userStreak}
               onUpdateCoach={handleUpdateCoach}
+              onBroadcastStreakReminder={handleBroadcastStreakReminder}
             />
 
             {/* Quick Overview Section: Full Width Coach Announcements */}

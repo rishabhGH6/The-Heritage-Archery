@@ -2,7 +2,7 @@ import React, { useState } from 'react';
 import { Shield, Award, Edit3, Flame, MapPin, Calendar, ArrowRight, Quote, CheckCircle2, Upload, Trash2, Trophy, BarChart2, CheckSquare } from 'lucide-react';
 import confetti from 'canvas-confetti';
 
-export default function HeroCoach({ coach, venueSchedule, currentUser, archers = [], streaks = {}, onCheckInStreak, userStreak, onUpdateCoach }) {
+export default function HeroCoach({ coach, venueSchedule, currentUser, archers = [], streaks = {}, onCheckInStreak, userStreak, onUpdateCoach, onBroadcastStreakReminder }) {
   const [showEditModal, setShowEditModal] = useState(false);
   const [tagline, setTagline] = useState(coach.tagline);
   const [motivatingLines, setMotivatingLines] = useState(coach.motivatingLines);
@@ -235,18 +235,44 @@ export default function HeroCoach({ coach, venueSchedule, currentUser, archers =
             {/* Action Buttons */}
             <div style={{ display: 'flex', alignItems: 'center', gap: '12px', flexWrap: 'wrap' }}>
               {currentUser.role === 'coach' && (
-                <button 
-                  onClick={() => {
-                    setTagline(coach.tagline);
-                    setMotivatingLines(coach.motivatingLines);
-                    setPhotoUrl(coach.photo || '');
-                    setShowEditModal(true);
-                  }}
-                  className="btn-gold"
-                  style={{ width: '100%', maxWidth: '240px', justifyContent: 'center' }}
-                >
-                  <Edit3 size={16} /> Edit Profile & Photo
-                </button>
+                <>
+                  <button 
+                    onClick={() => {
+                      setTagline(coach.tagline);
+                      setMotivatingLines(coach.motivatingLines);
+                      setPhotoUrl(coach.photo || '');
+                      setShowEditModal(true);
+                    }}
+                    className="btn-gold"
+                    style={{ width: '100%', maxWidth: '220px', justifyContent: 'center' }}
+                  >
+                    <Edit3 size={16} /> Edit Profile & Photo
+                  </button>
+
+                  <button
+                    onClick={() => {
+                      if (onBroadcastStreakReminder) {
+                        onBroadcastStreakReminder("Archers, practice time! Check in your daily streak or log your scorecard to keep our team streak alive! 🔥");
+                        alert("📢 Streak Reminder Broadcasted to all team members!");
+                      }
+                    }}
+                    className="btn-gold"
+                    style={{
+                      background: 'linear-gradient(135deg, #d97706, #b45309)',
+                      border: '1px solid rgba(251, 191, 36, 0.5)',
+                      padding: '10px 18px',
+                      borderRadius: '12px',
+                      fontSize: '0.86rem',
+                      fontWeight: 700,
+                      cursor: 'pointer',
+                      display: 'flex',
+                      alignItems: 'center',
+                      gap: '8px'
+                    }}
+                  >
+                    📢 Send Team Streak Reminder
+                  </button>
+                </>
               )}
 
               {/* Daily Streak Check-in Button */}
