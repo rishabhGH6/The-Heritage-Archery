@@ -1,6 +1,5 @@
 import React from 'react';
 import { Award, Flame, CheckCircle2, Calendar, Trophy, Medal, Star } from 'lucide-react';
-import { resolveArcherPhoto } from '../data/photoStorage';
 
 export default function Leaderboard({ archers, streaks, currentUser, onCheckInStreak }) {
   // Map archers with their streak stats
@@ -137,7 +136,7 @@ export default function Leaderboard({ archers, streaks, currentUser, onCheckInSt
               <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: '14px' }}>
                 <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
                   <img 
-                    src={resolveArcherPhoto(archer)} 
+                    src={archer.photo} 
                     alt={archer.name}
                     style={{ width: '48px', height: '48px', borderRadius: '50%', objectFit: 'cover', border: `2px solid ${rankColor}` }}
                   />

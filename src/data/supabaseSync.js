@@ -1,5 +1,4 @@
 import { supabase } from '../lib/supabaseClient';
-import { resolveArcherPhoto } from './photoStorage';
 
 // Helper to safely parse JSON or return default
 const parseJson = (val, fallback) => {
@@ -14,12 +13,17 @@ const parseJson = (val, fallback) => {
 
 export const fetchSupabaseData = async (defaultData) => {
   try {
-    // 4.5-second timeout promise to eliminate 30s network hanging on cold starts
-    const timeoutPromise = new Promise((_, reject) =>
-      setTimeout(() => reject(new Error('Supabase request timeout')), 4500)
-    );
-
-    const dataFetchPromise = Promise.all([
+    const [
+      { data: archersData },
+      { data: coachData },
+      { data: streaksData },
+      { data: venueData },
+      { data: announcementsData },
+      { data: equipmentData },
+      { data: scoreLogsData },
+      { data: badgesData },
+      { data: chatData }
+    ] = await Promise.all([
       supabase.from('archers').select('*'),
       supabase.from('coach').select('*'),
       supabase.from('streaks').select('*'),
@@ -31,26 +35,12 @@ export const fetchSupabaseData = async (defaultData) => {
       supabase.from('chat_messages').select('*').order('created_at', { ascending: true })
     ]);
 
-    const [
-      { data: archersData },
-      { data: coachData },
-      { data: streaksData },
-      { data: venueData },
-      { data: announcementsData },
-      { data: equipmentData },
-      { data: scoreLogsData },
-      { data: badgesData },
-      { data: chatData }
-    ] = await Promise.race([dataFetchPromise, timeoutPromise]);
-
     const result = { ...defaultData };
 
-    const activeList = [];
-    const pendingList = [];
-    const existingNames = new Set();
-    const existingIds = new Set();
-
     if (archersData && archersData.length > 0) {
+      const activeList = [];
+      const pendingList = [];
+
       archersData.forEach(a => {
         const defaultA = defaultData.archers?.find(da => da.name.trim().toLowerCase() === a.name.trim().toLowerCase() || da.id === a.id);
         const fallbackPhoto = defaultA?.photo || "https://images.unsplash.com/photo-1534528741775-53994a69daeb?auto=format&fit=crop&w=400&q=80";
@@ -61,9 +51,9 @@ export const fetchSupabaseData = async (defaultData) => {
           name: a.name,
           password: a.password || 'archer',
           securityAnswer: a.security_answer || '',
-          photo: resolveArcherPhoto(a, defaultA?.photo || fallbackPhoto),
-          category: a.category || defaultA?.category || 'Junior Archer',
-          occupation: a.occupation || defaultA?.occupation || 'College Student',
+          photo: (a.photo && a.photo.trim().length > 5) ? a.photo : fallbackPhoto,
+          category: a.category || defaultA?.category || 'Junior',
+          occupation: a.occupation || defaultA?.occupation || 'Student',
           currentlyPracticing: a.currently_practicing || 'Yes',
           dob: a.dob || defaultA?.dob || '',
           aim: a.aim || defaultA?.aim || '',
@@ -74,30 +64,18 @@ export const fetchSupabaseData = async (defaultData) => {
           requestDate: a.created_at ? new Date(a.created_at).toLocaleDateString() : new Date().toLocaleDateString()
         };
 
-        if (a.name) existingNames.add(a.name.trim().toLowerCase());
-        if (a.id) existingIds.add(a.id);
-
         if (a.status === 'pending') {
           pendingList.push(archerObj);
         } else {
           activeList.push(archerObj);
         }
       });
-    }
 
-    // Always merge default archers if not present in remote database to guarantee 100% data visibility
-    (defaultData.archers || []).forEach(da => {
-      const isNamePresent = da.name && existingNames.has(da.name.trim().toLowerCase());
-      const isIdPresent = da.id && existingIds.has(da.id);
-      if (!isNamePresent && !isIdPresent) {
-        activeList.push(da);
-        // Background sync missing default archer to Supabase
-        syncSaveArcher(da).catch(() => {});
+      if (activeList.length > 0) {
+        result.archers = activeList;
       }
-    });
-
-    result.archers = activeList.length > 0 ? activeList : defaultData.archers;
-    result.pendingArchers = pendingList;
+      result.pendingArchers = pendingList;
+    }
 
     if (coachData && coachData.length > 0) {
       const c = coachData[0];

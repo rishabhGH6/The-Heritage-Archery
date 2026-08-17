@@ -33,7 +33,6 @@ import {
 import { Target, Megaphone, Trophy, Shield, Heart } from 'lucide-react';
 
 import { registerServiceWorker } from './lib/pushNotifications';
-import { saveCustomArcherPhoto } from './data/photoStorage';
 
 export default function App() {
   const [appData, setAppData] = useState(loadAppData());
@@ -44,14 +43,10 @@ export default function App() {
   // Load from Supabase on mount & register Push Service Worker
   useEffect(() => {
     registerServiceWorker();
-
-    // Verify 5-day persistent session token on app load/refresh
-    const persistentUser = getPersistentSession();
-
     fetchSupabaseData(appData).then(remoteData => {
       setAppData(prev => {
         const loadedArchers = (remoteData.archers && remoteData.archers.length > 0) ? remoteData.archers : (prev.archers && prev.archers.length > 0 ? prev.archers : defaultArchers);
-        let activeUser = persistentUser;
+        let activeUser = (prev.currentUser && prev.currentUser.id !== 'guest') ? prev.currentUser : { id: 'guest', role: 'guest', name: 'Guest' };
 
         if (activeUser && activeUser.role === 'archer') {
           const matchedArcher = loadedArchers.find(a => 
@@ -65,13 +60,7 @@ export default function App() {
               id: matchedArcher.id,
               name: matchedArcher.name
             };
-            savePersistentSession(activeUser); // Re-save / refresh active session token
-          } else {
-            activeUser = { id: 'guest', role: 'guest', name: 'Guest' };
-            savePersistentSession(activeUser); // Clear storage on invalid archer profile
           }
-        } else if (activeUser && activeUser.role === 'coach') {
-          savePersistentSession(activeUser); // Re-save / refresh active coach session token
         }
 
         return {
@@ -133,11 +122,6 @@ export default function App() {
   };
 
   const handleUpdateArcher = (updatedArcher) => {
-    if (updatedArcher.photo && updatedArcher.photo.trim().length > 10) {
-      if (updatedArcher.id) saveCustomArcherPhoto(updatedArcher.id, updatedArcher.photo);
-      if (updatedArcher.altId) saveCustomArcherPhoto(updatedArcher.altId, updatedArcher.photo);
-      if (updatedArcher.name) saveCustomArcherPhoto(updatedArcher.name.trim().toLowerCase(), updatedArcher.photo);
-    }
     setAppData(prev => ({
       ...prev,
       archers: prev.archers.map(a => a.id === updatedArcher.id ? updatedArcher : a)

@@ -1,9 +1,9 @@
 import React, { useState, useRef, useEffect } from 'react';
-import { MessageSquare, Send, User, Shield, Lock, Hash, Search, Smile, Sparkles, LogIn, Circle } from 'lucide-react';
-import { resolveArcherPhoto } from '../data/photoStorage';
+import { MessageSquare, Send, User, Shield, Lock, Hash, Search, Smile, Sparkles, LogIn, Circle, ArrowLeft, Users } from 'lucide-react';
 
 export default function ChatHub({ currentUser, archers = [], coach, chatMessages = [], onSendMessage, onSwitchUser }) {
   const [activeChannel, setActiveChannel] = useState('general'); // 'general', 'coach', or archerId
+  const [mobileView, setMobileView] = useState('chat'); // 'contacts' or 'chat' on small screens
   const [inputText, setInputText] = useState('');
   const [searchQuery, setSearchQuery] = useState('');
   const [reactionsMap, setReactionsMap] = useState({}); // { [msgId]: { [emoji]: count } }
@@ -12,7 +12,7 @@ export default function ChatHub({ currentUser, archers = [], coach, chatMessages
   // Auto-scroll to bottom of chat on new message or channel change
   useEffect(() => {
     messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
-  }, [chatMessages, activeChannel]);
+  }, [chatMessages, activeChannel, mobileView]);
 
   const handleSend = (e) => {
     e.preventDefault();
@@ -38,6 +38,11 @@ export default function ChatHub({ currentUser, archers = [], coach, chatMessages
     });
 
     setInputText('');
+  };
+
+  const handleSelectChannel = (channelId) => {
+    setActiveChannel(channelId);
+    setMobileView('chat'); // Automatically switch to chat view on mobile when contact is selected
   };
 
   const handleAddReaction = (msgId, emoji) => {
@@ -85,7 +90,7 @@ export default function ChatHub({ currentUser, archers = [], coach, chatMessages
     <div style={{ marginBottom: '32px' }}>
       
       {/* Header */}
-      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '20px', flexWrap: 'wrap', gap: '12px' }}>
+      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '16px', flexWrap: 'wrap', gap: '12px' }}>
         <div>
           <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
             <span className="badge-emerald">
@@ -103,7 +108,7 @@ export default function ChatHub({ currentUser, archers = [], coach, chatMessages
 
       {/* GUEST MODE LOCKED BANNER (If Guest, do NOT show any messages or message input options!) */}
       {isGuest ? (
-        <div className="glass-card" style={{ padding: '48px 24px', textAlign: 'center', display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '18px', maxWidth: '640px', margin: '20px auto' }}>
+        <div className="glass-card" style={{ padding: '48px 20px', textAlign: 'center', display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '18px', maxWidth: '640px', margin: '20px auto' }}>
           <div style={{
             width: '64px',
             height: '64px',
@@ -147,131 +152,135 @@ export default function ChatHub({ currentUser, archers = [], coach, chatMessages
         </div>
       ) : (
         /* MAIN CHAT CONTAINER (For Logged In Archer / Coach) */
-        <div className="glass-card chat-responsive-grid" style={{ display: 'grid', gridTemplateColumns: '290px 1fr', height: '620px', overflow: 'hidden' }}>
+        <div className="glass-card chat-responsive-container" style={{ display: 'flex', flexDirection: 'column', overflow: 'hidden' }}>
           
-          {/* LEFT SIDEBAR: Players List & Channels (Scrollable Up and Down) */}
-          <div style={{ borderRight: '1px solid var(--border-glass)', background: 'rgba(15, 23, 42, 0.85)', padding: '16px', display: 'flex', flexDirection: 'column', gap: '14px', height: '100%', overflow: 'hidden' }}>
+          {/* Mobile Top View Switcher (Only visible on small mobile screens <= 850px) */}
+          <div className="chat-mobile-nav-bar" style={{ padding: '8px 12px', background: 'rgba(15,23,42,0.95)', borderBottom: '1px solid var(--border-glass)', gap: '8px' }}>
+            <button
+              onClick={() => setMobileView('contacts')}
+              style={{
+                flex: 1,
+                padding: '8px',
+                borderRadius: '8px',
+                border: mobileView === 'contacts' ? '1px solid #34d399' : '1px solid transparent',
+                background: mobileView === 'contacts' ? 'rgba(5, 150, 105, 0.2)' : 'rgba(255,255,255,0.03)',
+                color: mobileView === 'contacts' ? '#34d399' : '#cbd5e1',
+                fontSize: '0.82rem',
+                fontWeight: 700,
+                cursor: 'pointer',
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'center',
+                gap: '6px'
+              }}
+            >
+              <Users size={15} /> Contacts & Players ({filteredArchers.length + 1})
+            </button>
+
+            <button
+              onClick={() => setMobileView('chat')}
+              style={{
+                flex: 1,
+                padding: '8px',
+                borderRadius: '8px',
+                border: mobileView === 'chat' ? '1px solid #fbbf24' : '1px solid transparent',
+                background: mobileView === 'chat' ? 'rgba(217, 119, 6, 0.2)' : 'rgba(255,255,255,0.03)',
+                color: mobileView === 'chat' ? '#fbbf24' : '#cbd5e1',
+                fontSize: '0.82rem',
+                fontWeight: 700,
+                cursor: 'pointer',
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'center',
+                gap: '6px'
+              }}
+            >
+              <MessageSquare size={15} /> Active Chat ({activeContactName})
+            </button>
+          </div>
+
+          <div className="chat-main-grid" style={{ display: 'grid', gridTemplateColumns: '290px 1fr', height: '600px', overflow: 'hidden' }}>
             
-            {/* Search Input for Players */}
-            <div style={{ position: 'relative' }}>
-              <Search size={15} color="#94a3b8" style={{ position: 'absolute', left: '12px', top: '50%', transform: 'translateY(-50%)' }} />
-              <input
-                type="text"
-                className="input-glass"
-                placeholder="Search players & coach..."
-                value={searchQuery}
-                onChange={(e) => setSearchQuery(e.target.value)}
-                style={{ paddingLeft: '36px', fontSize: '0.82rem', height: '38px', borderRadius: '10px' }}
-              />
-            </div>
-
-            {/* Group Channel Tab */}
-            <div>
-              <span style={{ fontSize: '0.7rem', color: '#94a3b8', fontWeight: 800, textTransform: 'uppercase', letterSpacing: '0.08em' }}>
-                Team Channel
-              </span>
-              <div style={{ marginTop: '6px' }}>
-                <button
-                  onClick={() => setActiveChannel('general')}
-                  style={{
-                    width: '100%',
-                    padding: '10px 12px',
-                    borderRadius: '10px',
-                    border: activeChannel === 'general' ? '1px solid #34d399' : '1px solid transparent',
-                    background: activeChannel === 'general' ? 'rgba(5, 150, 105, 0.2)' : 'rgba(255,255,255,0.03)',
-                    color: activeChannel === 'general' ? '#34d399' : '#cbd5e1',
-                    fontWeight: 700,
-                    fontSize: '0.86rem',
-                    display: 'flex',
-                    alignItems: 'center',
-                    justifyContent: 'space-between',
-                    cursor: 'pointer',
-                    transition: 'all 0.2s ease'
-                  }}
-                >
-                  <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
-                    <Hash size={16} /> #general-team
-                  </div>
-                  <span style={{ fontSize: '0.7rem', background: 'rgba(5, 150, 105, 0.3)', color: '#34d399', padding: '2px 8px', borderRadius: '9999px', fontWeight: 800 }}>
-                    Team
-                  </span>
-                </button>
-              </div>
-            </div>
-
-            {/* SCROLLABLE PLAYERS LIST (Scrolls Up & Down smoothly) */}
-            <div style={{ flex: 1, overflowY: 'auto', paddingRight: '4px', display: 'flex', flexDirection: 'column', gap: '14px' }}>
+            {/* LEFT SIDEBAR: Players List & Channels (Scrollable Up and Down) */}
+            <div 
+              className={`chat-sidebar-pane ${mobileView === 'contacts' ? 'mobile-pane-active' : 'mobile-pane-hidden'}`}
+              style={{ borderRight: '1px solid var(--border-glass)', background: 'rgba(15, 23, 42, 0.85)', padding: '16px', display: 'flex', flexDirection: 'column', gap: '14px', height: '100%', overflow: 'hidden' }}
+            >
               
+              {/* Search Input for Players */}
+              <div style={{ position: 'relative' }}>
+                <Search size={15} color="#94a3b8" style={{ position: 'absolute', left: '12px', top: '50%', transform: 'translateY(-50%)' }} />
+                <input
+                  type="text"
+                  className="input-glass"
+                  placeholder="Search players & coach..."
+                  value={searchQuery}
+                  onChange={(e) => setSearchQuery(e.target.value)}
+                  style={{ paddingLeft: '36px', fontSize: '0.82rem', height: '38px', borderRadius: '10px' }}
+                />
+              </div>
+
+              {/* Group Channel Tab */}
               <div>
-                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '6px' }}>
-                  <span style={{ fontSize: '0.7rem', color: '#94a3b8', fontWeight: 800, textTransform: 'uppercase', letterSpacing: '0.08em' }}>
-                    Direct Messages ({filteredArchers.length + (currentUser.role !== 'coach' ? 1 : 0)})
-                  </span>
-                  <span style={{ fontSize: '0.68rem', color: '#34d399', fontWeight: 600, display: 'flex', alignItems: 'center', gap: '4px' }}>
-                    <Circle size={7} fill="#34d399" color="#34d399" /> Online
-                  </span>
+                <span style={{ fontSize: '0.7rem', color: '#94a3b8', fontWeight: 800, textTransform: 'uppercase', letterSpacing: '0.08em' }}>
+                  Team Channel
+                </span>
+                <div style={{ marginTop: '6px' }}>
+                  <button
+                    onClick={() => handleSelectChannel('general')}
+                    style={{
+                      width: '100%',
+                      padding: '10px 12px',
+                      borderRadius: '10px',
+                      border: activeChannel === 'general' ? '1px solid #34d399' : '1px solid transparent',
+                      background: activeChannel === 'general' ? 'rgba(5, 150, 105, 0.2)' : 'rgba(255,255,255,0.03)',
+                      color: activeChannel === 'general' ? '#34d399' : '#cbd5e1',
+                      fontWeight: 700,
+                      fontSize: '0.86rem',
+                      display: 'flex',
+                      alignItems: 'center',
+                      justifyContent: 'space-between',
+                      cursor: 'pointer',
+                      transition: 'all 0.2s ease'
+                    }}
+                  >
+                    <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+                      <Hash size={16} /> #general-team
+                    </div>
+                    <span style={{ fontSize: '0.7rem', background: 'rgba(5, 150, 105, 0.3)', color: '#34d399', padding: '2px 8px', borderRadius: '9999px', fontWeight: 800 }}>
+                      Team
+                    </span>
+                  </button>
                 </div>
+              </div>
 
-                <div style={{ display: 'flex', flexDirection: 'column', gap: '6px' }}>
-                  
-                  {/* Coach Jayanta (Pinned at Top of DM List) */}
-                  {currentUser.role !== 'coach' && (!searchQuery || 'coach jayanta'.includes(searchQuery.toLowerCase())) && (
-                    <button
-                      onClick={() => setActiveChannel('coach')}
-                      style={{
-                        width: '100%',
-                        padding: '10px 12px',
-                        borderRadius: '10px',
-                        border: activeChannel === 'coach' ? '1px solid #fbbf24' : '1px solid rgba(255,255,255,0.04)',
-                        background: activeChannel === 'coach' ? 'rgba(217, 119, 6, 0.22)' : 'rgba(255,255,255,0.02)',
-                        color: activeChannel === 'coach' ? '#fbbf24' : '#f8fafc',
-                        fontWeight: 700,
-                        fontSize: '0.85rem',
-                        display: 'flex',
-                        alignItems: 'center',
-                        justifyContent: 'space-between',
-                        cursor: 'pointer',
-                        textAlign: 'left',
-                        transition: 'all 0.2s ease'
-                      }}
-                    >
-                      <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
-                        <div style={{ position: 'relative' }}>
-                          <img 
-                            src={coach?.photo || "https://images.unsplash.com/photo-1534528741775-53994a69daeb?auto=format&fit=crop&w=400&q=80"} 
-                            alt="Coach" 
-                            style={{ width: '32px', height: '32px', borderRadius: '50%', objectFit: 'cover', border: '1.5px solid #d97706' }} 
-                          />
-                          <span style={{ position: 'absolute', bottom: 0, right: 0, width: '8px', height: '8px', borderRadius: '50%', background: '#10b981', border: '1.5px solid #0f172a' }} />
-                        </div>
-                        <div>
-                          <div style={{ fontSize: '0.82rem', fontWeight: 800, color: '#f8fafc', lineHeight: 1.1 }}>
-                            Coach Jayanta
-                          </div>
-                          <span style={{ fontSize: '0.68rem', color: '#fbbf24', fontWeight: 600 }}>
-                            Head Coach 🛡️
-                          </span>
-                        </div>
-                      </div>
-                    </button>
-                  )}
+              {/* SCROLLABLE PLAYERS LIST (Scrolls Up & Down smoothly) */}
+              <div style={{ flex: 1, overflowY: 'auto', paddingRight: '4px', display: 'flex', flexDirection: 'column', gap: '14px' }}>
+                
+                <div>
+                  <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '6px' }}>
+                    <span style={{ fontSize: '0.7rem', color: '#94a3b8', fontWeight: 800, textTransform: 'uppercase', letterSpacing: '0.08em' }}>
+                      Direct Messages ({filteredArchers.length + (currentUser.role !== 'coach' ? 1 : 0)})
+                    </span>
+                    <span style={{ fontSize: '0.68rem', color: '#34d399', fontWeight: 600, display: 'flex', alignItems: 'center', gap: '4px' }}>
+                      <Circle size={7} fill="#34d399" color="#34d399" /> Online
+                    </span>
+                  </div>
 
-                  {/* Archer DM List */}
-                  {filteredArchers.filter(a => a.id !== currentUser.id).map(a => {
-                    const isSelected = activeChannel === a.id;
-
-                    return (
+                  <div style={{ display: 'flex', flexDirection: 'column', gap: '6px' }}>
+                    
+                    {/* Coach Jayanta (Pinned at Top of DM List) */}
+                    {currentUser.role !== 'coach' && (!searchQuery || 'coach jayanta'.includes(searchQuery.toLowerCase())) && (
                       <button
-                        key={a.id}
-                        onClick={() => setActiveChannel(a.id)}
+                        onClick={() => handleSelectChannel('coach')}
                         style={{
                           width: '100%',
                           padding: '10px 12px',
                           borderRadius: '10px',
-                          border: isSelected ? '1px solid #34d399' : '1px solid rgba(255,255,255,0.04)',
-                          background: isSelected ? 'rgba(5, 150, 105, 0.18)' : 'rgba(255,255,255,0.02)',
-                          color: isSelected ? '#34d399' : '#cbd5e1',
-                          fontWeight: isSelected ? 700 : 500,
+                          border: activeChannel === 'coach' ? '1px solid #fbbf24' : '1px solid rgba(255,255,255,0.04)',
+                          background: activeChannel === 'coach' ? 'rgba(217, 119, 6, 0.22)' : 'rgba(255,255,255,0.02)',
+                          color: activeChannel === 'coach' ? '#fbbf24' : '#f8fafc',
+                          fontWeight: 700,
                           fontSize: '0.85rem',
                           display: 'flex',
                           alignItems: 'center',
@@ -284,193 +293,267 @@ export default function ChatHub({ currentUser, archers = [], coach, chatMessages
                         <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
                           <div style={{ position: 'relative' }}>
                             <img 
-                              src={resolveArcherPhoto(a)} 
-                              alt={a.name} 
-                              style={{ width: '30px', height: '30px', borderRadius: '50%', objectFit: 'cover', border: '1.5px solid #059669' }} 
+                              src={coach?.photo || "https://images.unsplash.com/photo-1534528741775-53994a69daeb?auto=format&fit=crop&w=400&q=80"} 
+                              alt="Coach" 
+                              style={{ width: '32px', height: '32px', borderRadius: '50%', objectFit: 'cover', border: '1.5px solid #d97706' }} 
                             />
                             <span style={{ position: 'absolute', bottom: 0, right: 0, width: '8px', height: '8px', borderRadius: '50%', background: '#10b981', border: '1.5px solid #0f172a' }} />
                           </div>
                           <div>
-                            <div style={{ fontSize: '0.82rem', fontWeight: 700, color: '#f8fafc', lineHeight: 1.1 }}>
-                              {a.name}
+                            <div style={{ fontSize: '0.82rem', fontWeight: 800, color: '#f8fafc', lineHeight: 1.1 }}>
+                              Coach Jayanta
                             </div>
-                            <span style={{ fontSize: '0.68rem', color: '#94a3b8' }}>
-                              {a.category || 'Archer'}
+                            <span style={{ fontSize: '0.68rem', color: '#fbbf24', fontWeight: 600 }}>
+                              Head Coach 🛡️
                             </span>
                           </div>
                         </div>
                       </button>
-                    );
-                  })}
+                    )}
 
-                  {filteredArchers.length === 0 && (
-                    <div style={{ textAlign: 'center', padding: '20px 10px', color: '#64748b', fontSize: '0.8rem' }}>
-                      No players found.
-                    </div>
-                  )}
+                    {/* Archer DM List */}
+                    {filteredArchers.filter(a => a.id !== currentUser.id).map(a => {
+                      const isSelected = activeChannel === a.id;
 
-                </div>
-              </div>
+                      return (
+                        <button
+                          key={a.id}
+                          onClick={() => handleSelectChannel(a.id)}
+                          style={{
+                            width: '100%',
+                            padding: '10px 12px',
+                            borderRadius: '10px',
+                            border: isSelected ? '1px solid #34d399' : '1px solid rgba(255,255,255,0.04)',
+                            background: isSelected ? 'rgba(5, 150, 105, 0.18)' : 'rgba(255,255,255,0.02)',
+                            color: isSelected ? '#34d399' : '#cbd5e1',
+                            fontWeight: isSelected ? 700 : 500,
+                            fontSize: '0.85rem',
+                            display: 'flex',
+                            alignItems: 'center',
+                            justifyContent: 'space-between',
+                            cursor: 'pointer',
+                            textAlign: 'left',
+                            transition: 'all 0.2s ease'
+                          }}
+                        >
+                          <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
+                            <div style={{ position: 'relative' }}>
+                              <img 
+                                src={a.photo || "https://images.unsplash.com/photo-1534528741775-53994a69daeb?auto=format&fit=crop&w=400&q=80"} 
+                                alt={a.name} 
+                                style={{ width: '30px', height: '30px', borderRadius: '50%', objectFit: 'cover', border: '1.5px solid #059669' }} 
+                              />
+                              <span style={{ position: 'absolute', bottom: 0, right: 0, width: '8px', height: '8px', borderRadius: '50%', background: '#10b981', border: '1.5px solid #0f172a' }} />
+                            </div>
+                            <div>
+                              <div style={{ fontSize: '0.82rem', fontWeight: 700, color: '#f8fafc', lineHeight: 1.1 }}>
+                                {a.name}
+                              </div>
+                              <span style={{ fontSize: '0.68rem', color: '#94a3b8' }}>
+                                {a.category || 'Archer'}
+                              </span>
+                            </div>
+                          </div>
+                        </button>
+                      );
+                    })}
 
-            </div>
-
-          </div>
-
-          {/* RIGHT PANEL: CHAT HISTORY & PINNED ALWAYS-VISIBLE INPUT SLOT */}
-          <div style={{ display: 'flex', flexDirection: 'column', height: '100%', overflow: 'hidden' }}>
-            
-            {/* Header Bar */}
-            <div style={{ padding: '14px 20px', borderBottom: '1px solid var(--border-glass)', background: 'rgba(15,23,42,0.92)', display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: '12px', flexShrink: 0 }}>
-              <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
-                <MessageSquare size={18} color="#fbbf24" />
-                <div>
-                  <h3 style={{ fontSize: '1rem', fontWeight: 800, color: '#f8fafc', margin: 0, lineHeight: 1.2 }}>
-                    {activeContactName}
-                  </h3>
-                  <span style={{ fontSize: '0.72rem', color: '#94a3b8' }}>
-                    {activeChannel === 'general' ? 'Public Team Channel • All Members' : 'Encrypted Direct Message'}
-                  </span>
-                </div>
-              </div>
-
-              <span className="badge-gold" style={{ fontSize: '0.7rem' }}>
-                {activeChannel === 'general' ? 'Group Chat' : 'Private DM'}
-              </span>
-            </div>
-
-            {/* MESSAGES SCROLL FEED */}
-            <div style={{ flex: 1, padding: '20px', overflowY: 'auto', display: 'flex', flexDirection: 'column', gap: '14px' }}>
-              {filteredMessages.length === 0 ? (
-                <div style={{ textAlign: 'center', padding: '60px 20px', color: '#64748b', fontSize: '0.9rem' }}>
-                  <div style={{ fontSize: '2.2rem', marginBottom: '8px' }}>💬</div>
-                  No messages yet in <strong>{activeContactName}</strong>. Type a message below to start chatting!
-                </div>
-              ) : (
-                filteredMessages.map(msg => {
-                  const isSelf = msg.senderId === currentUser.id;
-                  const isCoachMsg = msg.senderRole === 'coach';
-                  const msgReactions = reactionsMap[msg.id] || {};
-
-                  return (
-                    <div
-                      key={msg.id}
-                      className="fade-in-up"
-                      style={{
-                        alignSelf: isSelf ? 'flex-end' : 'flex-start',
-                        maxWidth: '75%',
-                        display: 'flex',
-                        flexDirection: 'column',
-                        alignItems: isSelf ? 'flex-end' : 'flex-start'
-                      }}
-                    >
-                      <div style={{
-                        background: isSelf 
-                          ? 'linear-gradient(135deg, #059669, #047857)' 
-                          : isCoachMsg 
-                            ? 'rgba(217, 119, 6, 0.22)' 
-                            : 'rgba(15, 23, 42, 0.9)',
-                        border: isSelf 
-                          ? '1px solid #34d399' 
-                          : isCoachMsg 
-                            ? '1px solid #fbbf24' 
-                            : '1px solid rgba(255, 255, 255, 0.1)',
-                        padding: '12px 16px',
-                        borderRadius: isSelf ? '18px 18px 2px 18px' : '18px 18px 18px 2px',
-                        boxShadow: '0 4px 20px rgba(0, 0, 0, 0.35)',
-                        position: 'relative'
-                      }}>
-                        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', gap: '14px', marginBottom: '4px' }}>
-                          <span style={{ fontSize: '0.78rem', fontWeight: 800, color: isCoachMsg ? '#fbbf24' : '#f8fafc' }}>
-                            {msg.senderName} {isCoachMsg && '🛡️ (Coach)'}
-                          </span>
-                          <span style={{ fontSize: '0.68rem', color: isSelf ? '#a7f3d0' : '#94a3b8' }}>
-                            {msg.timestamp}
-                          </span>
-                        </div>
-
-                        <p style={{ fontSize: '0.92rem', color: '#f8fafc', lineHeight: 1.45, margin: 0, wordBreak: 'break-word' }}>
-                          {msg.text}
-                        </p>
-
-                        {/* Interactive Quick Reactions Hover Bar */}
-                        <div style={{ marginTop: '8px', display: 'flex', alignItems: 'center', gap: '6px', flexWrap: 'wrap' }}>
-                          {['👍', '🎯', '🔥', '🏆', '❤️'].map(emoji => (
-                            <button
-                              key={emoji}
-                              onClick={() => handleAddReaction(msg.id, emoji)}
-                              style={{
-                                background: (msgReactions[emoji] || 0) > 0 ? 'rgba(251, 191, 36, 0.2)' : 'rgba(255,255,255,0.06)',
-                                border: (msgReactions[emoji] || 0) > 0 ? '1px solid rgba(251, 191, 36, 0.5)' : '1px solid rgba(255,255,255,0.1)',
-                                borderRadius: '9999px',
-                                padding: '2px 8px',
-                                fontSize: '0.75rem',
-                                color: '#f8fafc',
-                                cursor: 'pointer',
-                                transition: 'all 0.2s ease',
-                                display: 'flex',
-                                alignItems: 'center',
-                                gap: '4px'
-                              }}
-                            >
-                              <span>{emoji}</span>
-                              {(msgReactions[emoji] || 0) > 0 && (
-                                <span style={{ fontWeight: 800, color: '#fbbf24', fontSize: '0.7rem' }}>
-                                  {msgReactions[emoji]}
-                                </span>
-                              )}
-                            </button>
-                          ))}
-                        </div>
-
+                    {filteredArchers.length === 0 && (
+                      <div style={{ textAlign: 'center', padding: '20px 10px', color: '#64748b', fontSize: '0.8rem' }}>
+                        No players found.
                       </div>
-                    </div>
-                  );
-                })
-              )}
-              <div ref={messagesEndRef} />
+                    )}
+
+                  </div>
+                </div>
+
+              </div>
+
             </div>
 
-            {/* ALWAYS VISIBLE PINNED MESSAGE INPUT SLOT AT BOTTOM */}
-            <form 
-              onSubmit={handleSend} 
-              style={{ 
-                padding: '16px 20px', 
-                borderTop: '1px solid var(--border-glass)', 
-                background: 'rgba(15, 23, 42, 0.95)', 
-                backdropFilter: 'blur(12px)',
-                display: 'flex', 
-                gap: '12px',
-                flexShrink: 0,
-                position: 'sticky',
-                bottom: 0,
-                zIndex: 10
-              }}
+            {/* RIGHT PANEL: CHAT HISTORY & PINNED ALWAYS-VISIBLE INPUT SLOT */}
+            <div 
+              className={`chat-content-pane ${mobileView === 'chat' ? 'mobile-pane-active' : 'mobile-pane-hidden'}`}
+              style={{ display: 'flex', flexDirection: 'column', height: '100%', overflow: 'hidden' }}
             >
-              <input
-                type="text"
-                className="input-glass"
-                placeholder={`Message ${activeContactName}...`}
-                value={inputText}
-                onChange={(e) => setInputText(e.target.value)}
-                style={{ height: '46px', fontSize: '0.92rem', borderRadius: '12px' }}
-              />
-              <button 
-                type="submit" 
-                className="btn-emerald" 
+              
+              {/* Header Bar */}
+              <div style={{ padding: '12px 16px', borderBottom: '1px solid var(--border-glass)', background: 'rgba(15,23,42,0.92)', display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: '12px', flexShrink: 0 }}>
+                <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
+                  
+                  {/* Mobile Back Button to Player List */}
+                  <button 
+                    className="chat-mobile-back-btn"
+                    onClick={() => setMobileView('contacts')}
+                    style={{
+                      background: 'rgba(255,255,255,0.06)',
+                      border: '1px solid rgba(255,255,255,0.12)',
+                      color: '#cbd5e1',
+                      padding: '6px 10px',
+                      borderRadius: '8px',
+                      fontSize: '0.78rem',
+                      fontWeight: 700,
+                      cursor: 'pointer',
+                      display: 'flex',
+                      alignItems: 'center',
+                      gap: '4px'
+                    }}
+                  >
+                    <ArrowLeft size={14} /> Contacts
+                  </button>
+
+                  <MessageSquare size={18} color="#fbbf24" />
+                  <div>
+                    <h3 style={{ fontSize: '0.98rem', fontWeight: 800, color: '#f8fafc', margin: 0, lineHeight: 1.2 }}>
+                      {activeContactName}
+                    </h3>
+                    <span style={{ fontSize: '0.7rem', color: '#94a3b8' }}>
+                      {activeChannel === 'general' ? 'Public Team Channel' : 'Direct Message'}
+                    </span>
+                  </div>
+                </div>
+
+                <span className="badge-gold" style={{ fontSize: '0.68rem', padding: '3px 8px' }}>
+                  {activeChannel === 'general' ? 'Group Chat' : 'Private DM'}
+                </span>
+              </div>
+
+              {/* MESSAGES SCROLL FEED */}
+              <div style={{ flex: 1, padding: '16px', overflowY: 'auto', display: 'flex', flexDirection: 'column', gap: '12px' }}>
+                {filteredMessages.length === 0 ? (
+                  <div style={{ textAlign: 'center', padding: '50px 16px', color: '#64748b', fontSize: '0.88rem' }}>
+                    <div style={{ fontSize: '2rem', marginBottom: '8px' }}>💬</div>
+                    No messages yet in <strong>{activeContactName}</strong>. Type a message below to start chatting!
+                  </div>
+                ) : (
+                  filteredMessages.map(msg => {
+                    const isSelf = msg.senderId === currentUser.id;
+                    const isCoachMsg = msg.senderRole === 'coach';
+                    const msgReactions = reactionsMap[msg.id] || {};
+
+                    return (
+                      <div
+                        key={msg.id}
+                        className="fade-in-up"
+                        style={{
+                          alignSelf: isSelf ? 'flex-end' : 'flex-start',
+                          maxWidth: '85%',
+                          display: 'flex',
+                          flexDirection: 'column',
+                          alignItems: isSelf ? 'flex-end' : 'flex-start'
+                        }}
+                      >
+                        <div style={{
+                          background: isSelf 
+                            ? 'linear-gradient(135deg, #059669, #047857)' 
+                            : isCoachMsg 
+                              ? 'rgba(217, 119, 6, 0.22)' 
+                              : 'rgba(15, 23, 42, 0.9)',
+                          border: isSelf 
+                            ? '1px solid #34d399' 
+                            : isCoachMsg 
+                              ? '1px solid #fbbf24' 
+                              : '1px solid rgba(255, 255, 255, 0.1)',
+                          padding: '10px 14px',
+                          borderRadius: isSelf ? '16px 16px 2px 16px' : '16px 16px 16px 2px',
+                          boxShadow: '0 4px 18px rgba(0, 0, 0, 0.35)',
+                          position: 'relative'
+                        }}>
+                          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', gap: '12px', marginBottom: '4px' }}>
+                            <span style={{ fontSize: '0.76rem', fontWeight: 800, color: isCoachMsg ? '#fbbf24' : '#f8fafc' }}>
+                              {msg.senderName} {isCoachMsg && '🛡️ (Coach)'}
+                            </span>
+                            <span style={{ fontSize: '0.65rem', color: isSelf ? '#a7f3d0' : '#94a3b8' }}>
+                              {msg.timestamp}
+                            </span>
+                          </div>
+
+                          <p style={{ fontSize: '0.88rem', color: '#f8fafc', lineHeight: 1.4, margin: 0, wordBreak: 'break-word' }}>
+                            {msg.text}
+                          </p>
+
+                          {/* Interactive Quick Reactions Hover Bar */}
+                          <div style={{ marginTop: '6px', display: 'flex', alignItems: 'center', gap: '5px', flexWrap: 'wrap' }}>
+                            {['👍', '🎯', '🔥', '🏆', '❤️'].map(emoji => (
+                              <button
+                                key={emoji}
+                                onClick={() => handleAddReaction(msg.id, emoji)}
+                                style={{
+                                  background: (msgReactions[emoji] || 0) > 0 ? 'rgba(251, 191, 36, 0.2)' : 'rgba(255,255,255,0.06)',
+                                  border: (msgReactions[emoji] || 0) > 0 ? '1px solid rgba(251, 191, 36, 0.5)' : '1px solid rgba(255,255,255,0.1)',
+                                  borderRadius: '9999px',
+                                  padding: '2px 7px',
+                                  fontSize: '0.72rem',
+                                  color: '#f8fafc',
+                                  cursor: 'pointer',
+                                  transition: 'all 0.2s ease',
+                                  display: 'flex',
+                                  alignItems: 'center',
+                                  gap: '3px'
+                                }}
+                              >
+                                <span>{emoji}</span>
+                                {(msgReactions[emoji] || 0) > 0 && (
+                                  <span style={{ fontWeight: 800, color: '#fbbf24', fontSize: '0.68rem' }}>
+                                    {msgReactions[emoji]}
+                                  </span>
+                                )}
+                              </button>
+                            ))}
+                          </div>
+
+                        </div>
+                      </div>
+                    );
+                  })
+                )}
+                <div ref={messagesEndRef} />
+              </div>
+
+              {/* ALWAYS VISIBLE PINNED MESSAGE INPUT SLOT AT BOTTOM */}
+              <form 
+                onSubmit={handleSend} 
                 style={{ 
-                  padding: '0 26px', 
-                  height: '46px', 
-                  borderRadius: '12px', 
-                  fontWeight: 800,
-                  display: 'flex',
-                  alignItems: 'center',
+                  padding: '12px 14px', 
+                  borderTop: '1px solid var(--border-glass)', 
+                  background: 'rgba(15, 23, 42, 0.96)', 
+                  backdropFilter: 'blur(12px)',
+                  display: 'flex', 
                   gap: '8px',
-                  boxShadow: '0 4px 15px rgba(5, 150, 105, 0.4)'
+                  flexShrink: 0,
+                  position: 'sticky',
+                  bottom: 0,
+                  zIndex: 10
                 }}
               >
-                <Send size={18} /> Send
-              </button>
-            </form>
+                <input
+                  type="text"
+                  className="input-glass"
+                  placeholder={`Message ${activeContactName}...`}
+                  value={inputText}
+                  onChange={(e) => setInputText(e.target.value)}
+                  style={{ height: '44px', fontSize: '0.88rem', borderRadius: '10px' }}
+                />
+                <button 
+                  type="submit" 
+                  className="btn-emerald" 
+                  style={{ 
+                    padding: '0 20px', 
+                    height: '44px', 
+                    borderRadius: '10px', 
+                    fontWeight: 800,
+                    display: 'flex',
+                    alignItems: 'center',
+                    gap: '6px',
+                    boxShadow: '0 4px 15px rgba(5, 150, 105, 0.4)',
+                    flexShrink: 0
+                  }}
+                >
+                  <Send size={16} /> <span className="chat-send-btn-text">Send</span>
+                </button>
+              </form>
+
+            </div>
 
           </div>
 

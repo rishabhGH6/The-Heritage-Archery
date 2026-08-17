@@ -152,88 +152,39 @@ export const defaultData = {
   chatMessages: []
 };
 
-// Authentication & Session Persistence Constants
-export const AUTH_TOKEN_KEY = "heritage_archery_auth_token";
-export const AUTH_SESSION_KEY = "heritage_archery_user_session";
-export const FIVE_DAYS_MS = 5 * 24 * 60 * 60 * 1000; // 5 days in milliseconds
-
-/**
- * Requirement 1: Persistence on Login
- * Stores user auth token along with an expiration timestamp (5 days from login time) in localStorage
- */
-export const savePersistentSession = (userObj, token = null) => {
-  try {
-    if (!userObj || userObj.role === 'guest') {
-      clearPersistentSession();
-    } else {
-      const now = Date.now();
-      const expiresAt = now + FIVE_DAYS_MS;
-      const authToken = token || `ha_auth_token_${userObj.id}_${now}`;
-
-      const sessionPayload = {
-        token: authToken,
-        user: userObj,
-        loginTime: now,
-        expiresAt: expiresAt
-      };
-
-      localStorage.setItem(AUTH_TOKEN_KEY, authToken);
-      localStorage.setItem(AUTH_SESSION_KEY, JSON.stringify(sessionPayload));
-    }
-  } catch (e) {
-    console.warn("Failed to persist authentication session:", e);
-  }
-};
-
-/**
- * Requirement 2: Auto-Check on App Load / Page Refresh
- * Verifies if the token exists and is not expired (within 5 days from login).
- * - If valid: returns the stored logged-in user state.
- * - If expired or missing: clears storage and returns logged-out guest state.
- */
+// Load persistent session if less than 5 days old
 export const getPersistentSession = () => {
   try {
-    const token = localStorage.getItem(AUTH_TOKEN_KEY);
-    const savedSession = localStorage.getItem(AUTH_SESSION_KEY);
-
+    const savedSession = localStorage.getItem("heritage_archery_user_session");
     if (savedSession) {
       const parsed = JSON.parse(savedSession);
       const now = Date.now();
-
-      // Verify token exists and expiration timestamp has not passed (5-day validity check)
-      if (parsed && parsed.expiresAt && now < parsed.expiresAt && parsed.user && parsed.user.role !== 'guest') {
+      const FIVE_DAYS_MS = 5 * 24 * 60 * 60 * 1000;
+      if (parsed.timestamp && (now - parsed.timestamp < FIVE_DAYS_MS) && parsed.user) {
         return parsed.user;
       }
     }
-  } catch (e) {
-    console.error("Error checking authentication session state:", e);
-  }
-
-  // If expired or missing: clear storage and return logged-out guest state
-  clearPersistentSession();
+  } catch (e) {}
   return { id: "guest", role: "guest", name: "Guest" };
 };
 
-/**
- * Requirement 3: Logout Handler Helper
- * Explicitly removes stored authentication token and expiration timestamp from localStorage
- */
-export const clearPersistentSession = () => {
+export const savePersistentSession = (userObj) => {
   try {
-    localStorage.removeItem(AUTH_TOKEN_KEY);
-    localStorage.removeItem(AUTH_SESSION_KEY);
-  } catch (e) {
-    console.warn("Failed to clear authentication session:", e);
-  }
+    if (!userObj || userObj.role === 'guest') {
+      localStorage.removeItem("heritage_archery_user_session");
+    } else {
+      localStorage.setItem("heritage_archery_user_session", JSON.stringify({
+        user: userObj,
+        timestamp: Date.now()
+      }));
+    }
+  } catch (e) {}
 };
 
-/**
- * Helper function to load data from LocalStorage or initialize default on app load/refresh
- */
+// Helper function to load data from LocalStorage or initialize default
 export const loadAppData = () => {
-  const activeUser = getPersistentSession(); // Auto-Check 5-day token on app load/refresh!
+  const guestUser = { id: "guest", role: "guest", name: "Guest" };
   const saved = localStorage.getItem("heritage_archery_clean_v6") || localStorage.getItem("heritage_archery_clean_v5");
-
   if (saved) {
     try {
       const parsed = JSON.parse(saved);
@@ -241,7 +192,7 @@ export const loadAppData = () => {
         ...parsed,
         archers: (parsed.archers && parsed.archers.length > 0) ? parsed.archers : defaultArchers,
         streaks: (parsed.streaks && Object.keys(parsed.streaks).length > 0) ? parsed.streaks : defaultStreaks,
-        currentUser: activeUser
+        currentUser: guestUser
       };
     } catch (e) {
       console.error("Error loading saved archery data", e);
@@ -249,36 +200,25 @@ export const loadAppData = () => {
   }
   return {
     ...defaultData,
-    currentUser: activeUser
+    currentUser: guestUser
   };
 };
 
-import { saveCustomArcherPhoto, resolveArcherPhoto } from './photoStorage';
-
 export const saveAppData = (data) => {
   try {
-    // Save any custom archer profile photos to dedicated photoStorage
-    if (data.archers && Array.isArray(data.archers)) {
-      data.archers.forEach(a => {
-        if (a.photo && a.photo.trim().length > 10) {
-          if (a.id) saveCustomArcherPhoto(a.id, a.photo);
-          if (a.altId) saveCustomArcherPhoto(a.altId, a.photo);
-          if (a.name) saveCustomArcherPhoto(a.name.trim().toLowerCase(), a.photo);
-        }
-      });
-    }
-
     localStorage.setItem("heritage_archery_clean_v6", JSON.stringify(data));
   } catch (e) {
     try {
-      // Safe fallback if localStorage quota exceeded: preserve photos in photoStorage map
-      localStorage.setItem("heritage_archery_clean_v6", JSON.stringify({
+      // QuotaExceededError fallback: strip heavy base64 strings from photos array before saving
+      const lightweightData = {
         ...data,
         archers: (data.archers || []).map(a => ({
           ...a,
-          photo: resolveArcherPhoto(a)
+          photo: (a.photo && a.photo.startsWith('data:image')) ? (defaultArchers.find(da => da.name === a.name)?.photo || "") : a.photo,
+          photos: []
         }))
-      }));
+      };
+      localStorage.setItem("heritage_archery_clean_v6", JSON.stringify(lightweightData));
     } catch (err) {
       console.warn("Storage quota exceeded, continuing with memory state:", err);
     }
