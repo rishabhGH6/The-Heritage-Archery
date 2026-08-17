@@ -44,10 +44,12 @@ export const fetchSupabaseData = async (defaultData) => {
 
     const result = { ...defaultData };
 
-    if (archersData && archersData.length > 0) {
-      const activeList = [];
-      const pendingList = [];
+    const activeList = [];
+    const pendingList = [];
+    const existingNames = new Set();
+    const existingIds = new Set();
 
+    if (archersData && archersData.length > 0) {
       archersData.forEach(a => {
         const defaultA = defaultData.archers?.find(da => da.name.trim().toLowerCase() === a.name.trim().toLowerCase() || da.id === a.id);
         const fallbackPhoto = defaultA?.photo || "https://images.unsplash.com/photo-1534528741775-53994a69daeb?auto=format&fit=crop&w=400&q=80";
@@ -59,8 +61,8 @@ export const fetchSupabaseData = async (defaultData) => {
           password: a.password || 'archer',
           securityAnswer: a.security_answer || '',
           photo: (a.photo && a.photo.trim().length > 5) ? a.photo : fallbackPhoto,
-          category: a.category || defaultA?.category || 'Junior',
-          occupation: a.occupation || defaultA?.occupation || 'Student',
+          category: a.category || defaultA?.category || 'Junior Archer',
+          occupation: a.occupation || defaultA?.occupation || 'College Student',
           currentlyPracticing: a.currently_practicing || 'Yes',
           dob: a.dob || defaultA?.dob || '',
           aim: a.aim || defaultA?.aim || '',
@@ -71,18 +73,30 @@ export const fetchSupabaseData = async (defaultData) => {
           requestDate: a.created_at ? new Date(a.created_at).toLocaleDateString() : new Date().toLocaleDateString()
         };
 
+        if (a.name) existingNames.add(a.name.trim().toLowerCase());
+        if (a.id) existingIds.add(a.id);
+
         if (a.status === 'pending') {
           pendingList.push(archerObj);
         } else {
           activeList.push(archerObj);
         }
       });
-
-      if (activeList.length > 0) {
-        result.archers = activeList;
-      }
-      result.pendingArchers = pendingList;
     }
+
+    // Always merge default archers if not present in remote database to guarantee 100% data visibility
+    (defaultData.archers || []).forEach(da => {
+      const isNamePresent = da.name && existingNames.has(da.name.trim().toLowerCase());
+      const isIdPresent = da.id && existingIds.has(da.id);
+      if (!isNamePresent && !isIdPresent) {
+        activeList.push(da);
+        // Background sync missing default archer to Supabase
+        syncSaveArcher(da).catch(() => {});
+      }
+    });
+
+    result.archers = activeList.length > 0 ? activeList : defaultData.archers;
+    result.pendingArchers = pendingList;
 
     if (coachData && coachData.length > 0) {
       const c = coachData[0];
