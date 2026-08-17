@@ -282,12 +282,11 @@ h1, h2, h3, h4, h5, h6 {
 .side-drawer-overlay {
   position: fixed;
   inset: 0;
-  background: rgba(6, 11, 19, 0.75);
-  backdrop-filter: blur(8px);
+  background: rgba(6, 11, 19, 0.65);
   z-index: 99999;
   display: flex;
   justify-content: flex-start;
-  animation: fadeIn 0.25s ease-out;
+  animation: fadeIn 0.2s ease-out;
 }
 
 .side-drawer-container {
