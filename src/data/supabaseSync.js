@@ -13,17 +13,12 @@ const parseJson = (val, fallback) => {
 
 export const fetchSupabaseData = async (defaultData) => {
   try {
-    const [
-      { data: archersData },
-      { data: coachData },
-      { data: streaksData },
-      { data: venueData },
-      { data: announcementsData },
-      { data: equipmentData },
-      { data: scoreLogsData },
-      { data: badgesData },
-      { data: chatData }
-    ] = await Promise.all([
+    // 4.5-second timeout promise to eliminate 30s network hanging on cold starts
+    const timeoutPromise = new Promise((_, reject) =>
+      setTimeout(() => reject(new Error('Supabase request timeout')), 4500)
+    );
+
+    const dataFetchPromise = Promise.all([
       supabase.from('archers').select('*'),
       supabase.from('coach').select('*'),
       supabase.from('streaks').select('*'),
@@ -34,6 +29,18 @@ export const fetchSupabaseData = async (defaultData) => {
       supabase.from('badges').select('*').order('created_at', { ascending: false }),
       supabase.from('chat_messages').select('*').order('created_at', { ascending: true })
     ]);
+
+    const [
+      { data: archersData },
+      { data: coachData },
+      { data: streaksData },
+      { data: venueData },
+      { data: announcementsData },
+      { data: equipmentData },
+      { data: scoreLogsData },
+      { data: badgesData },
+      { data: chatData }
+    ] = await Promise.race([dataFetchPromise, timeoutPromise]);
 
     const result = { ...defaultData };
 
