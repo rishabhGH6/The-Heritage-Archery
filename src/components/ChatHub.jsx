@@ -1,5 +1,6 @@
 import React, { useState, useRef, useEffect } from 'react';
 import { MessageSquare, Send, User, Shield, Lock, Hash, Search, Smile, Sparkles, LogIn, Circle } from 'lucide-react';
+import { resolveArcherPhoto } from '../data/photoStorage';
 
 export default function ChatHub({ currentUser, archers = [], coach, chatMessages = [], onSendMessage, onSwitchUser }) {
   const [activeChannel, setActiveChannel] = useState('general'); // 'general', 'coach', or archerId
@@ -283,7 +284,7 @@ export default function ChatHub({ currentUser, archers = [], coach, chatMessages
                         <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
                           <div style={{ position: 'relative' }}>
                             <img 
-                              src={a.photo || "https://images.unsplash.com/photo-1534528741775-53994a69daeb?auto=format&fit=crop&w=400&q=80"} 
+                              src={resolveArcherPhoto(a)} 
                               alt={a.name} 
                               style={{ width: '30px', height: '30px', borderRadius: '50%', objectFit: 'cover', border: '1.5px solid #059669' }} 
                             />

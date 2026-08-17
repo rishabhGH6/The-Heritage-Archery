@@ -1,5 +1,6 @@
 import React, { useState } from 'react';
 import { User, Edit3, Lock, Plus, Trash2, Award, Calendar, Briefcase, Camera, Check, Shield, UserPlus, TrendingUp, BarChart2, FileText, ChevronRight } from 'lucide-react';
+import { resolveArcherPhoto } from '../data/photoStorage';
 
 export default function ArcherDirectory({ archers, currentUser, coach, onUpdateArcher, onAddArcher, scoreLogs = [] }) {
   const [selectedGraphArcher, setSelectedGraphArcher] = useState(null);
@@ -136,7 +137,7 @@ export default function ArcherDirectory({ archers, currentUser, coach, onUpdateA
                   <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: '16px' }}>
                     <div style={{ display: 'flex', alignItems: 'center', gap: '14px' }}>
                       <img 
-                        src={archer.photo || "https://images.unsplash.com/photo-1534528741775-53994a69daeb?auto=format&fit=crop&w=400&q=80"} 
+                        src={resolveArcherPhoto(archer)} 
                         alt={archer.name} 
                         style={{ width: '64px', height: '64px', borderRadius: '16px', objectFit: 'cover', border: '2px solid #059669' }}
                       />

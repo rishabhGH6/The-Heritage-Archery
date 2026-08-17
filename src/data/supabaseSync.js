@@ -1,4 +1,5 @@
 import { supabase } from '../lib/supabaseClient';
+import { resolveArcherPhoto } from './photoStorage';
 
 // Helper to safely parse JSON or return default
 const parseJson = (val, fallback) => {
@@ -60,7 +61,7 @@ export const fetchSupabaseData = async (defaultData) => {
           name: a.name,
           password: a.password || 'archer',
           securityAnswer: a.security_answer || '',
-          photo: (a.photo && a.photo.trim().length > 5) ? a.photo : fallbackPhoto,
+          photo: resolveArcherPhoto(a, defaultA?.photo || fallbackPhoto),
           category: a.category || defaultA?.category || 'Junior Archer',
           occupation: a.occupation || defaultA?.occupation || 'College Student',
           currentlyPracticing: a.currently_practicing || 'Yes',

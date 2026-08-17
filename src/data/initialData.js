@@ -253,21 +253,32 @@ export const loadAppData = () => {
   };
 };
 
+import { saveCustomArcherPhoto, resolveArcherPhoto } from './photoStorage';
+
 export const saveAppData = (data) => {
   try {
+    // Save any custom archer profile photos to dedicated photoStorage
+    if (data.archers && Array.isArray(data.archers)) {
+      data.archers.forEach(a => {
+        if (a.photo && a.photo.trim().length > 10) {
+          if (a.id) saveCustomArcherPhoto(a.id, a.photo);
+          if (a.altId) saveCustomArcherPhoto(a.altId, a.photo);
+          if (a.name) saveCustomArcherPhoto(a.name.trim().toLowerCase(), a.photo);
+        }
+      });
+    }
+
     localStorage.setItem("heritage_archery_clean_v6", JSON.stringify(data));
   } catch (e) {
     try {
-      // QuotaExceededError fallback: strip heavy base64 strings from photos array before saving
-      const lightweightData = {
+      // Safe fallback if localStorage quota exceeded: preserve photos in photoStorage map
+      localStorage.setItem("heritage_archery_clean_v6", JSON.stringify({
         ...data,
         archers: (data.archers || []).map(a => ({
           ...a,
-          photo: (a.photo && a.photo.startsWith('data:image')) ? (defaultArchers.find(da => da.name === a.name)?.photo || "") : a.photo,
-          photos: []
+          photo: resolveArcherPhoto(a)
         }))
-      };
-      localStorage.setItem("heritage_archery_clean_v6", JSON.stringify(lightweightData));
+      }));
     } catch (err) {
       console.warn("Storage quota exceeded, continuing with memory state:", err);
     }

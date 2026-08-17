@@ -33,6 +33,7 @@ import {
 import { Target, Megaphone, Trophy, Shield, Heart } from 'lucide-react';
 
 import { registerServiceWorker } from './lib/pushNotifications';
+import { saveCustomArcherPhoto } from './data/photoStorage';
 
 export default function App() {
   const [appData, setAppData] = useState(loadAppData());
@@ -132,6 +133,11 @@ export default function App() {
   };
 
   const handleUpdateArcher = (updatedArcher) => {
+    if (updatedArcher.photo && updatedArcher.photo.trim().length > 10) {
+      if (updatedArcher.id) saveCustomArcherPhoto(updatedArcher.id, updatedArcher.photo);
+      if (updatedArcher.altId) saveCustomArcherPhoto(updatedArcher.altId, updatedArcher.photo);
+      if (updatedArcher.name) saveCustomArcherPhoto(updatedArcher.name.trim().toLowerCase(), updatedArcher.photo);
+    }
     setAppData(prev => ({
       ...prev,
       archers: prev.archers.map(a => a.id === updatedArcher.id ? updatedArcher : a)
