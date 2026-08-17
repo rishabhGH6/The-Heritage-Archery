@@ -43,10 +43,14 @@ export default function App() {
   // Load from Supabase on mount & register Push Service Worker
   useEffect(() => {
     registerServiceWorker();
+
+    // Verify 5-day persistent session token on app load/refresh
+    const persistentUser = getPersistentSession();
+
     fetchSupabaseData(appData).then(remoteData => {
       setAppData(prev => {
         const loadedArchers = (remoteData.archers && remoteData.archers.length > 0) ? remoteData.archers : (prev.archers && prev.archers.length > 0 ? prev.archers : defaultArchers);
-        let activeUser = (prev.currentUser && prev.currentUser.id !== 'guest') ? prev.currentUser : { id: 'guest', role: 'guest', name: 'Guest' };
+        let activeUser = persistentUser;
 
         if (activeUser && activeUser.role === 'archer') {
           const matchedArcher = loadedArchers.find(a => 
@@ -60,7 +64,13 @@ export default function App() {
               id: matchedArcher.id,
               name: matchedArcher.name
             };
+            savePersistentSession(activeUser); // Re-save / refresh active session token
+          } else {
+            activeUser = { id: 'guest', role: 'guest', name: 'Guest' };
+            savePersistentSession(activeUser); // Clear storage on invalid archer profile
           }
+        } else if (activeUser && activeUser.role === 'coach') {
+          savePersistentSession(activeUser); // Re-save / refresh active coach session token
         }
 
         return {

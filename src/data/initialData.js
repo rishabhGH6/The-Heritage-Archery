@@ -152,39 +152,88 @@ export const defaultData = {
   chatMessages: []
 };
 
-// Load persistent session if less than 5 days old
+// Authentication & Session Persistence Constants
+export const AUTH_TOKEN_KEY = "heritage_archery_auth_token";
+export const AUTH_SESSION_KEY = "heritage_archery_user_session";
+export const FIVE_DAYS_MS = 5 * 24 * 60 * 60 * 1000; // 5 days in milliseconds
+
+/**
+ * Requirement 1: Persistence on Login
+ * Stores user auth token along with an expiration timestamp (5 days from login time) in localStorage
+ */
+export const savePersistentSession = (userObj, token = null) => {
+  try {
+    if (!userObj || userObj.role === 'guest') {
+      clearPersistentSession();
+    } else {
+      const now = Date.now();
+      const expiresAt = now + FIVE_DAYS_MS;
+      const authToken = token || `ha_auth_token_${userObj.id}_${now}`;
+
+      const sessionPayload = {
+        token: authToken,
+        user: userObj,
+        loginTime: now,
+        expiresAt: expiresAt
+      };
+
+      localStorage.setItem(AUTH_TOKEN_KEY, authToken);
+      localStorage.setItem(AUTH_SESSION_KEY, JSON.stringify(sessionPayload));
+    }
+  } catch (e) {
+    console.warn("Failed to persist authentication session:", e);
+  }
+};
+
+/**
+ * Requirement 2: Auto-Check on App Load / Page Refresh
+ * Verifies if the token exists and is not expired (within 5 days from login).
+ * - If valid: returns the stored logged-in user state.
+ * - If expired or missing: clears storage and returns logged-out guest state.
+ */
 export const getPersistentSession = () => {
   try {
-    const savedSession = localStorage.getItem("heritage_archery_user_session");
+    const token = localStorage.getItem(AUTH_TOKEN_KEY);
+    const savedSession = localStorage.getItem(AUTH_SESSION_KEY);
+
     if (savedSession) {
       const parsed = JSON.parse(savedSession);
       const now = Date.now();
-      const FIVE_DAYS_MS = 5 * 24 * 60 * 60 * 1000;
-      if (parsed.timestamp && (now - parsed.timestamp < FIVE_DAYS_MS) && parsed.user) {
+
+      // Verify token exists and expiration timestamp has not passed (5-day validity check)
+      if (parsed && parsed.expiresAt && now < parsed.expiresAt && parsed.user && parsed.user.role !== 'guest') {
         return parsed.user;
       }
     }
-  } catch (e) {}
+  } catch (e) {
+    console.error("Error checking authentication session state:", e);
+  }
+
+  // If expired or missing: clear storage and return logged-out guest state
+  clearPersistentSession();
   return { id: "guest", role: "guest", name: "Guest" };
 };
 
-export const savePersistentSession = (userObj) => {
+/**
+ * Requirement 3: Logout Handler Helper
+ * Explicitly removes stored authentication token and expiration timestamp from localStorage
+ */
+export const clearPersistentSession = () => {
   try {
-    if (!userObj || userObj.role === 'guest') {
-      localStorage.removeItem("heritage_archery_user_session");
-    } else {
-      localStorage.setItem("heritage_archery_user_session", JSON.stringify({
-        user: userObj,
-        timestamp: Date.now()
-      }));
-    }
-  } catch (e) {}
+    localStorage.removeItem(AUTH_TOKEN_KEY);
+    localStorage.removeItem(AUTH_SESSION_KEY);
+  } catch (e) {
+    console.warn("Failed to clear authentication session:", e);
+  }
 };
 
-// Helper function to load data from LocalStorage or initialize default
+/**
+ * Helper function to load data from LocalStorage or initialize default on app load/refresh
+ */
 export const loadAppData = () => {
-  const guestUser = { id: "guest", role: "guest", name: "Guest" };
+  const activeUser = getPersistentSession(); // Auto-Check 5-day token on app load/refresh!
   const saved = localStorage.getItem("heritage_archery_clean_v6") || localStorage.getItem("heritage_archery_clean_v5");
+
   if (saved) {
     try {
       const parsed = JSON.parse(saved);
@@ -192,7 +241,7 @@ export const loadAppData = () => {
         ...parsed,
         archers: (parsed.archers && parsed.archers.length > 0) ? parsed.archers : defaultArchers,
         streaks: (parsed.streaks && Object.keys(parsed.streaks).length > 0) ? parsed.streaks : defaultStreaks,
-        currentUser: guestUser
+        currentUser: activeUser
       };
     } catch (e) {
       console.error("Error loading saved archery data", e);
@@ -200,7 +249,7 @@ export const loadAppData = () => {
   }
   return {
     ...defaultData,
-    currentUser: guestUser
+    currentUser: activeUser
   };
 };
 
