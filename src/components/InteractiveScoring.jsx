@@ -233,20 +233,27 @@ export default function InteractiveScoring({ currentUser, archers = [], scoreLog
 
   // Save whole scorecard with round notes and session notes
   const handleSaveSession = () => {
+    const allArrows = roundsData.flatMap(r => r.arrows);
+    const grandTotal = getGrandTotal();
+
+    if (allArrows.length === 0) {
+      alert("Please score at least 1 arrow before saving!");
+      return;
+    }
+
     if (currentUser.role === 'guest') {
       alert("🔒 Guest Mode: Please log in or register your archer account to save scorecards!");
       return;
     }
-    const grandTotal = getGrandTotal();
-    const allArrows = roundsData.flatMap(r => r.arrows);
+
     const sessionGrouping = calculateGrouping(allArrows);
 
     const newLog = {
-      id: "score_" + Date.now(),
-      archerId: selectedArcherId,
-      archerName: selectedArcher?.name || "Archer",
+      id: "log_" + Date.now(),
+      archerId: selectedArcherId === 'coach' ? 'coach' : selectedArcherId,
+      archerName: (selectedArcherId === 'coach' ? 'Coach Jayanta' : archers.find(a => a.id === selectedArcherId)?.name) || currentUser.name,
       date: new Date().toISOString().split('T')[0],
-      distance,
+      distance: distance,
       rounds: roundsData.map((r, idx) => ({
         roundNumber: idx + 1,
         arrows: r.arrows,
@@ -271,26 +278,34 @@ export default function InteractiveScoring({ currentUser, archers = [], scoreLog
       // Ensure targetLog is a valid scorecard object and NOT a React Event
       const isValidLogObj = targetLog && typeof targetLog === 'object' && !('nativeEvent' in targetLog) && ('rounds' in targetLog || 'totalScore' in targetLog);
 
+      const activeRoundsMapped = (roundsData || []).map((r, idx) => {
+        const arrowList = r.arrows || [];
+        const roundSum = arrowList.reduce((s, a) => s + (a?.score || 0), 0);
+        return {
+          roundNumber: idx + 1,
+          arrows: arrowList,
+          total: roundSum,
+          note: (roundNotes && roundNotes[idx + 1]) || ""
+        };
+      });
+
+      const activeGrandTotal = activeRoundsMapped.reduce((sum, r) => sum + r.total, 0);
+
       // Determine log source (from modal targetLog OR active session state)
       const logToExport = isValidLogObj ? targetLog : {
         archerName: (selectedArcherId === 'coach' ? 'Coach Jayanta Chakraborty' : (archers.find(a => a.id === selectedArcherId) || currentUser)?.name) || "Archer",
-        distance: distance,
+        distance: distance || "70m",
         date: new Date().toISOString().split('T')[0],
-        rounds: roundsData.map((r, idx) => ({
-          roundNumber: idx + 1,
-          arrows: r.arrows || [],
-          total: getRoundTotal(r),
-          note: roundNotes[idx + 1] || ""
-        })),
-        totalScore: getGrandTotal(),
+        rounds: activeRoundsMapped,
+        totalScore: activeGrandTotal,
         sessionNotes: sessionNotes || "",
-        groupingAnalysis: calculateGrouping(roundsData.flatMap(r => r.arrows || []))
+        groupingAnalysis: calculateGrouping((roundsData || []).flatMap(r => r.arrows || []))
       };
 
       const archerName = logToExport.archerName || "Archer";
       const targetDistance = logToExport.distance || "70m";
       const dateStr = logToExport.date || new Date().toISOString().split('T')[0];
-      const grandTotal = logToExport.totalScore ?? 0;
+      const grandTotal = typeof logToExport.totalScore === 'number' ? logToExport.totalScore : (logToExport.rounds || []).reduce((sum, r) => sum + (r.total || 0), 0);
       
       const roundsList = logToExport.rounds || [];
       const allArrows = roundsList.flatMap(r => r.arrows || []);
@@ -352,7 +367,7 @@ export default function InteractiveScoring({ currentUser, archers = [], scoreLog
         const r = roundsList[idx] || { roundNumber: idx + 1, arrows: [], total: 0 };
         const rowY = startY + 26 + idx * 28;
         const arrowsArr = r.arrows || [];
-        const rTotal = r.total !== undefined ? r.total : arrowsArr.reduce((s, a) => s + (a?.score || 0), 0);
+        const rTotal = typeof r.total === 'number' ? r.total : arrowsArr.reduce((s, a) => s + (a?.score || 0), 0);
         runningSum += rTotal;
 
         // Alternate row background
@@ -408,7 +423,8 @@ export default function InteractiveScoring({ currentUser, archers = [], scoreLog
 
       // 6. Session Notes Box if present
       let currentY = summaryY + 60;
-      if (logToExport.sessionNotes) {
+      const notesText = logToExport.sessionNotes || logToExport.notes || logToExport.equipmentNotes;
+      if (notesText) {
         doc.setFillColor(241, 245, 249);
         doc.roundedRect(40, currentY, 515, 45, 6, 6, 'F');
         
@@ -419,7 +435,7 @@ export default function InteractiveScoring({ currentUser, archers = [], scoreLog
 
         doc.setFont('helvetica', 'normal');
         doc.setTextColor(15, 23, 42);
-        const splitText = doc.splitTextToSize(logToExport.sessionNotes, 495);
+        const splitText = doc.splitTextToSize(notesText, 495);
         doc.text(splitText, 50, currentY + 32);
 
         currentY += 55;
@@ -1138,17 +1154,20 @@ export default function InteractiveScoring({ currentUser, archers = [], scoreLog
               </table>
             </div>
 
-            {/* Session Notes */}
-            {selectedScorecardDetail.sessionNotes && (
-              <div style={{ background: 'rgba(15, 23, 42, 0.6)', padding: '12px 14px', borderRadius: '10px', border: '1px solid rgba(251, 191, 36, 0.2)', marginBottom: '16px' }}>
-                <div style={{ fontSize: '0.75rem', fontWeight: 700, color: '#fbbf24', textTransform: 'uppercase', marginBottom: '4px' }}>
-                  📝 Session Takeaways & Equipment Notes:
+            {/* Overall Session Takeaways & Equipment Notes */}
+            {(() => {
+              const overallNoteText = selectedScorecardDetail.sessionNotes || selectedScorecardDetail.notes || selectedScorecardDetail.equipmentNotes || selectedScorecardDetail.takeaways;
+              return (
+                <div style={{ background: 'rgba(15, 23, 42, 0.7)', padding: '12px 14px', borderRadius: '10px', border: '1px solid rgba(251, 191, 36, 0.3)', marginBottom: '16px' }}>
+                  <div style={{ fontSize: '0.78rem', fontWeight: 800, color: '#fbbf24', textTransform: 'uppercase', marginBottom: '4px', display: 'flex', alignItems: 'center', gap: '6px' }}>
+                    📝 Overall Session Takeaways & Equipment Notes:
+                  </div>
+                  <div style={{ fontSize: '0.85rem', color: overallNoteText ? '#f8fafc' : '#94a3b8', lineHeight: 1.5, fontStyle: overallNoteText ? 'normal' : 'italic', whiteSpace: 'pre-wrap' }}>
+                    {overallNoteText || "No overall session notes were recorded for this practice session."}
+                  </div>
                 </div>
-                <div style={{ fontSize: '0.85rem', color: '#f8fafc', lineHeight: 1.4 }}>
-                  {selectedScorecardDetail.sessionNotes}
-                </div>
-              </div>
-            )}
+              );
+            })()}
 
             {/* Modal Actions */}
             <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', gap: '10px', flexWrap: 'wrap' }}>

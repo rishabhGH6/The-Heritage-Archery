@@ -235,10 +235,14 @@ export default function App() {
   };
 
   const handleDeleteScorecard = (scoreLogId) => {
-    setAppData(prev => ({
-      ...prev,
-      scoreLogs: (prev.scoreLogs || []).filter(s => s.id !== scoreLogId)
-    }));
+    setAppData(prev => {
+      const updated = {
+        ...prev,
+        scoreLogs: (prev.scoreLogs || []).filter(s => s.id !== scoreLogId)
+      };
+      saveAppData(updated);
+      return updated;
+    });
     syncDeleteScoreLog(scoreLogId);
   };
 
