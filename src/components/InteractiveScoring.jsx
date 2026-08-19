@@ -268,20 +268,23 @@ export default function InteractiveScoring({ currentUser, archers = [], scoreLog
     try {
       const doc = new jsPDF('p', 'pt', 'a4');
 
+      // Ensure targetLog is a valid scorecard object and NOT a React Event
+      const isValidLogObj = targetLog && typeof targetLog === 'object' && !('nativeEvent' in targetLog) && ('rounds' in targetLog || 'totalScore' in targetLog);
+
       // Determine log source (from modal targetLog OR active session state)
-      const logToExport = targetLog || {
+      const logToExport = isValidLogObj ? targetLog : {
         archerName: (selectedArcherId === 'coach' ? 'Coach Jayanta Chakraborty' : (archers.find(a => a.id === selectedArcherId) || currentUser)?.name) || "Archer",
         distance: distance,
         date: new Date().toISOString().split('T')[0],
         rounds: roundsData.map((r, idx) => ({
           roundNumber: idx + 1,
-          arrows: r.arrows,
+          arrows: r.arrows || [],
           total: getRoundTotal(r),
           note: roundNotes[idx + 1] || ""
         })),
         totalScore: getGrandTotal(),
         sessionNotes: sessionNotes || "",
-        groupingAnalysis: calculateGrouping(roundsData.flatMap(r => r.arrows))
+        groupingAnalysis: calculateGrouping(roundsData.flatMap(r => r.arrows || []))
       };
 
       const archerName = logToExport.archerName || "Archer";
@@ -457,7 +460,7 @@ export default function InteractiveScoring({ currentUser, archers = [], scoreLog
         </div>
 
         <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
-          <button onClick={handleExportPDF} className="btn-ghost" style={{ border: '1px solid rgba(217,119,6,0.4)', color: '#fbbf24' }}>
+          <button onClick={() => handleExportPDF()} className="btn-ghost" style={{ border: '1px solid rgba(217,119,6,0.4)', color: '#fbbf24' }}>
             <Download size={16} /> Export PDF Scorecard
           </button>
           <button onClick={handleSaveSession} className="btn-emerald">
