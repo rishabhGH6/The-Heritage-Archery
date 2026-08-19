@@ -1,10 +1,10 @@
 import React, { useState, useRef } from 'react';
-import { Target, Save, Download, RefreshCw, CheckCircle, AlertCircle, FileText, ChevronRight, BarChart2, Shield } from 'lucide-react';
+import { Target, Save, Download, RefreshCw, CheckCircle, AlertCircle, FileText, ChevronRight, BarChart2, Shield, Trash2 } from 'lucide-react';
 import jsPDF from 'jspdf';
 import html2canvas from 'html2canvas';
 import RangeWhistleControl from './RangeWhistleControl';
 
-export default function InteractiveScoring({ currentUser, archers = [], scoreLogs = [], onSaveScorecard }) {
+export default function InteractiveScoring({ currentUser, archers = [], scoreLogs = [], onSaveScorecard, onDeleteScorecard }) {
   const [selectedArcherId, setSelectedArcherId] = useState(
     currentUser.role === 'archer' 
       ? currentUser.id 
@@ -1021,9 +1021,37 @@ export default function InteractiveScoring({ currentUser, archers = [], scoreLog
                           {log.groupingAnalysis?.tightness} ({log.groupingAnalysis?.bias})
                         </td>
                         <td style={{ padding: '10px', textAlign: 'right' }}>
-                          <span style={{ background: 'rgba(56, 189, 248, 0.15)', border: '1px solid rgba(56, 189, 248, 0.3)', color: '#38bdf8', fontSize: '0.72rem', padding: '4px 10px', borderRadius: '8px', fontWeight: 700 }}>
-                            View Details 🔍
-                          </span>
+                          <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'flex-end', gap: '8px' }}>
+                            <span style={{ background: 'rgba(56, 189, 248, 0.15)', border: '1px solid rgba(56, 189, 248, 0.3)', color: '#38bdf8', fontSize: '0.72rem', padding: '4px 10px', borderRadius: '8px', fontWeight: 700 }}>
+                              View Details 🔍
+                            </span>
+
+                            <button
+                              type="button"
+                              onClick={(e) => {
+                                e.stopPropagation();
+                                if (window.confirm(`Are you sure you want to delete this scorecard log from ${log.date}?`)) {
+                                  if (onDeleteScorecard) onDeleteScorecard(log.id);
+                                }
+                              }}
+                              style={{
+                                background: 'rgba(239, 68, 68, 0.15)',
+                                border: '1px solid rgba(239, 68, 68, 0.4)',
+                                color: '#ef4444',
+                                padding: '4px 8px',
+                                borderRadius: '8px',
+                                fontSize: '0.72rem',
+                                fontWeight: 700,
+                                cursor: 'pointer',
+                                display: 'inline-flex',
+                                alignItems: 'center',
+                                gap: '4px'
+                              }}
+                              title="Delete this saved scorecard"
+                            >
+                              <Trash2 size={13} /> Delete
+                            </button>
+                          </div>
                         </td>
                       </tr>
                     ))}
@@ -1120,11 +1148,37 @@ export default function InteractiveScoring({ currentUser, archers = [], scoreLog
             )}
 
             {/* Modal Actions */}
-            <div style={{ display: 'flex', justifyContent: 'flex-end', gap: '10px' }}>
-              <button onClick={() => setSelectedScorecardDetail(null)} className="btn-ghost">Close</button>
-              <button onClick={() => handleExportPDF(selectedScorecardDetail)} className="btn-emerald">
-                <Download size={14} /> Export PDF
+            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', gap: '10px', flexWrap: 'wrap' }}>
+              <button
+                onClick={() => {
+                  if (window.confirm(`Are you sure you want to delete this scorecard log from ${selectedScorecardDetail.date}?`)) {
+                    if (onDeleteScorecard) onDeleteScorecard(selectedScorecardDetail.id);
+                    setSelectedScorecardDetail(null);
+                  }
+                }}
+                style={{
+                  background: 'rgba(239, 68, 68, 0.15)',
+                  border: '1px solid rgba(239, 68, 68, 0.4)',
+                  color: '#ef4444',
+                  padding: '8px 16px',
+                  borderRadius: '10px',
+                  fontSize: '0.84rem',
+                  fontWeight: 700,
+                  cursor: 'pointer',
+                  display: 'flex',
+                  alignItems: 'center',
+                  gap: '6px'
+                }}
+              >
+                <Trash2 size={15} /> Delete Scorecard
               </button>
+
+              <div style={{ display: 'flex', gap: '10px' }}>
+                <button onClick={() => setSelectedScorecardDetail(null)} className="btn-ghost">Close</button>
+                <button onClick={() => handleExportPDF(selectedScorecardDetail)} className="btn-emerald">
+                  <Download size={14} /> Export PDF
+                </button>
+              </div>
             </div>
 
           </div>

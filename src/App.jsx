@@ -26,6 +26,7 @@ import {
   syncSaveVenue,
   syncSaveAnnouncement,
   syncSaveScoreLog,
+  syncDeleteScoreLog,
   syncSaveEquipment,
   syncSaveBadge,
   syncSaveChatMessage
@@ -228,9 +229,17 @@ export default function App() {
   const handleSaveScorecard = (scoreLog) => {
     setAppData(prev => ({
       ...prev,
-      scoreLogs: [scoreLog, ...prev.scoreLogs]
+      scoreLogs: [scoreLog, ...(prev.scoreLogs || [])]
     }));
     syncSaveScoreLog(scoreLog);
+  };
+
+  const handleDeleteScorecard = (scoreLogId) => {
+    setAppData(prev => ({
+      ...prev,
+      scoreLogs: (prev.scoreLogs || []).filter(s => s.id !== scoreLogId)
+    }));
+    syncDeleteScoreLog(scoreLogId);
   };
 
   const handleSaveEquipment = (archerId, eqConfig) => {
@@ -404,6 +413,7 @@ export default function App() {
             archers={appData.archers}
             scoreLogs={appData.scoreLogs || []}
             onSaveScorecard={handleSaveScorecard}
+            onDeleteScorecard={handleDeleteScorecard}
           />
         )}
 

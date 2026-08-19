@@ -291,6 +291,14 @@ export const syncSaveScoreLog = async (log) => {
   }
 };
 
+export const syncDeleteScoreLog = async (scoreLogId) => {
+  try {
+    await supabase.from('score_logs').delete().eq('id', scoreLogId);
+  } catch (e) {
+    console.error("Supabase score log delete error", e);
+  }
+};
+
 export const syncSaveEquipment = async (archerId, config) => {
   try {
     await supabase.from('equipment').upsert({
