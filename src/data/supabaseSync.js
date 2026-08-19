@@ -11,7 +11,32 @@ const parseJson = (val, fallback) => {
   }
 };
 
-export const fetchSupabaseData = async (defaultData) => {
+const CACHE_KEY = 'heritage_supabase_cache_v2';
+const CACHE_TIME_KEY = 'heritage_supabase_cache_time_v2';
+const CACHE_TTL_MS = 3 * 60 * 1000; // 3 Minutes Smart Cache to minimize Egress bandwidth
+
+export const fetchSupabaseData = async (defaultData, forceRefresh = false) => {
+  // 1. Check local cache first to save bandwidth (Egress)
+  if (!forceRefresh) {
+    try {
+      const cachedTime = localStorage.getItem(CACHE_TIME_KEY);
+      const cachedData = localStorage.getItem(CACHE_KEY);
+
+      if (cachedTime && cachedData) {
+        const age = Date.now() - parseInt(cachedTime, 10);
+        if (age < CACHE_TTL_MS) {
+          const parsed = JSON.parse(cachedData);
+          if (parsed && parsed.archers && parsed.archers.length > 0) {
+            return parsed;
+          }
+        }
+      }
+    } catch (err) {
+      console.warn("Cache read error:", err);
+    }
+  }
+
+  // 2. Fetch from Supabase if cache is expired or force refreshed
   try {
     const [
       { data: archersData },
@@ -28,11 +53,11 @@ export const fetchSupabaseData = async (defaultData) => {
       supabase.from('coach').select('*'),
       supabase.from('streaks').select('*'),
       supabase.from('venue_schedule').select('*'),
-      supabase.from('announcements').select('*').order('created_at', { ascending: false }),
+      supabase.from('announcements').select('*').order('created_at', { ascending: false }).limit(20),
       supabase.from('equipment').select('*'),
-      supabase.from('score_logs').select('*').order('created_at', { ascending: false }),
+      supabase.from('score_logs').select('*').order('created_at', { ascending: false }).limit(50),
       supabase.from('badges').select('*').order('created_at', { ascending: false }),
-      supabase.from('chat_messages').select('*').order('created_at', { ascending: true })
+      supabase.from('chat_messages').select('*').order('created_at', { ascending: true }).limit(100)
     ]);
 
     const result = { ...defaultData };
@@ -99,9 +124,9 @@ export const fetchSupabaseData = async (defaultData) => {
           lastChecked: s.last_checked || null,
           history: parseJson(s.history, [])
         };
-        if (s.archer_id) streaksObj[s.archer_id] = streakData;
+        streaksObj[s.archer_id] = streakData;
         if (matchingArcher) {
-          streaksObj[matchingArcher.id] = streakData;
+          if (matchingArcher.id) streaksObj[matchingArcher.id] = streakData;
           if (matchingArcher.altId) streaksObj[matchingArcher.altId] = streakData;
         }
       });
@@ -175,6 +200,12 @@ export const fetchSupabaseData = async (defaultData) => {
       }));
     }
 
+    // Save to local cache
+    try {
+      localStorage.setItem(CACHE_KEY, JSON.stringify(result));
+      localStorage.setItem(CACHE_TIME_KEY, Date.now().toString());
+    } catch (e) {}
+
     return result;
   } catch (err) {
     console.warn("Supabase fetch failed, using local state", err);
@@ -182,21 +213,29 @@ export const fetchSupabaseData = async (defaultData) => {
   }
 };
 
-// Sync functions to upsert data to Supabase
+// Write helpers clear cache to ensure fresh sync on mutations
+const invalidateCache = () => {
+  try {
+    localStorage.removeItem(CACHE_KEY);
+    localStorage.removeItem(CACHE_TIME_KEY);
+  } catch (e) {}
+};
+
 export const syncSaveArcher = async (archer) => {
+  invalidateCache();
   try {
     await supabase.from('archers').upsert({
       id: archer.id,
       name: archer.name,
       password: archer.password,
-      security_answer: archer.securityAnswer || '',
-      photo: archer.photo || '',
-      category: archer.category || 'Junior',
-      occupation: archer.occupation || 'Student',
-      currently_practicing: archer.currentlyPracticing || 'Yes',
-      dob: archer.dob || '',
-      aim: archer.aim || '',
-      summary: archer.summary || '',
+      security_answer: archer.securityAnswer,
+      photo: archer.photo,
+      category: archer.category,
+      occupation: archer.occupation,
+      currently_practicing: archer.currentlyPracticing,
+      dob: archer.dob,
+      aim: archer.aim,
+      summary: archer.summary,
       states_played: JSON.stringify(archer.statesPlayed || []),
       photos: JSON.stringify(archer.photos || []),
       status: archer.status || 'approved'
@@ -207,6 +246,7 @@ export const syncSaveArcher = async (archer) => {
 };
 
 export const syncDeleteArcher = async (archerId) => {
+  invalidateCache();
   try {
     await supabase.from('archers').delete().eq('id', archerId);
   } catch (e) {
@@ -214,16 +254,17 @@ export const syncDeleteArcher = async (archerId) => {
   }
 };
 
-export const syncSaveCoach = async (coach) => {
+export const syncSaveCoach = async (coachObj) => {
+  invalidateCache();
   try {
     await supabase.from('coach').upsert({
       id: 'coach_jayanta',
-      name: coach.name,
-      role: coach.role,
-      photo: coach.photo || '',
-      tagline: coach.tagline,
-      motivating_lines: coach.motivatingLines,
-      password: coach.password
+      name: coachObj.name,
+      role: coachObj.role,
+      photo: coachObj.photo,
+      tagline: coachObj.tagline,
+      motivating_lines: coachObj.motivatingLines,
+      password: coachObj.password || 'jayanta'
     });
   } catch (e) {
     console.error("Supabase coach save error", e);
@@ -231,6 +272,7 @@ export const syncSaveCoach = async (coach) => {
 };
 
 export const syncSaveStreak = async (archerId, streakObj) => {
+  invalidateCache();
   try {
     await supabase.from('streaks').upsert({
       archer_id: archerId,
@@ -244,6 +286,7 @@ export const syncSaveStreak = async (archerId, streakObj) => {
 };
 
 export const syncSaveVenue = async (venueObj) => {
+  invalidateCache();
   try {
     await supabase.from('venue_schedule').upsert({
       id: 'default_venue',
@@ -261,6 +304,7 @@ export const syncSaveVenue = async (venueObj) => {
 };
 
 export const syncSaveAnnouncement = async (an) => {
+  invalidateCache();
   try {
     await supabase.from('announcements').insert({
       id: an.id,
@@ -275,6 +319,7 @@ export const syncSaveAnnouncement = async (an) => {
 };
 
 export const syncSaveScoreLog = async (log) => {
+  invalidateCache();
   try {
     await supabase.from('score_logs').insert({
       id: log.id,
@@ -292,6 +337,7 @@ export const syncSaveScoreLog = async (log) => {
 };
 
 export const syncDeleteScoreLog = async (scoreLogId) => {
+  invalidateCache();
   try {
     await supabase.from('score_logs').delete().eq('id', scoreLogId);
   } catch (e) {
@@ -300,6 +346,7 @@ export const syncDeleteScoreLog = async (scoreLogId) => {
 };
 
 export const syncSaveEquipment = async (archerId, config) => {
+  invalidateCache();
   try {
     await supabase.from('equipment').upsert({
       archer_id: archerId,
@@ -311,6 +358,7 @@ export const syncSaveEquipment = async (archerId, config) => {
 };
 
 export const syncSaveBadge = async (b) => {
+  invalidateCache();
   try {
     await supabase.from('badges').insert({
       id: b.id,
@@ -326,6 +374,7 @@ export const syncSaveBadge = async (b) => {
 };
 
 export const syncSaveChatMessage = async (msg) => {
+  invalidateCache();
   try {
     await supabase.from('chat_messages').insert({
       id: msg.id,
@@ -333,10 +382,10 @@ export const syncSaveChatMessage = async (msg) => {
       sender_name: msg.senderName,
       sender_role: msg.senderRole,
       text: msg.text,
-      channel: msg.channel || 'general',
+      channel: msg.channel,
       timestamp: msg.timestamp
     });
   } catch (e) {
-    console.error("Supabase chat message save error", e);
+    console.error("Supabase chat save error", e);
   }
 };
