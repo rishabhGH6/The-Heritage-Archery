@@ -456,37 +456,13 @@ export default function Navbar({ activeTab, setActiveTab, currentUser, archers, 
 
             {/* Drawer Footer */}
             <div className="side-drawer-footer">
-              {onReplayIntro && (
-                <button
-                  onClick={() => { setSideMenuOpen(false); onReplayIntro(); }}
-                  style={{
-                    width: '100%',
-                    background: 'rgba(251, 191, 36, 0.1)',
-                    border: '1px solid rgba(251, 191, 36, 0.3)',
-                    color: '#fbbf24',
-                    padding: '8px 12px',
-                    borderRadius: '10px',
-                    fontSize: '0.8rem',
-                    fontWeight: 700,
-                    cursor: 'pointer',
-                    display: 'flex',
-                    alignItems: 'center',
-                    justifyContent: 'center',
-                    gap: '6px',
-                    transition: 'all 0.2s ease'
-                  }}
-                >
-                  🎬 Replay 3D Intro Animation
-                </button>
-              )}
-
               <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
                 <div>
                   <div style={{ fontSize: '0.85rem', fontWeight: 700, color: '#f8fafc' }}>
                     {currentUser.name}
                   </div>
                   <div style={{ fontSize: '0.72rem', color: currentUser.role === 'coach' ? '#fbbf24' : currentUser.role === 'archer' ? '#34d399' : '#94a3b8', fontWeight: 600 }}>
-                    {currentUser.role === 'coach' ? 'Head Coach' : currentUser.role === 'archer' ? 'Archer Member' : 'Guest Mode'}
+                    {currentUser.role === 'coach' ? 'Head Coach 🛡️' : currentUser.role === 'archer' ? 'Archer Member 🏹' : 'Guest Mode 🔒'}
                   </div>
                 </div>
 
