@@ -553,7 +553,7 @@ h1, h2, h3, h4, h5, h6 {
   }
 }
 
-/* Animations */
+/* Animations & Interactive Micro-Transitions */
 @keyframes metallicShine {
   0% { background-position: -200% center; }
   100% { background-position: 200% center; }
@@ -569,19 +569,61 @@ h1, h2, h3, h4, h5, h6 {
   filter: drop-shadow(0 4px 15px rgba(217, 119, 6, 0.3));
 }
 
-@keyframes fadeInUp {
-  from {
+@keyframes staggerItemIn {
+  0% {
     opacity: 0;
-    transform: translateY(16px);
+    transform: translateX(-16px) scale(0.96);
   }
-  to {
+  100% {
     opacity: 1;
-    transform: translateY(0);
+    transform: translateX(0) scale(1);
+  }
+}
+
+.stagger-menu-item {
+  animation: staggerItemIn 0.35s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+  animation-delay: calc(var(--item-index, 0) * 35ms);
+}
+
+@keyframes modalPopIn {
+  0% {
+    opacity: 0;
+    transform: scale(0.92) translateY(12px);
+  }
+  100% {
+    opacity: 1;
+    transform: scale(1) translateY(0);
+  }
+}
+
+.modal-content {
+  animation: modalPopIn 0.32s cubic-bezier(0.16, 1, 0.3, 1) forwards !important;
+}
+
+@keyframes tabEntrance {
+  0% {
+    opacity: 0;
+    transform: translateY(18px) scale(0.985);
+  }
+  100% {
+    opacity: 1;
+    transform: translateY(0) scale(1);
   }
 }
 
 .fade-in-up {
-  animation: fadeInUp 0.35s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+  animation: tabEntrance 0.38s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+}
+
+/* Active Click Feedback Compression */
+.btn-emerald:active, 
+.btn-gold:active, 
+.btn-ghost:active, 
+.side-drawer-item:active, 
+.side-drawer-sub-item:active,
+.side-menu-trigger-btn:active {
+  transform: scale(0.96) !important;
+  transition: transform 0.1s cubic-bezier(0.4, 0, 0.2, 1) !important;
 }
 
 .hover-lift {

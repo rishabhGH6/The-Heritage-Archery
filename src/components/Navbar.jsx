@@ -375,15 +375,15 @@ export default function Navbar({ activeTab, setActiveTab, currentUser, archers, 
             <div className="side-drawer-body">
               <div className="side-drawer-section-label">Main Navigation</div>
 
-              <button className={`side-drawer-item ${activeTab === 'home' ? 'active' : ''}`} onClick={() => handleTabClick('home')}>
+              <button className={`side-drawer-item stagger-menu-item ${activeTab === 'home' ? 'active' : ''}`} style={{ '--item-index': 1 }} onClick={() => handleTabClick('home')}>
                 <Target size={18} /> Home
               </button>
-              <button className={`side-drawer-item ${activeTab === 'leaderboard' ? 'active' : ''}`} onClick={() => handleTabClick('leaderboard')}>
+              <button className={`side-drawer-item stagger-menu-item ${activeTab === 'leaderboard' ? 'active' : ''}`} style={{ '--item-index': 2 }} onClick={() => handleTabClick('leaderboard')}>
                 <Award size={18} /> Streak Leaderboard
               </button>
 
               {/* Practice Now Expandable Parent Tab */}
-              <div>
+              <div className="stagger-menu-item" style={{ '--item-index': 3 }}>
                 <button 
                   className={`side-drawer-item ${['scoring', 'equipment', 'venue'].includes(activeTab) ? 'active' : ''}`} 
                   onClick={() => setPracticeSubmenuOpen(!practiceSubmenuOpen)}
@@ -412,32 +412,32 @@ export default function Navbar({ activeTab, setActiveTab, currentUser, archers, 
                 )}
               </div>
 
-              <button className={`side-drawer-item ${activeTab === 'archers' ? 'active' : ''}`} onClick={() => handleTabClick('archers')}>
+              <button className={`side-drawer-item stagger-menu-item ${activeTab === 'archers' ? 'active' : ''}`} style={{ '--item-index': 4 }} onClick={() => handleTabClick('archers')}>
                 <User size={18} /> Team Roster & Performance
               </button>
-              <button className={`side-drawer-item ${activeTab === 'chat' ? 'active' : ''}`} onClick={() => handleTabClick('chat')}>
+              <button className={`side-drawer-item stagger-menu-item ${activeTab === 'chat' ? 'active' : ''}`} style={{ '--item-index': 5 }} onClick={() => handleTabClick('chat')}>
                 <MessageSquare size={18} /> Team Chat & Private DMs
               </button>
-              <button className={`side-drawer-item ${activeTab === 'gallery' ? 'active' : ''}`} onClick={() => handleTabClick('gallery')}>
+              <button className={`side-drawer-item stagger-menu-item ${activeTab === 'gallery' ? 'active' : ''}`} style={{ '--item-index': 6 }} onClick={() => handleTabClick('gallery')}>
                 <Camera size={18} /> Photo Gallery
               </button>
-              <button className={`side-drawer-item ${activeTab === 'news' ? 'active' : ''}`} onClick={() => handleTabClick('news')}>
+              <button className={`side-drawer-item stagger-menu-item ${activeTab === 'news' ? 'active' : ''}`} style={{ '--item-index': 7 }} onClick={() => handleTabClick('news')}>
                 <Newspaper size={18} color="#38bdf8" /> Archery News 📰
               </button>
-              <button className={`side-drawer-item ${activeTab === 'ai-coach' ? 'active' : ''}`} onClick={() => handleTabClick('ai-coach')}>
+              <button className={`side-drawer-item stagger-menu-item ${activeTab === 'ai-coach' ? 'active' : ''}`} style={{ '--item-index': 8 }} onClick={() => handleTabClick('ai-coach')}>
                 <Sparkles size={18} color="#fbbf24" /> AI Performance Coach ✨
               </button>
 
               <div className="side-drawer-section-label">User Portals</div>
 
               {currentUser.role === 'archer' && (
-                <button className={`side-drawer-item ${activeTab === 'profile' ? 'active' : ''}`} onClick={() => handleTabClick('profile')}>
+                <button className={`side-drawer-item stagger-menu-item ${activeTab === 'profile' ? 'active' : ''}`} style={{ '--item-index': 9 }} onClick={() => handleTabClick('profile')}>
                   <User size={18} /> My Archer Profile
                 </button>
               )}
 
               {(currentUser.role === 'admin' || (currentUser.name && currentUser.name.trim().toLowerCase() === 'rishabh kumar sinha')) && (
-                <button className={`side-drawer-item ${activeTab === 'admin' ? 'active' : ''}`} onClick={() => handleTabClick('admin')}>
+                <button className={`side-drawer-item stagger-menu-item ${activeTab === 'admin' ? 'active' : ''}`} style={{ '--item-index': 10 }} onClick={() => handleTabClick('admin')}>
                   <Shield size={18} color="#ef4444" /> Admin Control Panel
                   {pendingArchers && pendingArchers.length > 0 && (
                     <span style={{ background: '#ef4444', color: '#ffffff', fontSize: '0.7rem', padding: '2px 8px', borderRadius: '10px', fontWeight: 800, marginLeft: 'auto' }}>
@@ -448,7 +448,7 @@ export default function Navbar({ activeTab, setActiveTab, currentUser, archers, 
               )}
 
               {currentUser.role === 'coach' && (
-                <button className={`side-drawer-item ${activeTab === 'coach' ? 'active' : ''}`} onClick={() => handleTabClick('coach')}>
+                <button className={`side-drawer-item stagger-menu-item ${activeTab === 'coach' ? 'active' : ''}`} style={{ '--item-index': 10 }} onClick={() => handleTabClick('coach')}>
                   <Shield size={18} /> Coach Dashboard
                 </button>
               )}
