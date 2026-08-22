@@ -183,7 +183,7 @@ export const savePersistentSession = (userObj) => {
 
 // Helper function to load data from LocalStorage or initialize default
 export const loadAppData = () => {
-  const guestUser = { id: "guest", role: "guest", name: "Guest" };
+  const savedUser = getPersistentSession();
   const saved = localStorage.getItem("heritage_archery_clean_v6") || localStorage.getItem("heritage_archery_clean_v5");
   if (saved) {
     try {
@@ -192,7 +192,7 @@ export const loadAppData = () => {
         ...parsed,
         archers: (parsed.archers && parsed.archers.length > 0) ? parsed.archers : defaultArchers,
         streaks: (parsed.streaks && Object.keys(parsed.streaks).length > 0) ? parsed.streaks : defaultStreaks,
-        currentUser: guestUser
+        currentUser: (parsed.currentUser && parsed.currentUser.id !== 'guest') ? parsed.currentUser : savedUser
       };
     } catch (e) {
       console.error("Error loading saved archery data", e);
@@ -200,7 +200,7 @@ export const loadAppData = () => {
   }
   return {
     ...defaultData,
-    currentUser: guestUser
+    currentUser: savedUser
   };
 };
 
