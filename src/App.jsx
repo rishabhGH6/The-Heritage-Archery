@@ -560,6 +560,8 @@ export default function App() {
             onGrantBadge={handleGrantBadge}
             onUpdateCoachPassword={handleUpdateCoachPassword}
           />
+        )}
+
         {activeTab === 'about' && (
           <AboutUs
             setActiveTab={setActiveTab}
