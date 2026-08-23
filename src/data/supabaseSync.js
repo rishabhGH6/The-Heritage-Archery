@@ -416,3 +416,31 @@ export const syncSaveChatMessage = async (msg) => {
     console.error("Supabase chat save error", e);
   }
 };
+
+export const syncSaveInquiry = async (inquiry) => {
+  invalidateCache();
+  try {
+    await supabase.from('inquiries').upsert({
+      id: inquiry.id,
+      name: inquiry.name,
+      email_or_phone: inquiry.emailOrPhone,
+      user_type: inquiry.userType,
+      subject: inquiry.subject,
+      message: inquiry.message,
+      date: inquiry.date,
+      status: inquiry.status || 'new'
+    });
+  } catch (e) {
+    console.warn("Supabase inquiry save notice:", e);
+  }
+};
+
+export const syncDeleteInquiry = async (inquiryId) => {
+  invalidateCache();
+  try {
+    await supabase.from('inquiries').delete().eq('id', inquiryId);
+  } catch (e) {
+    console.warn("Supabase inquiry delete notice:", e);
+  }
+};
+

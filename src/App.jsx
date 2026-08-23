@@ -32,7 +32,9 @@ import {
   getDeletedScoreLogIds,
   syncSaveEquipment,
   syncSaveBadge,
-  syncSaveChatMessage
+  syncSaveChatMessage,
+  syncSaveInquiry,
+  syncDeleteInquiry
 } from './data/supabaseSync';
 import { Target, Megaphone, Trophy, Shield, Heart } from 'lucide-react';
 
@@ -179,6 +181,36 @@ export default function App() {
       pendingArchers: (prev.pendingArchers || []).filter(p => p.id !== pendingArcherId)
     }));
     syncDeleteArcher(pendingArcherId);
+  };
+
+  const handleAddInquiry = (inquiryObj) => {
+    setAppData(prev => ({
+      ...prev,
+      inquiries: [inquiryObj, ...(prev.inquiries || [])]
+    }));
+    syncSaveInquiry(inquiryObj);
+  };
+
+  const handleDeleteInquiry = (inquiryId) => {
+    setAppData(prev => ({
+      ...prev,
+      inquiries: (prev.inquiries || []).filter(i => i.id !== inquiryId)
+    }));
+    syncDeleteInquiry(inquiryId);
+  };
+
+  const handleToggleInquiryStatus = (inquiryId) => {
+    setAppData(prev => ({
+      ...prev,
+      inquiries: (prev.inquiries || []).map(i => {
+        if (i.id === inquiryId) {
+          const updated = { ...i, status: i.status === 'resolved' ? 'new' : 'resolved' };
+          syncSaveInquiry(updated);
+          return updated;
+        }
+        return i;
+      })
+    }));
   };
 
   const handleCheckInStreak = (archerId) => {
@@ -544,8 +576,12 @@ export default function App() {
           <AdminControl
             archers={appData.archers}
             pendingArchers={appData.pendingArchers || []}
+            inquiries={appData.inquiries || []}
             onApproveArcher={handleApproveArcher}
             onRejectArcher={handleRejectArcher}
+            onDeleteInquiry={handleDeleteInquiry}
+            onToggleInquiryStatus={handleToggleInquiryStatus}
+            setActiveTab={setActiveTab}
           />
         )}
 
@@ -573,6 +609,7 @@ export default function App() {
           <ContactUs
             coach={appData.coach}
             venueSchedule={appData.venueSchedule}
+            onAddInquiry={handleAddInquiry}
           />
         )}
 

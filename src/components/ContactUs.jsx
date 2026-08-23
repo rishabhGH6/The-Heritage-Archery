@@ -1,7 +1,15 @@
 import React, { useState } from 'react';
-import { MapPin, Phone, Mail, Clock, Send, CheckCircle2, Shield, User, MessageSquare, ChevronDown, ChevronUp, Sparkles, Target } from 'lucide-react';
+import { MapPin, Phone, Mail, Clock, Send, CheckCircle2, Shield, User, MessageSquare, ChevronDown, ChevronUp, Sparkles, Target, ExternalLink } from 'lucide-react';
 
-export default function ContactUs({ coach, venueSchedule }) {
+const InstagramIcon = ({ size = 20, color = "currentColor" }) => (
+  <svg width={size} height={size} viewBox="0 0 24 24" fill="none" stroke={color} strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+    <rect x="2" y="2" width="20" height="20" rx="5" ry="5"></rect>
+    <path d="M16 11.37A4 4 0 1 1 12.63 8 4 4 0 0 1 16 11.37z"></path>
+    <line x1="17.5" y1="6.5" x2="17.51" y2="6.5"></line>
+  </svg>
+);
+
+export default function ContactUs({ coach, venueSchedule, onAddInquiry }) {
   const [formData, setFormData] = useState({
     name: '',
     emailOrPhone: '',
@@ -17,6 +25,21 @@ export default function ContactUs({ coach, venueSchedule }) {
     if (!formData.name.trim() || !formData.emailOrPhone.trim() || !formData.message.trim()) {
       alert("Please complete all required fields before submitting your inquiry.");
       return;
+    }
+
+    const newInquiry = {
+      id: 'inq_' + Date.now(),
+      name: formData.name.trim(),
+      emailOrPhone: formData.emailOrPhone.trim(),
+      userType: formData.userType,
+      subject: formData.subject,
+      message: formData.message.trim(),
+      date: new Date().toLocaleString('en-US', { dateStyle: 'medium', timeStyle: 'short' }),
+      status: 'new'
+    };
+
+    if (onAddInquiry) {
+      onAddInquiry(newInquiry);
     }
 
     setSubmitted(true);
@@ -46,8 +69,8 @@ export default function ContactUs({ coach, venueSchedule }) {
       a: "Any Heritage College student practicing or interested in college target archery can submit a registration request. New account requests are reviewed and verified by Admin/Coach."
     },
     {
-      q: "How can I contact Head Coach Jayanta Chakraborty directly?",
-      a: "You can reach Coach Jayanta via the contact form on this page, through Team Chat DMs when logged in, or by visiting the target range during daily practice hours."
+      q: "How can I contact the archery team or send a message directly?",
+      a: "You can reach us directly via Instagram DM (@theheritage_archery), through the contact inquiry form on this page, or by visiting the target range during daily practice hours."
     }
   ];
 
@@ -77,7 +100,7 @@ export default function ContactUs({ coach, venueSchedule }) {
         </h1>
 
         <p style={{ fontSize: 'clamp(0.92rem, 2.2vw, 1.05rem)', color: '#cbd5e1', lineHeight: 1.6, maxWidth: '850px', margin: 0 }}>
-          Have questions regarding college team practice, target distance line allocations, bow tuning sessions, or archer registrations? Reach out directly to our team leadership below.
+          Have questions regarding college team practice, target distance line allocations, bow tuning sessions, or archer registrations? Reach out directly via our Instagram, DM us, or submit an inquiry below.
         </p>
       </div>
 
@@ -124,21 +147,86 @@ export default function ContactUs({ coach, venueSchedule }) {
             </div>
           </div>
 
-          {/* Head Coach Direct Contact */}
-          <div className="glass-card hover-lift" style={{ padding: '22px', borderLeft: '4px solid #38bdf8' }}>
+          {/* Official Instagram & Direct Message (DM) Hub */}
+          <div className="glass-card hover-lift" style={{ 
+            padding: '22px', 
+            borderLeft: '4px solid #e1306c',
+            background: 'linear-gradient(135deg, rgba(15, 23, 42, 0.9), rgba(225, 48, 108, 0.12))'
+          }}>
             <div style={{ display: 'flex', alignItems: 'flex-start', gap: '14px' }}>
-              <div style={{ padding: '10px', borderRadius: '12px', background: 'rgba(56, 189, 248, 0.2)', color: '#38bdf8', flexShrink: 0 }}>
-                <Shield size={22} />
+              <div style={{
+                width: '46px',
+                height: '46px',
+                borderRadius: '14px',
+                background: 'linear-gradient(45deg, #f09433 0%, #e6683c 25%, #dc2743 50%, #cc2366 75%, #bc1888 100%)',
+                padding: '2px',
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'center',
+                boxShadow: '0 6px 20px rgba(220,39,67,0.35)',
+                flexShrink: 0
+              }}>
+                <div style={{ width: '100%', height: '100%', borderRadius: '12px', background: '#0f172a', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+                  <InstagramIcon size={22} color="#f472b6" />
+                </div>
               </div>
-              <div>
-                <h4 style={{ fontSize: '1.05rem', fontWeight: 800, color: '#f8fafc', margin: '0 0 4px 0' }}>
-                  Head Coach Jayanta Chakraborty
-                </h4>
-                <p style={{ fontSize: '0.86rem', color: '#cbd5e1', lineHeight: 1.5, margin: 0 }}>
-                  Official Team Coach & Range Safety Officer
+
+              <div style={{ width: '100%' }}>
+                <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: '8px', flexWrap: 'wrap' }}>
+                  <h4 style={{ fontSize: '1.05rem', fontWeight: 800, color: '#f8fafc', margin: 0 }}>
+                    Official Instagram & DM Support
+                  </h4>
+                  <span style={{ fontSize: '0.72rem', background: 'rgba(225, 48, 108, 0.2)', color: '#f472b6', padding: '2px 8px', borderRadius: '6px', fontWeight: 700, border: '1px solid rgba(225, 48, 108, 0.3)' }}>
+                    @theheritage_archery
+                  </span>
+                </div>
+                <p style={{ fontSize: '0.85rem', color: '#cbd5e1', lineHeight: 1.5, margin: '6px 0 12px 0' }}>
+                  Follow our official Instagram handle for practice updates & tournament highlights. Need instant assistance? Send us a Direct Message (DM)!
                 </p>
-                <div style={{ fontSize: '0.82rem', color: '#fbbf24', fontWeight: 700, marginTop: '6px', display: 'flex', alignItems: 'center', gap: '6px' }}>
-                  <Mail size={14} /> archery@heritage.edu.in
+
+                <div style={{ display: 'flex', gap: '10px', flexWrap: 'wrap' }}>
+                  <a
+                    href="https://www.instagram.com/theheritage_archery?utm_source=ig_web_button_share_sheet&igsh=ZDNlZDc0MzIxNw=="
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="btn-gold"
+                    style={{
+                      padding: '8px 14px',
+                      fontSize: '0.82rem',
+                      fontWeight: 800,
+                      textDecoration: 'none',
+                      display: 'inline-flex',
+                      alignItems: 'center',
+                      gap: '6px',
+                      borderRadius: '10px'
+                    }}
+                  >
+                    <InstagramIcon size={15} color="#090d16" /> Instagram Link <ExternalLink size={12} />
+                  </a>
+
+                  <a
+                    href="https://ig.me/m/theheritage_archery"
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    style={{
+                      background: 'linear-gradient(135deg, #ec4899, #8b5cf6)',
+                      color: '#ffffff',
+                      padding: '8px 14px',
+                      fontSize: '0.82rem',
+                      fontWeight: 800,
+                      textDecoration: 'none',
+                      display: 'inline-flex',
+                      alignItems: 'center',
+                      gap: '6px',
+                      borderRadius: '10px',
+                      border: 'none',
+                      boxShadow: '0 4px 15px rgba(236, 72, 153, 0.3)',
+                      cursor: 'pointer'
+                    }}
+                    className="hover-lift"
+                  >
+                    <MessageSquare size={15} /> DM Us on Instagram 💬
+                  </a>
                 </div>
               </div>
             </div>

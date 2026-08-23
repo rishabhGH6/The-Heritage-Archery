@@ -109,6 +109,29 @@ export const defaultStreaks = {
   }
 };
 
+export const defaultInquiries = [
+  {
+    id: "inq_1785700100000",
+    name: "Siddharth Verma",
+    emailOrPhone: "siddharth.v@gmail.com",
+    userType: "Prospective Student",
+    subject: "Team Registration",
+    message: "Hi! I am joining Heritage College next semester. How can I join the archery team practice sessions at the Chowbaga range?",
+    date: "Aug 22, 2026, 5:30 PM",
+    status: "new"
+  },
+  {
+    id: "inq_1785700200000",
+    name: "Priyanka Roy",
+    emailOrPhone: "+91 98301 23456",
+    userType: "Parent / Guardian",
+    subject: "Practice & Range Timings",
+    message: "Are parents allowed to visit the target range during daily evening practice sessions (4:30 PM - 7:00 PM)?",
+    date: "Aug 23, 2026, 11:15 AM",
+    status: "new"
+  }
+];
+
 export const defaultData = {
   coach: {
     name: "Coach Jayanta Chakraborty",
@@ -149,7 +172,9 @@ export const defaultData = {
 
   badges: [],
 
-  chatMessages: []
+  chatMessages: [],
+
+  inquiries: defaultInquiries
 };
 
 // Load persistent session if less than 5 days old
@@ -181,29 +206,6 @@ export const savePersistentSession = (userObj) => {
   } catch (e) {}
 };
 
-// Helper function to load data from LocalStorage or initialize default
-export const loadAppData = () => {
-  const savedUser = getPersistentSession();
-  const saved = localStorage.getItem("heritage_archery_clean_v6") || localStorage.getItem("heritage_archery_clean_v5");
-  if (saved) {
-    try {
-      const parsed = JSON.parse(saved);
-      return {
-        ...parsed,
-        archers: (parsed.archers && parsed.archers.length > 0) ? parsed.archers : defaultArchers,
-        streaks: (parsed.streaks && Object.keys(parsed.streaks).length > 0) ? parsed.streaks : defaultStreaks,
-        currentUser: (parsed.currentUser && parsed.currentUser.id !== 'guest') ? parsed.currentUser : savedUser
-      };
-    } catch (e) {
-      console.error("Error loading saved archery data", e);
-    }
-  }
-  return {
-    ...defaultData,
-    currentUser: savedUser
-  };
-};
-
 export const saveAppData = (data) => {
   try {
     localStorage.setItem("heritage_archery_clean_v6", JSON.stringify(data));
@@ -223,4 +225,28 @@ export const saveAppData = (data) => {
       console.warn("Storage quota exceeded, continuing with memory state:", err);
     }
   }
+};
+
+// Helper function to load data from LocalStorage or initialize default
+export const loadAppData = () => {
+  const savedUser = getPersistentSession();
+  const saved = localStorage.getItem("heritage_archery_clean_v6") || localStorage.getItem("heritage_archery_clean_v5");
+  if (saved) {
+    try {
+      const parsed = JSON.parse(saved);
+      return {
+        ...parsed,
+        archers: (parsed.archers && parsed.archers.length > 0) ? parsed.archers : defaultArchers,
+        streaks: (parsed.streaks && Object.keys(parsed.streaks).length > 0) ? parsed.streaks : defaultStreaks,
+        inquiries: (parsed.inquiries && Array.isArray(parsed.inquiries)) ? parsed.inquiries : defaultInquiries,
+        currentUser: (parsed.currentUser && parsed.currentUser.id !== 'guest') ? parsed.currentUser : savedUser
+      };
+    } catch (e) {
+      console.error("Error loading saved archery data", e);
+    }
+  }
+  return {
+    ...defaultData,
+    currentUser: savedUser
+  };
 };
