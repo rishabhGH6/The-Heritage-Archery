@@ -27,6 +27,7 @@ import {
   syncSaveAnnouncement,
   syncSaveScoreLog,
   syncDeleteScoreLog,
+  getDeletedScoreLogIds,
   syncSaveEquipment,
   syncSaveBadge,
   syncSaveChatMessage
@@ -64,8 +65,12 @@ export default function App() {
           }
         }
 
+        const deletedLogsSet = getDeletedScoreLogIds();
+        const cleanScoreLogs = (remoteData.scoreLogs || prev.scoreLogs || []).filter(s => !deletedLogsSet.has(s.id));
+
         return {
           ...remoteData,
+          scoreLogs: cleanScoreLogs,
           archers: loadedArchers,
           streaks: (remoteData.streaks && Object.keys(remoteData.streaks).length > 0) ? remoteData.streaks : (prev.streaks && Object.keys(prev.streaks).length > 0 ? prev.streaks : defaultStreaks),
           currentUser: activeUser

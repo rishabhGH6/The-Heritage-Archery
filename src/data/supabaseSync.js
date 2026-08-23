@@ -14,6 +14,24 @@ const parseJson = (val, fallback) => {
 const CACHE_KEY = 'heritage_supabase_cache_v2';
 const CACHE_TIME_KEY = 'heritage_supabase_cache_time_v2';
 const CACHE_TTL_MS = 3 * 60 * 1000; // 3 Minutes Smart Cache to minimize Egress bandwidth
+const DELETED_SCORE_LOGS_KEY = 'heritage_deleted_score_logs_v1';
+
+export const getDeletedScoreLogIds = () => {
+  try {
+    const raw = localStorage.getItem(DELETED_SCORE_LOGS_KEY);
+    return new Set(raw ? JSON.parse(raw) : []);
+  } catch (e) {
+    return new Set();
+  }
+};
+
+export const trackDeletedScoreLog = (scoreLogId) => {
+  try {
+    const currentSet = getDeletedScoreLogIds();
+    currentSet.add(scoreLogId);
+    localStorage.setItem(DELETED_SCORE_LOGS_KEY, JSON.stringify(Array.from(currentSet)));
+  } catch (e) {}
+};
 
 export const fetchSupabaseData = async (defaultData, forceRefresh = false) => {
   // 1. Check local cache first to save bandwidth (Egress)
@@ -27,6 +45,8 @@ export const fetchSupabaseData = async (defaultData, forceRefresh = false) => {
         if (age < CACHE_TTL_MS) {
           const parsed = JSON.parse(cachedData);
           if (parsed && parsed.archers && parsed.archers.length > 0) {
+            const deletedSet = getDeletedScoreLogIds();
+            parsed.scoreLogs = (parsed.scoreLogs || []).filter(s => !deletedSet.has(s.id));
             return parsed;
           }
         }
@@ -164,17 +184,20 @@ export const fetchSupabaseData = async (defaultData, forceRefresh = false) => {
       result.equipment = eqMap;
     }
 
-    if (scoreLogsData && scoreLogsData.length > 0) {
-      result.scoreLogs = scoreLogsData.map(s => ({
-        id: s.id,
-        archerId: s.archer_id,
-        archerName: s.archer_name,
-        date: s.date,
-        distance: s.distance,
-        totalScore: s.total_score,
-        rounds: parseJson(s.rounds, []),
-        groupingAnalysis: parseJson(s.grouping_analysis, null)
-      }));
+    if (scoreLogsData) {
+      const deletedSet = getDeletedScoreLogIds();
+      result.scoreLogs = scoreLogsData
+        .filter(s => !deletedSet.has(s.id))
+        .map(s => ({
+          id: s.id,
+          archerId: s.archer_id,
+          archerName: s.archer_name,
+          date: s.date,
+          distance: s.distance,
+          totalScore: s.total_score,
+          rounds: parseJson(s.rounds, []),
+          groupingAnalysis: parseJson(s.grouping_analysis, null)
+        }));
     }
 
     if (badgesData && badgesData.length > 0) {
@@ -337,9 +360,13 @@ export const syncSaveScoreLog = async (log) => {
 };
 
 export const syncDeleteScoreLog = async (scoreLogId) => {
+  trackDeletedScoreLog(scoreLogId);
   invalidateCache();
   try {
-    await supabase.from('score_logs').delete().eq('id', scoreLogId);
+    const { error } = await supabase.from('score_logs').delete().eq('id', scoreLogId);
+    if (error) {
+      console.warn("Supabase score log delete notice:", error);
+    }
   } catch (e) {
     console.error("Supabase score log delete error", e);
   }
