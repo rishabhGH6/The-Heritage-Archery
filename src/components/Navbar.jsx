@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { Target, Award, Calendar, MessageSquare, Shield, User, MapPin, Camera, Wrench, LogIn, LogOut, ChevronDown, ChevronRight, UserPlus, Upload, HelpCircle, Key, CheckCircle2, Menu, X, Sparkles, Newspaper } from 'lucide-react';
+import { Target, Award, Calendar, MessageSquare, Shield, User, MapPin, Camera, Wrench, LogIn, LogOut, ChevronDown, ChevronRight, UserPlus, Upload, HelpCircle, Key, CheckCircle2, Menu, X, Sparkles, Newspaper, Info, PhoneCall } from 'lucide-react';
 import { defaultArchers } from '../data/initialData';
 import HeritageLogo from './HeritageLogo';
 
@@ -577,6 +577,14 @@ export default function Navbar({ activeTab, setActiveTab, currentUser, archers, 
               </button>
               <button className={`side-drawer-item stagger-menu-item ${activeTab === 'ai-coach' ? 'active' : ''}`} style={{ '--item-index': 8 }} onClick={() => handleTabClick('ai-coach')}>
                 <Sparkles size={18} color="#fbbf24" /> AI Performance Coach ✨
+              </button>
+
+              <button className={`side-drawer-item stagger-menu-item ${activeTab === 'about' ? 'active' : ''}`} style={{ '--item-index': 9 }} onClick={() => handleTabClick('about')}>
+                <Info size={18} color="#38bdf8" /> About Us ℹ️
+              </button>
+
+              <button className={`side-drawer-item stagger-menu-item ${activeTab === 'contact' ? 'active' : ''}`} style={{ '--item-index': 10 }} onClick={() => handleTabClick('contact')}>
+                <PhoneCall size={18} color="#34d399" /> Contact Us 📞
               </button>
 
               <div className="side-drawer-section-label">User Portals</div>

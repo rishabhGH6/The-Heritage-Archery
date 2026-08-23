@@ -15,6 +15,8 @@ import ArcheryNews from './components/ArcheryNews';
 import AdminControl from './components/AdminControl';
 import CinematicIntro from './components/CinematicIntro';
 import StreakNotificationBanner from './components/StreakNotificationBanner';
+import AboutUs from './components/AboutUs';
+import ContactUs from './components/ContactUs';
 
 import { defaultData, loadAppData, saveAppData, defaultArchers, defaultStreaks, getPersistentSession, savePersistentSession } from './data/initialData';
 import {
@@ -363,6 +365,51 @@ export default function App() {
         {/* Render Tab Contents */}
         {activeTab === 'home' && (
           <div>
+            {/* Top Welcome & Feature Highlights Banner */}
+            <div className="glass-card fade-in-up" style={{
+              padding: '24px 28px',
+              marginBottom: '24px',
+              border: '1px solid rgba(251, 191, 36, 0.35)',
+              background: 'linear-gradient(135deg, rgba(15, 23, 42, 0.95), rgba(5, 150, 105, 0.18), rgba(217, 119, 6, 0.18))',
+              boxShadow: '0 10px 35px rgba(0, 0, 0, 0.4)',
+              borderRadius: '20px',
+              position: 'relative',
+              overflow: 'hidden'
+            }}>
+              <div style={{ display: 'flex', alignItems: 'center', gap: '10px', marginBottom: '12px', flexWrap: 'wrap' }}>
+                <span className="badge-gold">
+                  <Trophy size={13} /> Official Team Portal
+                </span>
+                <span className="badge-emerald">
+                  <Target size={13} /> World Archery Standards 🎯
+                </span>
+              </div>
+
+              <h2 style={{ fontSize: 'clamp(1.25rem, 4vw, 1.85rem)', fontWeight: 800, color: '#f8fafc', marginBottom: '12px', lineHeight: 1.25 }}>
+                Welcome to <span className="metallic-text-shine">The Heritage Archery</span>
+              </h2>
+
+              <p style={{ fontSize: 'clamp(0.9rem, 2.2vw, 1.02rem)', color: '#cbd5e1', lineHeight: 1.65, margin: 0 }}>
+                Welcome to <strong>The Heritage Archery</strong> official team portal—the ultimate training hub built by archers, for archers. Designed around <strong>World Archery</strong> standards, our platform empowers you with <strong>interactive scoring</strong>, <strong>precise bow tuning</strong>, an <strong>official range timer</strong>, and daily practice streak tracking. Manage your <strong>personal archer profile</strong>, view target range schedules, connect directly with Head Coach Jayanta Chakraborty, and leverage AI performance coaching to keep your eyes locked on the gold target!
+              </p>
+
+              {/* Quick Jump Links */}
+              <div style={{ display: 'flex', alignItems: 'center', gap: '10px', marginTop: '18px', flexWrap: 'wrap' }}>
+                <button onClick={() => setActiveTab('scoring')} className="btn-ghost" style={{ fontSize: '0.78rem', padding: '6px 14px', borderRadius: '9999px', border: '1px solid rgba(5, 150, 105, 0.4)', background: 'rgba(5, 150, 105, 0.15)', color: '#a7f3d0' }}>
+                  🎯 Interactive Scoring
+                </button>
+                <button onClick={() => setActiveTab('equipment')} className="btn-ghost" style={{ fontSize: '0.78rem', padding: '6px 14px', borderRadius: '9999px', border: '1px solid rgba(217, 119, 6, 0.4)', background: 'rgba(217, 119, 6, 0.15)', color: '#fde68a' }}>
+                  🔧 Bow Tuning
+                </button>
+                <button onClick={() => setActiveTab('profile')} className="btn-ghost" style={{ fontSize: '0.78rem', padding: '6px 14px', borderRadius: '9999px', border: '1px solid rgba(56, 189, 248, 0.4)', background: 'rgba(56, 189, 248, 0.15)', color: '#bae6fd' }}>
+                  👤 Personal Profile
+                </button>
+                <button onClick={() => setActiveTab('ai-coach')} className="btn-ghost" style={{ fontSize: '0.78rem', padding: '6px 14px', borderRadius: '9999px', border: '1px solid rgba(251, 191, 36, 0.4)', background: 'rgba(251, 191, 36, 0.15)', color: '#fef08a' }}>
+                  ✨ AI Coach
+                </button>
+              </div>
+            </div>
+
             <HeroCoach
               coach={appData.coach}
               venueSchedule={appData.venueSchedule}
@@ -512,6 +559,18 @@ export default function App() {
             onDeleteAnnouncement={handleDeleteAnnouncement}
             onGrantBadge={handleGrantBadge}
             onUpdateCoachPassword={handleUpdateCoachPassword}
+          />
+        {activeTab === 'about' && (
+          <AboutUs
+            setActiveTab={setActiveTab}
+            coach={appData.coach}
+          />
+        )}
+
+        {activeTab === 'contact' && (
+          <ContactUs
+            coach={appData.coach}
+            venueSchedule={appData.venueSchedule}
           />
         )}
 
