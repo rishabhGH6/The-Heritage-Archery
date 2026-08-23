@@ -9,7 +9,7 @@ export default function MyProfile({ currentUser, archers, onUpdateArcher }) {
   )) || {
     id: currentUser.id,
     name: currentUser.name,
-    password: 'archer',
+    password: '',
     photo: 'https://images.unsplash.com/photo-1534528741775-53994a69daeb?auto=format&fit=crop&w=400&q=80',
     category: 'Junior',
     occupation: 'Student',
@@ -178,7 +178,7 @@ export default function MyProfile({ currentUser, archers, onUpdateArcher }) {
                   <input
                     type={showPassword ? "text" : "password"}
                     className="input-glass"
-                    value={formData.password || 'archer'}
+                    value={formData.password || ''}
                     onChange={(e) => setFormData({ ...formData, password: e.target.value })}
                     required
                   />

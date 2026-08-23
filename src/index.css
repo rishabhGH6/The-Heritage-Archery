@@ -272,11 +272,80 @@ h1, h2, h3, h4, h5, h6 {
   position: sticky;
   top: 0;
   z-index: 999;
-  background: rgba(6, 11, 19, 0.85);
+  background: rgba(6, 11, 19, 0.92);
   backdrop-filter: blur(16px);
   -webkit-backdrop-filter: blur(16px);
   border-bottom: 1px solid var(--border-glass);
+  width: 100%;
 }
+
+.nav-container {
+  max-width: 1280px;
+  width: 100%;
+  margin: 0 auto;
+  padding: 12px 20px;
+  box-sizing: border-box;
+}
+
+.nav-desktop-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
+  width: 100%;
+}
+
+.nav-mobile-stacked {
+  display: none;
+  flex-direction: column;
+  align-items: center;
+  gap: 8px;
+  width: 100%;
+}
+
+.nav-mobile-top-row {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  cursor: pointer;
+  width: 100%;
+}
+
+.nav-mobile-bottom-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+  width: 100%;
+  padding-top: 6px;
+  border-top: 1px solid rgba(255, 255, 255, 0.08);
+}
+
+.main-app-container {
+  max-width: 1280px;
+  width: 100%;
+  margin: 0 auto;
+  padding: 24px 20px;
+  flex: 1;
+  box-sizing: border-box;
+}
+
+@media (max-width: 768px) {
+  .nav-container {
+    padding: 10px 14px;
+  }
+  .nav-desktop-row {
+    display: none !important;
+  }
+  .nav-mobile-stacked {
+    display: flex !important;
+  }
+  .main-app-container {
+    padding: 14px;
+  }
+}
+
 
 /* Side Drawer Navigation Menu Overlay & Container */
 .side-drawer-overlay {

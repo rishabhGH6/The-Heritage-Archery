@@ -41,12 +41,15 @@ export default function Navbar({ activeTab, setActiveTab, currentUser, archers, 
     setPasswordError('');
 
     if (selectedRole === 'coach') {
-      if (inputPassword === coach.password) {
+      const coachPassInput = (inputPassword || '').trim();
+      const coachPassStored = (coach.password || '').trim();
+
+      if (coachPassInput && coachPassStored && coachPassInput === coachPassStored) {
         onSwitchUser({ role: 'coach', id: 'coach', name: coach.name });
         setShowRoleModal(false);
         setInputPassword('');
       } else {
-        setPasswordError('Incorrect Coach Password. Password for Head Coach is "STAR@Archery".');
+        setPasswordError('Incorrect password for Head Coach Jayanta Chakraborty. Please enter your set password.');
       }
     } else if (selectedRole === 'new_archer') {
       if (!regName.trim() || !regPass.trim()) {
@@ -110,9 +113,8 @@ export default function Navbar({ activeTab, setActiveTab, currentUser, archers, 
         if (expectedAnswer && givenAnswer === expectedAnswer) {
           setForgotVerified(true);
           setPasswordError('');
-        } else if (!expectedAnswer && givenAnswer !== "") {
-          setForgotVerified(true);
-          setPasswordError('');
+        } else if (!expectedAnswer) {
+          setPasswordError('Security answer has not been configured for this account. Please contact Admin or Head Coach to reset your password.');
         } else {
           setPasswordError('Incorrect answer to security question: What is your highest score?');
         }
@@ -162,16 +164,13 @@ export default function Navbar({ activeTab, setActiveTab, currentUser, archers, 
       }
 
       const passTrimmed = (inputPassword || '').trim();
-      const storedPass = (archer.password || 'archer').trim();
+      const storedPass = (archer.password || '').trim();
 
-      // Allow matching stored password, stored password case-insensitive, 'archer', 'Rishabh14102004', 'STAR@Archery', 'archer123'
-      const isPasswordValid = 
+      // Accounts can ONLY be accessed by using the password specifically set for that account
+      const isPasswordValid = storedPass.length > 0 && (
         passTrimmed === storedPass ||
-        passTrimmed.toLowerCase() === storedPass.toLowerCase() ||
-        passTrimmed === 'archer' ||
-        passTrimmed === 'Rishabh14102004' ||
-        passTrimmed === 'STAR@Archery' ||
-        passTrimmed === 'archer123';
+        passTrimmed.toLowerCase() === storedPass.toLowerCase()
+      );
 
       if (isPasswordValid) {
         onSwitchUser({ role: 'archer', id: archer.id, name: archer.name });
@@ -180,7 +179,7 @@ export default function Navbar({ activeTab, setActiveTab, currentUser, archers, 
         setInputArcherName('');
         setPasswordError('');
       } else {
-        setPasswordError(`Incorrect password for ${archer.name}. (Default account password is "archer"). Click "Forgot Password?" above to reset.`);
+        setPasswordError(`Incorrect password for ${archer.name}. Account can only be accessed using the password set for this profile. Click "Forgot Password?" above if you need to reset.`);
       }
     }
   };
@@ -190,88 +189,91 @@ export default function Navbar({ activeTab, setActiveTab, currentUser, archers, 
     setSideMenuOpen(false);
   };
 
+  const activeUserPhoto = currentUser.role === 'coach' 
+    ? coach?.photo 
+    : (archers.find(a => a.id === currentUser.id)?.photo || currentUser.photo);
+
   return (
-    <header className="app-sticky-header">
-      <div style={{ maxWidth: '1280px', margin: '0 auto', padding: '12px 20px', display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: '16px' }}>
+    <>
+      <header className="app-sticky-header">
+        <div className="nav-container">
         
-        {/* Left Side: Side Menu Trigger Button + Brand Logo */}
-        <div style={{ display: 'flex', alignItems: 'center', gap: '14px' }}>
-          <button 
-            className="side-menu-trigger-btn"
-            onClick={() => setSideMenuOpen(true)}
-            aria-label="Open side navigation menu"
-          >
-            <Menu size={20} />
-            <span>Menu</span>
-          </button>
-
-          <div style={{ display: 'flex', alignItems: 'center', gap: '12px', cursor: 'pointer' }} onClick={() => handleTabClick('home')}>
-            <div style={{
-              background: 'linear-gradient(135deg, rgba(217, 119, 6, 0.2), rgba(5, 150, 105, 0.2))',
-              padding: '8px',
-              borderRadius: '12px',
-              border: '1px solid rgba(251, 191, 36, 0.4)',
-              boxShadow: '0 4px 15px rgba(217, 119, 6, 0.35)',
-              display: 'flex',
-              alignItems: 'center',
-              justifyContent: 'center'
-            }}>
-              <Target size={26} color="#fbbf24" />
-            </div>
-            <div>
-              <h1 style={{ fontSize: '1.25rem', fontWeight: 800, background: 'linear-gradient(90deg, #f8fafc, #fbbf24)', WebkitBackgroundClip: 'text', WebkitTextFillColor: 'transparent', lineHeight: 1.1, whiteSpace: 'nowrap' }}>
-                THE HERITAGE ARCHERY
-              </h1>
-              <span style={{ fontSize: '0.68rem', color: '#94a3b8', fontWeight: 600, letterSpacing: '0.08em', textTransform: 'uppercase' }}>
-                College Team Portal
-              </span>
-            </div>
-          </div>
-        </div>
-
-        {/* Right Side: Account Switch Badge + Sign Out */}
-        <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
-          {currentUser.role === 'guest' ? (
+        {/* DESKTOP NAVBAR VIEW (>= 769px) */}
+        <div className="nav-desktop-row">
+          
+          {/* Left Side: Side Menu Trigger Button + Brand Logo */}
+          <div style={{ display: 'flex', alignItems: 'center', gap: '14px' }}>
             <button 
-              onClick={() => setShowRoleModal(true)}
-              className="btn-gold"
-              style={{
+              className="side-menu-trigger-btn"
+              onClick={() => setSideMenuOpen(true)}
+              aria-label="Open side navigation menu"
+            >
+              <Menu size={20} />
+              <span>Menu</span>
+            </button>
+
+            <div style={{ display: 'flex', alignItems: 'center', gap: '12px', cursor: 'pointer' }} onClick={() => handleTabClick('home')}>
+              <div style={{
+                background: 'linear-gradient(135deg, rgba(217, 119, 6, 0.2), rgba(5, 150, 105, 0.2))',
+                padding: '8px',
+                borderRadius: '12px',
+                border: '1px solid rgba(251, 191, 36, 0.4)',
+                boxShadow: '0 4px 15px rgba(217, 119, 6, 0.35)',
                 display: 'flex',
                 alignItems: 'center',
-                gap: '8px',
-                padding: '8px 16px',
-                borderRadius: '9999px',
-                fontSize: '0.85rem',
-                fontWeight: 700,
-                boxShadow: '0 4px 15px rgba(217, 119, 6, 0.4)'
-              }}
-            >
-              <LogIn size={16} /> Login / Sign Up
-            </button>
-          ) : (
-            <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
-              <div 
+                justifyContent: 'center'
+              }}>
+                <Target size={26} color="#fbbf24" />
+              </div>
+              <div>
+                <h1 style={{ fontSize: '1.25rem', fontWeight: 800, background: 'linear-gradient(90deg, #f8fafc, #fbbf24)', WebkitBackgroundClip: 'text', WebkitTextFillColor: 'transparent', lineHeight: 1.1, whiteSpace: 'nowrap' }}>
+                  THE HERITAGE ARCHERY
+                </h1>
+                <span style={{ fontSize: '0.68rem', color: '#94a3b8', fontWeight: 600, letterSpacing: '0.08em', textTransform: 'uppercase' }}>
+                  College Team Portal
+                </span>
+              </div>
+            </div>
+          </div>
+
+          {/* Right Side: Account Switch Badge + Sign Out */}
+          <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
+            {currentUser.role === 'guest' ? (
+              <button 
                 onClick={() => setShowRoleModal(true)}
+                className="btn-gold"
                 style={{
                   display: 'flex',
                   alignItems: 'center',
                   gap: '8px',
-                  padding: '6px 12px',
+                  padding: '8px 16px',
                   borderRadius: '9999px',
-                  background: currentUser.role === 'coach' ? 'rgba(217, 119, 6, 0.15)' : 'rgba(5, 150, 105, 0.15)',
-                  border: `1px solid ${currentUser.role === 'coach' ? 'rgba(217, 119, 6, 0.4)' : 'rgba(5, 150, 105, 0.4)'}`,
-                  cursor: 'pointer',
-                  transition: 'all 0.2s ease'
+                  fontSize: '0.85rem',
+                  fontWeight: 700,
+                  boxShadow: '0 4px 15px rgba(217, 119, 6, 0.4)'
                 }}
               >
-                {(() => {
-                  const userPhoto = currentUser.role === 'coach' 
-                    ? coach?.photo 
-                    : (archers.find(a => a.id === currentUser.id)?.photo || currentUser.photo);
-                  
-                  return userPhoto ? (
+                <LogIn size={16} /> Login / Sign Up
+              </button>
+            ) : (
+              <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+                <div 
+                  onClick={() => setShowRoleModal(true)}
+                  style={{
+                    display: 'flex',
+                    alignItems: 'center',
+                    gap: '8px',
+                    padding: '6px 12px',
+                    borderRadius: '9999px',
+                    background: currentUser.role === 'coach' ? 'rgba(217, 119, 6, 0.15)' : 'rgba(5, 150, 105, 0.15)',
+                    border: `1px solid ${currentUser.role === 'coach' ? 'rgba(217, 119, 6, 0.4)' : 'rgba(5, 150, 105, 0.4)'}`,
+                    cursor: 'pointer',
+                    transition: 'all 0.2s ease'
+                  }}
+                >
+                  {activeUserPhoto ? (
                     <img 
-                      src={userPhoto} 
+                      src={activeUserPhoto} 
                       alt={currentUser.name} 
                       style={{
                         width: '28px',
@@ -296,42 +298,191 @@ export default function Navbar({ activeTab, setActiveTab, currentUser, archers, 
                     }}>
                       {currentUser.role === 'coach' ? 'C' : 'A'}
                     </div>
-                  );
-                })()}
-                <div>
-                  <div style={{ fontSize: '0.8rem', fontWeight: 700, color: '#f8fafc', lineHeight: 1.1 }}>
-                    {currentUser.name}
+                  )}
+                  <div>
+                    <div style={{ fontSize: '0.8rem', fontWeight: 700, color: '#f8fafc', lineHeight: 1.1 }}>
+                      {currentUser.name}
+                    </div>
+                    <div style={{ fontSize: '0.65rem', color: currentUser.role === 'coach' ? '#fbbf24' : '#34d399', fontWeight: 600 }}>
+                      {currentUser.role === 'coach' ? 'Coach' : 'Archer'}
+                    </div>
                   </div>
-                  <div style={{ fontSize: '0.65rem', color: currentUser.role === 'coach' ? '#fbbf24' : '#34d399', fontWeight: 600 }}>
-                    {currentUser.role === 'coach' ? 'Coach' : 'Archer'}
-                  </div>
+                  <ChevronDown size={14} color="#94a3b8" />
                 </div>
-                <ChevronDown size={14} color="#94a3b8" />
-              </div>
 
-              {/* Header Sign Out Quick Button */}
-              <button
-                onClick={handleSignOut}
-                title="Sign Out to Guest Mode"
-                style={{
-                  background: 'rgba(239, 68, 68, 0.15)',
-                  border: '1px solid rgba(239, 68, 68, 0.4)',
-                  color: '#ef4444',
-                  padding: '7px 10px',
-                  borderRadius: '9999px',
-                  cursor: 'pointer',
-                  display: 'flex',
-                  alignItems: 'center',
-                  justifyContent: 'center'
-                }}
-              >
-                <LogOut size={15} />
-              </button>
+                {/* Header Sign Out Quick Button */}
+                <button
+                  onClick={handleSignOut}
+                  title="Sign Out to Guest Mode"
+                  style={{
+                    background: 'rgba(239, 68, 68, 0.15)',
+                    border: '1px solid rgba(239, 68, 68, 0.4)',
+                    color: '#ef4444',
+                    padding: '7px 10px',
+                    borderRadius: '9999px',
+                    cursor: 'pointer',
+                    display: 'flex',
+                    alignItems: 'center',
+                    justifyContent: 'center'
+                  }}
+                >
+                  <LogOut size={15} />
+                </button>
+              </div>
+            )}
+          </div>
+
+        </div>
+
+        {/* MOBILE NAVBAR VIEW (<= 768px): Stacked Layout */}
+        <div className="nav-mobile-stacked">
+          
+          {/* Row 1: Brand Title ONLY ("THE HERITAGE ARCHERY") */}
+          <div className="nav-mobile-top-row" onClick={() => handleTabClick('home')}>
+            <div style={{
+              background: 'linear-gradient(135deg, rgba(217, 119, 6, 0.2), rgba(5, 150, 105, 0.2))',
+              padding: '6px',
+              borderRadius: '10px',
+              border: '1px solid rgba(251, 191, 36, 0.4)',
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'center',
+              flexShrink: 0
+            }}>
+              <Target size={20} color="#fbbf24" />
             </div>
-          )}
+            <div style={{ textAlign: 'center' }}>
+              <h1 style={{
+                fontSize: 'clamp(1rem, 4.8vw, 1.25rem)',
+                fontWeight: 900,
+                background: 'linear-gradient(90deg, #f8fafc, #fbbf24)',
+                WebkitBackgroundClip: 'text',
+                WebkitTextFillColor: 'transparent',
+                lineHeight: 1.1,
+                letterSpacing: '0.04em',
+                margin: 0,
+                whiteSpace: 'nowrap'
+              }}>
+                THE HERITAGE ARCHERY
+              </h1>
+              <span style={{ fontSize: '0.62rem', color: '#34d399', fontWeight: 700, letterSpacing: '0.1em', textTransform: 'uppercase' }}>
+                College Team Portal
+              </span>
+            </div>
+          </div>
+
+          {/* Row 2: Menu on Left, Account & Logout on Right */}
+          <div className="nav-mobile-bottom-row">
+            
+            {/* Left Option: Menu */}
+            <button 
+              className="side-menu-trigger-btn"
+              onClick={() => setSideMenuOpen(true)}
+              aria-label="Open side navigation menu"
+              style={{ padding: '6px 12px', fontSize: '0.82rem' }}
+            >
+              <Menu size={18} />
+              <span>Menu</span>
+            </button>
+
+            {/* Right Options: Account & Logout */}
+            <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+              {currentUser.role === 'guest' ? (
+                <button 
+                  onClick={() => setShowRoleModal(true)}
+                  className="btn-gold"
+                  style={{
+                    display: 'flex',
+                    alignItems: 'center',
+                    gap: '6px',
+                    padding: '6px 14px',
+                    borderRadius: '9999px',
+                    fontSize: '0.8rem',
+                    fontWeight: 700
+                  }}
+                >
+                  <LogIn size={15} /> Login / Sign Up
+                </button>
+              ) : (
+                <>
+                  <div 
+                    onClick={() => setShowRoleModal(true)}
+                    style={{
+                      display: 'flex',
+                      alignItems: 'center',
+                      gap: '6px',
+                      padding: '5px 10px',
+                      borderRadius: '9999px',
+                      background: currentUser.role === 'coach' ? 'rgba(217, 119, 6, 0.15)' : 'rgba(5, 150, 105, 0.15)',
+                      border: `1px solid ${currentUser.role === 'coach' ? 'rgba(217, 119, 6, 0.4)' : 'rgba(5, 150, 105, 0.4)'}`,
+                      cursor: 'pointer',
+                      maxWidth: '160px'
+                    }}
+                  >
+                    {activeUserPhoto ? (
+                      <img 
+                        src={activeUserPhoto} 
+                        alt={currentUser.name} 
+                        style={{ width: '22px', height: '22px', borderRadius: '50%', objectFit: 'cover', flexShrink: 0 }}
+                      />
+                    ) : (
+                      <div style={{
+                        width: '22px',
+                        height: '22px',
+                        borderRadius: '50%',
+                        background: currentUser.role === 'coach' ? '#d97706' : '#059669',
+                        display: 'flex',
+                        alignItems: 'center',
+                        justifyContent: 'center',
+                        fontWeight: 'bold',
+                        fontSize: '0.7rem',
+                        color: '#ffffff',
+                        flexShrink: 0
+                      }}>
+                        {currentUser.role === 'coach' ? 'C' : 'A'}
+                      </div>
+                    )}
+                    <span style={{
+                      fontSize: '0.78rem',
+                      fontWeight: 700,
+                      color: '#f8fafc',
+                      whiteSpace: 'nowrap',
+                      overflow: 'hidden',
+                      textOverflow: 'ellipsis'
+                    }}>
+                      {currentUser.name}
+                    </span>
+                    <ChevronDown size={13} color="#94a3b8" style={{ flexShrink: 0 }} />
+                  </div>
+
+                  <button
+                    onClick={handleSignOut}
+                    title="Sign Out"
+                    style={{
+                      background: 'rgba(239, 68, 68, 0.15)',
+                      border: '1px solid rgba(239, 68, 68, 0.4)',
+                      color: '#ef4444',
+                      padding: '6px 9px',
+                      borderRadius: '9999px',
+                      cursor: 'pointer',
+                      display: 'flex',
+                      alignItems: 'center',
+                      justifyContent: 'center',
+                      flexShrink: 0
+                    }}
+                  >
+                    <LogOut size={15} />
+                  </button>
+                </>
+              )}
+            </div>
+
+          </div>
+
         </div>
 
       </div>
+    </header>
 
       {/* Left Slide-Out Navigation Drawer */}
       {sideMenuOpen && (
@@ -785,6 +936,6 @@ export default function Navbar({ activeTab, setActiveTab, currentUser, archers, 
           </div>
         </div>
       )}
-    </header>
+    </>
   );
 }

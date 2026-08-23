@@ -33,14 +33,20 @@ export default function CinematicIntro({ onComplete }) {
   return (
     <div style={{
       position: 'fixed',
-      inset: 0,
+      top: 0,
+      left: 0,
+      right: 0,
+      bottom: 0,
+      width: '100vw',
+      height: '100dvh',
       zIndex: 99999,
       background: 'radial-gradient(circle at 50% 45%, #0f172a 0%, #060b13 70%, #030712 100%)',
       display: 'flex',
       flexDirection: 'column',
       alignItems: 'center',
       justifyContent: 'center',
-      padding: '24px',
+      padding: '16px',
+      boxSizing: 'border-box',
       overflow: 'hidden',
       color: '#f8fafc',
       userSelect: 'none'
@@ -51,14 +57,14 @@ export default function CinematicIntro({ onComplete }) {
         onClick={onComplete}
         style={{
           position: 'absolute',
-          top: '24px',
-          right: '24px',
+          top: '16px',
+          right: '16px',
           background: 'rgba(255, 255, 255, 0.06)',
           border: '1px solid rgba(255, 255, 255, 0.15)',
           color: '#cbd5e1',
-          padding: '8px 18px',
+          padding: '7px 16px',
           borderRadius: '9999px',
-          fontSize: '0.82rem',
+          fontSize: '0.78rem',
           fontWeight: 700,
           cursor: 'pointer',
           transition: 'all 0.3s ease',
@@ -82,8 +88,8 @@ export default function CinematicIntro({ onComplete }) {
       {/* Ambient Gold Radial Glow */}
       <div style={{
         position: 'absolute',
-        width: '750px',
-        height: '750px',
+        width: 'min(700px, 90vw)',
+        height: 'min(700px, 90vw)',
         background: phase === 3
           ? 'radial-gradient(circle, rgba(251, 191, 36, 0.22) 0%, rgba(5, 150, 105, 0.15) 40%, transparent 70%)'
           : 'radial-gradient(circle, rgba(5, 150, 105, 0.1) 0%, rgba(217, 119, 6, 0.06) 45%, transparent 70%)',
@@ -97,21 +103,22 @@ export default function CinematicIntro({ onComplete }) {
         position: 'relative',
         width: '100%',
         maxWidth: '750px',
-        minHeight: '380px',
+        minHeight: '320px',
         display: 'flex',
         flexDirection: 'column',
         alignItems: 'center',
         justifyContent: 'center',
-        textAlign: 'center'
+        textAlign: 'center',
+        boxSizing: 'border-box'
       }}>
 
         {/* Phase 1: WELCOME (with Fade In & Fade Out) */}
         {phase === 1 && (
           <div className="intro-text-fade">
             <h1 style={{
-              fontSize: '3.6rem',
+              fontSize: 'clamp(1.8rem, 8vw, 3.6rem)',
               fontWeight: 900,
-              letterSpacing: '0.25em',
+              letterSpacing: '0.2em',
               textTransform: 'uppercase',
               background: 'linear-gradient(180deg, #ffffff 0%, #cbd5e1 100%)',
               WebkitBackgroundClip: 'text',
@@ -128,9 +135,9 @@ export default function CinematicIntro({ onComplete }) {
         {phase === 2 && (
           <div className="intro-text-fade">
             <p style={{
-              fontSize: '2rem',
+              fontSize: 'clamp(1.15rem, 5vw, 2rem)',
               fontWeight: 500,
-              letterSpacing: '0.12em',
+              letterSpacing: '0.08em',
               color: '#fbbf24',
               fontStyle: 'italic',
               margin: 0,
@@ -143,17 +150,20 @@ export default function CinematicIntro({ onComplete }) {
 
         {/* Phase 3: TITLE + SUBTITLE + CTA */}
         {phase === 3 && (
-          <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '22px', zIndex: 20 }}>
+          <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '16px', zIndex: 20, width: '100%', boxSizing: 'border-box' }}>
             
-            {/* Title: THE HERITAGE ARCHERY (Stays on 1 Single Line) */}
+            {/* Title: THE HERITAGE ARCHERY */}
             <h1 className="metallic-text-shine" style={{
-              fontSize: 'clamp(1.6rem, 5.5vw, 3.4rem)',
+              fontSize: 'clamp(1.1rem, 5.5vw, 3.4rem)',
               fontWeight: 900,
-              letterSpacing: '0.06em',
+              letterSpacing: '0.04em',
               textTransform: 'uppercase',
               margin: 0,
-              lineHeight: 1,
+              lineHeight: 1.15,
               whiteSpace: 'nowrap',
+              maxWidth: '100%',
+              overflow: 'hidden',
+              textOverflow: 'ellipsis',
               filter: 'drop-shadow(0 8px 30px rgba(217, 119, 6, 0.4))'
             }}>
               THE HERITAGE ARCHERY
@@ -161,35 +171,39 @@ export default function CinematicIntro({ onComplete }) {
 
             {/* Subtitle: College Team Portal */}
             <div style={{
-              fontSize: '1.05rem',
+              fontSize: 'clamp(0.72rem, 3.2vw, 1.05rem)',
               fontWeight: 700,
               color: '#34d399',
-              letterSpacing: '0.22em',
+              letterSpacing: '0.14em',
               textTransform: 'uppercase',
               background: 'rgba(5, 150, 105, 0.15)',
               border: '1px solid rgba(5, 150, 105, 0.4)',
-              padding: '6px 24px',
+              padding: '5px 18px',
               borderRadius: '9999px',
-              boxShadow: '0 4px 20px rgba(5, 150, 105, 0.25)'
+              boxShadow: '0 4px 20px rgba(5, 150, 105, 0.25)',
+              whiteSpace: 'nowrap'
             }}>
               College Team Portal
             </div>
 
             {/* Tagline: Made by Archers for Archers */}
             <p style={{
-              fontSize: '1.05rem',
+              fontSize: 'clamp(0.75rem, 2.8vw, 1.05rem)',
               fontWeight: 700,
               color: '#fbbf24',
-              letterSpacing: '0.18em',
+              letterSpacing: '0.08em',
               textTransform: 'uppercase',
               margin: 0,
               display: 'flex',
               alignItems: 'center',
-              gap: '16px'
+              justifyContent: 'center',
+              gap: '8px',
+              width: '100%',
+              whiteSpace: 'nowrap'
             }}>
-              <span style={{ height: '1px', width: '45px', background: 'rgba(251, 191, 36, 0.4)' }} />
-              Made by Archers for Archers
-              <span style={{ height: '1px', width: '45px', background: 'rgba(251, 191, 36, 0.4)' }} />
+              <span style={{ height: '1px', flex: '0 1 30px', minWidth: '8px', background: 'rgba(251, 191, 36, 0.4)' }} />
+              <span>Made by Archers for Archers</span>
+              <span style={{ height: '1px', flex: '0 1 30px', minWidth: '8px', background: 'rgba(251, 191, 36, 0.4)' }} />
             </p>
 
             {/* ENTER PORTAL Button */}
@@ -197,19 +211,21 @@ export default function CinematicIntro({ onComplete }) {
               onClick={onComplete}
               className="btn-gold"
               style={{
-                marginTop: '12px',
-                padding: '16px 52px',
-                fontSize: '1.1rem',
+                marginTop: '8px',
+                padding: '14px 36px',
+                fontSize: 'clamp(0.95rem, 3.8vw, 1.1rem)',
                 borderRadius: '9999px',
                 boxShadow: '0 10px 35px rgba(217, 119, 6, 0.5)',
                 cursor: 'pointer',
                 display: 'flex',
                 alignItems: 'center',
-                gap: '12px',
-                fontWeight: 800
+                gap: '10px',
+                fontWeight: 800,
+                maxWidth: '90%',
+                justifyContent: 'center'
               }}
             >
-              ENTER PORTAL <ArrowRight size={22} />
+              ENTER PORTAL <ArrowRight size={20} />
             </button>
 
           </div>

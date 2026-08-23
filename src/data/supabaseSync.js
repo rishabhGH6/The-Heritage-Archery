@@ -74,7 +74,7 @@ export const fetchSupabaseData = async (defaultData, forceRefresh = false) => {
           id: a.id,
           altId: defaultA?.id,
           name: a.name,
-          password: a.password || 'archer',
+          password: a.password || defaultA?.password || '',
           securityAnswer: a.security_answer || '',
           photo: (a.photo && a.photo.trim().length > 5) ? a.photo : fallbackPhoto,
           category: a.category || defaultA?.category || 'Junior',

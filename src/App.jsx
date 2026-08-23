@@ -344,7 +344,7 @@ export default function App() {
       />
 
       {/* Main App Container with Smooth Entrance Transitions */}
-      <main className="fade-in-up" key={activeTab} style={{ maxWidth: '1280px', width: '100%', margin: '0 auto', padding: '24px 20px', flex: 1 }}>
+      <main className="main-app-container fade-in-up" key={activeTab}>
         
         {/* GLOBAL STREAK NOTIFICATION BANNER (For All Users) */}
         <StreakNotificationBanner

@@ -33,7 +33,7 @@ export default function ArcherDirectory({ archers, currentUser, coach, onUpdateA
     const newObj = {
       id: "archer_" + Date.now(),
       name: newArcherName.trim(),
-      password: newArcherPass || 'archer',
+      password: newArcherPass.trim(),
       photo: "https://images.unsplash.com/photo-1534528741775-53994a69daeb?auto=format&fit=crop&w=400&q=80",
       category: newArcherCategory,
       occupation: newArcherOccupation,

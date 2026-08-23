@@ -1,9 +1,54 @@
 import React from 'react';
-import { Award, Flame, CheckCircle2, Calendar, Trophy, Medal, Star } from 'lucide-react';
+import { Award, Flame, CheckCircle2, Calendar, Trophy, Medal, Star, Zap } from 'lucide-react';
+import confetti from 'canvas-confetti';
 
 export default function Leaderboard({ archers, streaks, currentUser, onCheckInStreak }) {
   // Map archers with their streak stats
   const todayStr = new Date().toISOString().split('T')[0];
+
+  // Match current active user's archer ID
+  const activeUserArcher = archers.find(a => 
+    a.id === currentUser?.id || 
+    (a.name && currentUser?.name && a.name.trim().toLowerCase() === currentUser.name.trim().toLowerCase())
+  );
+  
+  const targetCheckInId = currentUser?.role === 'guest' 
+    ? null 
+    : (activeUserArcher?.id || currentUser?.id || 'coach');
+
+  const currentStreakObj = targetCheckInId ? streaks[targetCheckInId] : null;
+  const isCheckedInToday = currentStreakObj?.lastChecked === todayStr;
+
+  const handleMarkPracticedToday = () => {
+    if (!currentUser || currentUser.role === 'guest') {
+      alert("🔒 Guest Mode: Please log in to your Archer or Coach account to track daily practice streaks!");
+      return;
+    }
+
+    if (!targetCheckInId) {
+      alert("Please log in to your archer account to check in for practice.");
+      return;
+    }
+
+    // Trigger celebratory confetti animation
+    try {
+      confetti({
+        particleCount: 110,
+        spread: 85,
+        origin: { y: 0.5 },
+        colors: ['#059669', '#d97706', '#fbbf24', '#3b82f6', '#f59e0b']
+      });
+    } catch (err) {}
+
+    if (isCheckedInToday) {
+      alert(`🎯 ${currentUser.name}, you are already checked in for today's practice! Active streak: 🔥 ${currentStreakObj?.count || 0} Days!`);
+    } else {
+      if (onCheckInStreak) {
+        onCheckInStreak(targetCheckInId);
+      }
+      alert(`🎉 Practice Checked In Successfully! Streak updated for ${currentUser.name}! Keep up the momentum! 🔥`);
+    }
+  };
   
   const getEffectiveStreak = (stObj) => {
     if (!stObj) return 0;
@@ -95,15 +140,24 @@ export default function Leaderboard({ archers, streaks, currentUser, onCheckInSt
           </p>
         </div>
 
-        {currentUser.role === 'archer' && (
-          <button 
-            onClick={() => onCheckInStreak(currentUser.id)}
-            className="btn-emerald"
-            style={{ padding: '12px 20px' }}
-          >
-            <Flame size={18} /> Mark Practiced Today (+1)
-          </button>
-        )}
+        <button 
+          onClick={handleMarkPracticedToday}
+          className="btn-emerald hover-lift"
+          style={{
+            padding: '10px 20px',
+            borderRadius: '9999px',
+            fontWeight: 800,
+            fontSize: '0.88rem',
+            cursor: 'pointer',
+            boxShadow: '0 6px 20px rgba(5, 150, 105, 0.4)',
+            display: 'flex',
+            alignItems: 'center',
+            gap: '8px'
+          }}
+        >
+          <Flame size={18} color="#fbbf24" style={{ filter: 'drop-shadow(0 0 6px #fbbf24)' }} />
+          <span>{isCheckedInToday ? '✓ Practiced Today!' : 'Mark Practiced Today (+1)'}</span>
+        </button>
       </div>
 
       {/* Leaderboard Cards Grid */}
@@ -174,6 +228,35 @@ export default function Leaderboard({ archers, streaks, currentUser, onCheckInSt
                 <span>Practicing: <strong style={{ color: '#34d399' }}>{archer.currentlyPracticing}</strong></span>
                 <span>Last: {archer.lastChecked || 'Not yet'}</span>
               </div>
+
+              {((activeUserArcher && activeUserArcher.id === archer.id) || (currentUser?.id === archer.id)) && (
+                <div style={{ marginTop: '12px', paddingTop: '10px', borderTop: '1px solid rgba(255, 255, 255, 0.08)', display: 'flex', justifyContent: 'flex-end' }}>
+                  <button
+                    onClick={handleMarkPracticedToday}
+                    className={isCheckedInToday ? "btn-ghost" : "btn-emerald"}
+                    style={{
+                      padding: '6px 14px',
+                      fontSize: '0.78rem',
+                      borderRadius: '9999px',
+                      fontWeight: 800,
+                      display: 'flex',
+                      alignItems: 'center',
+                      gap: '6px',
+                      cursor: 'pointer'
+                    }}
+                  >
+                    {isCheckedInToday ? (
+                      <>
+                        <CheckCircle2 size={14} color="#34d399" /> Checked In Today
+                      </>
+                    ) : (
+                      <>
+                        <Zap size={14} /> Quick Check In Today
+                      </>
+                    )}
+                  </button>
+                </div>
+              )}
 
             </div>
           );
