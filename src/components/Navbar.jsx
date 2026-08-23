@@ -156,7 +156,18 @@ export default function Navbar({ activeTab, setActiveTab, currentUser, archers, 
         return;
       }
 
-      const archer = displayArchers.find(a => a.name.trim().toLowerCase() === targetNameLower);
+      // Robust normalized search across current archers and default list
+      const normalize = (str) => (str || '').trim().toLowerCase().replace(/ψ/g, 'y').replace(/[^a-z0-9]/g, '');
+      const targetClean = (inputArcherName || '').trim().toLowerCase();
+      const targetNorm = normalize(inputArcherName);
+
+      const allSearchList = [...(archers || []), ...displayArchers, ...defaultArchers];
+      const archer = allSearchList.find(a => 
+        a.name.trim().toLowerCase() === targetClean ||
+        (targetNorm && normalize(a.name) === targetNorm) ||
+        (a.id && a.id.toLowerCase() === targetClean) ||
+        (a.altId && a.altId.toLowerCase() === targetClean)
+      );
 
       if (!archer) {
         setPasswordError(`No archer profile found matching "${inputArcherName.trim()}". Please check your spelling or click "New Archer" to register!`);
