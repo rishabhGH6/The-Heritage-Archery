@@ -9,6 +9,43 @@ const InstagramIcon = ({ size = 20, color = "currentColor" }) => (
   </svg>
 );
 
+const compressImage = (file, maxWidth = 800, maxHeight = 800, quality = 0.8) => {
+  return new Promise((resolve) => {
+    const reader = new FileReader();
+    reader.onload = (e) => {
+      const img = new Image();
+      img.onload = () => {
+        const canvas = document.createElement('canvas');
+        let width = img.width;
+        let height = img.height;
+
+        if (width > height) {
+          if (width > maxWidth) {
+            height = Math.round((height * maxWidth) / width);
+            width = maxWidth;
+          }
+        } else {
+          if (height > maxHeight) {
+            width = Math.round((width * maxHeight) / height);
+            height = maxHeight;
+          }
+        }
+
+        canvas.width = width;
+        canvas.height = height;
+        const ctx = canvas.getContext('2d');
+        ctx.drawImage(img, 0, 0, width, height);
+        const dataUrl = canvas.toDataURL('image/jpeg', quality);
+        resolve(dataUrl);
+      };
+      img.onerror = () => resolve(e.target.result);
+      img.src = e.target.result;
+    };
+    reader.onerror = () => resolve(null);
+    reader.readAsDataURL(file);
+  });
+};
+
 export default function GalleryInstagram({ archers, currentUser, onAddPhoto }) {
   const [showUploadModal, setShowUploadModal] = useState(false);
   const [maximizedPhoto, setMaximizedPhoto] = useState(null);
@@ -207,12 +244,15 @@ export default function GalleryInstagram({ archers, currentUser, onAddPhoto }) {
                   accept="image/*"
                   id="gallery-modal-picker"
                   style={{ display: 'none' }}
-                  onChange={(e) => {
+                  onChange={async (e) => {
                     const file = e.target.files[0];
                     if (file) {
-                      const reader = new FileReader();
-                      reader.onloadend = () => setPhotoUrl(reader.result);
-                      reader.readAsDataURL(file);
+                      try {
+                        const compressed = await compressImage(file, 800, 800, 0.8);
+                        if (compressed) setPhotoUrl(compressed);
+                      } catch (err) {
+                        console.warn("Gallery photo compress error:", err);
+                      }
                     }
                   }}
                 />

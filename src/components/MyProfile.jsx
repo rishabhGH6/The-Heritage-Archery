@@ -1,6 +1,43 @@
 import React, { useState } from 'react';
 import { User, Edit3, Lock, Plus, Trash2, Award, Calendar, Briefcase, Camera, Save, CheckCircle2, Shield, Eye, EyeOff, Upload } from 'lucide-react';
 
+const compressImage = (file, maxWidth = 400, maxHeight = 400, quality = 0.82) => {
+  return new Promise((resolve) => {
+    const reader = new FileReader();
+    reader.onload = (e) => {
+      const img = new Image();
+      img.onload = () => {
+        const canvas = document.createElement('canvas');
+        let width = img.width;
+        let height = img.height;
+
+        if (width > height) {
+          if (width > maxWidth) {
+            height = Math.round((height * maxWidth) / width);
+            width = maxWidth;
+          }
+        } else {
+          if (height > maxHeight) {
+            width = Math.round((width * maxHeight) / height);
+            height = maxHeight;
+          }
+        }
+
+        canvas.width = width;
+        canvas.height = height;
+        const ctx = canvas.getContext('2d');
+        ctx.drawImage(img, 0, 0, width, height);
+        const dataUrl = canvas.toDataURL('image/jpeg', quality);
+        resolve(dataUrl);
+      };
+      img.onerror = () => resolve(e.target.result);
+      img.src = e.target.result;
+    };
+    reader.onerror = () => resolve(null);
+    reader.readAsDataURL(file);
+  });
+};
+
 export default function MyProfile({ currentUser, archers, onUpdateArcher }) {
   const currentArcher = (archers && archers.find(a => 
     a.id === currentUser.id || 
@@ -25,35 +62,48 @@ export default function MyProfile({ currentUser, archers, onUpdateArcher }) {
 
   React.useEffect(() => {
     setFormData({ ...currentArcher });
-  }, [currentArcher.id, currentArcher.photo, currentArcher.summary, currentArcher.aim, currentArcher.password, currentArcher.dob, currentArcher.category, currentArcher.occupation, currentArcher.currentlyPracticing]);
+  }, [currentArcher.id, currentArcher.photo, currentArcher.name, currentArcher.summary, currentArcher.aim, currentArcher.password, currentArcher.dob, currentArcher.category, currentArcher.occupation, currentArcher.currentlyPracticing]);
   const [newState, setNewState] = useState('');
   const [newPhotoUrl, setNewPhotoUrl] = useState('');
   const [showPassword, setShowPassword] = useState(false);
   const [saveSuccess, setSaveSuccess] = useState(false);
+  const [isCompressing, setIsCompressing] = useState(false);
 
-  // Read image from user device as Base64 Data URL
-  const handleProfileImageFile = (e) => {
+  // Read image from user device and auto-compress for instant persistence
+  const handleProfileImageFile = async (e) => {
     const file = e.target.files[0];
     if (file) {
-      const reader = new FileReader();
-      reader.onloadend = () => {
-        setFormData(prev => ({ ...prev, photo: reader.result }));
-      };
-      reader.readAsDataURL(file);
+      setIsCompressing(true);
+      try {
+        const compressedDataUrl = await compressImage(file, 400, 400, 0.82);
+        if (compressedDataUrl) {
+          setFormData(prev => ({ ...prev, photo: compressedDataUrl }));
+        }
+      } catch (err) {
+        console.warn("Image compression error:", err);
+      } finally {
+        setIsCompressing(false);
+      }
     }
   };
 
-  const handleGalleryImageFile = (e) => {
+  const handleGalleryImageFile = async (e) => {
     const file = e.target.files[0];
     if (file) {
-      const reader = new FileReader();
-      reader.onloadend = () => {
-        setFormData(prev => ({
-          ...prev,
-          photos: [...(prev.photos || []), reader.result]
-        }));
-      };
-      reader.readAsDataURL(file);
+      setIsCompressing(true);
+      try {
+        const compressedDataUrl = await compressImage(file, 800, 800, 0.8);
+        if (compressedDataUrl) {
+          setFormData(prev => ({
+            ...prev,
+            photos: [...(prev.photos || []), compressedDataUrl]
+          }));
+        }
+      } catch (err) {
+        console.warn("Gallery compression error:", err);
+      } finally {
+        setIsCompressing(false);
+      }
     }
   };
 

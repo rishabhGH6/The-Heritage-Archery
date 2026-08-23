@@ -211,18 +211,17 @@ export const saveAppData = (data) => {
     localStorage.setItem("heritage_archery_clean_v6", JSON.stringify(data));
   } catch (e) {
     try {
-      // QuotaExceededError fallback: strip heavy base64 strings from photos array before saving
+      // Quota fallback: keep archer profile photo intact, only limit extra gallery photos if storage is full
       const lightweightData = {
         ...data,
         archers: (data.archers || []).map(a => ({
           ...a,
-          photo: (a.photo && a.photo.startsWith('data:image')) ? (defaultArchers.find(da => da.name === a.name)?.photo || "") : a.photo,
-          photos: []
+          photos: (a.photos || []).slice(0, 3)
         }))
       };
       localStorage.setItem("heritage_archery_clean_v6", JSON.stringify(lightweightData));
     } catch (err) {
-      console.warn("Storage quota exceeded, continuing with memory state:", err);
+      console.warn("Storage quota warning, continuing with memory state:", err);
     }
   }
 };

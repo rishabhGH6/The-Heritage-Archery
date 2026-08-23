@@ -51,7 +51,29 @@ export default function App() {
     registerServiceWorker();
     fetchSupabaseData(appData).then(remoteData => {
       setAppData(prev => {
-        const loadedArchers = (remoteData.archers && remoteData.archers.length > 0) ? remoteData.archers : (prev.archers && prev.archers.length > 0 ? prev.archers : defaultArchers);
+        const loadedArchers = (remoteData.archers && remoteData.archers.length > 0)
+          ? remoteData.archers.map(ra => {
+              const localA = (prev.archers || []).find(la =>
+                la.id === ra.id ||
+                (la.altId && la.altId === ra.id) ||
+                (ra.altId && la.id === ra.altId) ||
+                (la.name && ra.name && la.name.trim().toLowerCase() === ra.name.trim().toLowerCase())
+              );
+              if (localA) {
+                return {
+                  ...ra,
+                  photo: (ra.photo && !ra.photo.includes('unsplash.com')) ? ra.photo : (localA.photo || ra.photo),
+                  dob: ra.dob || localA.dob || '',
+                  aim: ra.aim || localA.aim || '',
+                  summary: ra.summary || localA.summary || '',
+                  statesPlayed: (ra.statesPlayed && ra.statesPlayed.length > 0) ? ra.statesPlayed : (localA.statesPlayed || []),
+                  photos: (ra.photos && ra.photos.length > 0) ? ra.photos : (localA.photos || [])
+                };
+              }
+              return ra;
+            })
+          : (prev.archers && prev.archers.length > 0 ? prev.archers : defaultArchers);
+
         let activeUser = (prev.currentUser && prev.currentUser.id !== 'guest') ? prev.currentUser : { id: 'guest', role: 'guest', name: 'Guest' };
 
         if (activeUser && activeUser.role === 'archer') {
@@ -132,10 +154,39 @@ export default function App() {
   };
 
   const handleUpdateArcher = (updatedArcher) => {
-    setAppData(prev => ({
-      ...prev,
-      archers: prev.archers.map(a => a.id === updatedArcher.id ? updatedArcher : a)
-    }));
+    setAppData(prev => {
+      const updatedArchers = prev.archers.map(a => {
+        const isMatch = a.id === updatedArcher.id || 
+                        (a.altId && a.altId === updatedArcher.id) ||
+                        (updatedArcher.altId && a.id === updatedArcher.altId) ||
+                        (a.name && updatedArcher.name && a.name.trim().toLowerCase() === updatedArcher.name.trim().toLowerCase());
+        return isMatch ? { ...a, ...updatedArcher } : a;
+      });
+
+      let updatedCurrentUser = prev.currentUser;
+      if (prev.currentUser && prev.currentUser.role === 'archer') {
+        const isCurrentMatch = prev.currentUser.id === updatedArcher.id ||
+                               (updatedArcher.altId && prev.currentUser.id === updatedArcher.altId) ||
+                               (prev.currentUser.name && updatedArcher.name && prev.currentUser.name.trim().toLowerCase() === updatedArcher.name.trim().toLowerCase());
+        if (isCurrentMatch) {
+          updatedCurrentUser = {
+            ...prev.currentUser,
+            name: updatedArcher.name
+          };
+          savePersistentSession(updatedCurrentUser);
+        }
+      }
+
+      const nextData = {
+        ...prev,
+        archers: updatedArchers,
+        currentUser: updatedCurrentUser
+      };
+
+      saveAppData(nextData);
+      return nextData;
+    });
+
     syncSaveArcher(updatedArcher);
   };
 
