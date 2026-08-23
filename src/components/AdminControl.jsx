@@ -37,7 +37,7 @@ export default function AdminControl({
           <div>
             <div style={{ display: 'flex', alignItems: 'center', gap: '8px', marginBottom: '4px' }}>
               <span className="badge-gold" style={{ background: 'rgba(239, 68, 68, 0.2)', color: '#f87171', border: '1px solid rgba(239, 68, 68, 0.4)' }}>
-                <Shield size={13} /> System Administrator & Team Captain Hub
+                <Shield size={13} /> System Administrator & Admin Hub
               </span>
             </div>
             <h2 style={{ fontSize: '1.8rem', fontWeight: 800, color: '#f8fafc', margin: '4px 0', display: 'flex', alignItems: 'center', gap: '10px' }}>
