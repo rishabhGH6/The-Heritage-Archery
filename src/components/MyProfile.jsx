@@ -62,7 +62,7 @@ export default function MyProfile({ currentUser, archers, onUpdateArcher }) {
 
   React.useEffect(() => {
     setFormData({ ...currentArcher });
-  }, [currentArcher.id, currentArcher.photo, currentArcher.name, currentArcher.summary, currentArcher.aim, currentArcher.password, currentArcher.dob, currentArcher.category, currentArcher.occupation, currentArcher.currentlyPracticing]);
+  }, [currentArcher.id, currentArcher.photo, currentArcher.name, currentArcher.summary, currentArcher.aim, currentArcher.password, currentArcher.dob, currentArcher.category, currentArcher.occupation, currentArcher.currentlyPracticing, JSON.stringify(currentArcher.photos || [])]);
   const [newState, setNewState] = useState('');
   const [newPhotoUrl, setNewPhotoUrl] = useState('');
   const [showPassword, setShowPassword] = useState(false);

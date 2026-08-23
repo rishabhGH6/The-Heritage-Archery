@@ -224,6 +224,25 @@ export default function ArcherDirectory({ archers, currentUser, coach, onUpdateA
                     </div>
                   </div>
 
+                  {/* Archer Action Photos Gallery */}
+                  {archer.photos && archer.photos.length > 0 && (
+                    <div style={{ marginTop: '12px', borderTop: '1px solid rgba(255,255,255,0.08)', paddingTop: '10px' }}>
+                      <span style={{ fontSize: '0.72rem', color: '#38bdf8', fontWeight: 700, display: 'flex', alignItems: 'center', gap: '4px', marginBottom: '8px' }}>
+                        <Camera size={13} /> Personal Gallery & Action Shots ({archer.photos.length})
+                      </span>
+                      <div style={{ display: 'flex', gap: '8px', overflowX: 'auto', paddingBottom: '4px' }}>
+                        {archer.photos.map((p, pIdx) => (
+                          <img 
+                            key={pIdx} 
+                            src={typeof p === 'string' ? p : (p.url || p.photo)} 
+                            alt={`${archer.name} Action Shot ${pIdx+1}`} 
+                            style={{ width: '54px', height: '54px', borderRadius: '10px', objectFit: 'cover', border: '1px solid rgba(56, 189, 248, 0.4)', flexShrink: 0, boxShadow: '0 2px 8px rgba(0,0,0,0.3)' }} 
+                          />
+                        ))}
+                      </div>
+                    </div>
+                  )}
+
                 </div>
 
                 {/* Score Graph Quick Trigger Bar */}
