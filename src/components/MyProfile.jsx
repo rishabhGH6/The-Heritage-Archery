@@ -69,6 +69,21 @@ export default function MyProfile({ currentUser, archers, onUpdateArcher }) {
   const [saveSuccess, setSaveSuccess] = useState(false);
   const [isCompressing, setIsCompressing] = useState(false);
 
+  // Check if form data has been modified compared to current stored profile
+  const hasChanges = Boolean(
+    (formData.name || '') !== (currentArcher.name || '') ||
+    (formData.password || '') !== (currentArcher.password || '') ||
+    (formData.photo || '') !== (currentArcher.photo || '') ||
+    (formData.category || '') !== (currentArcher.category || '') ||
+    (formData.occupation || '') !== (currentArcher.occupation || '') ||
+    (formData.currentlyPracticing || '') !== (currentArcher.currentlyPracticing || '') ||
+    (formData.dob || '') !== (currentArcher.dob || '') ||
+    (formData.aim || '') !== (currentArcher.aim || '') ||
+    (formData.summary || '') !== (currentArcher.summary || '') ||
+    JSON.stringify(formData.statesPlayed || []) !== JSON.stringify(currentArcher.statesPlayed || []) ||
+    JSON.stringify(formData.photos || []) !== JSON.stringify(currentArcher.photos || [])
+  );
+
   // Read image from user device and auto-compress for instant persistence
   const handleProfileImageFile = async (e) => {
     const file = e.target.files[0];
@@ -433,8 +448,24 @@ export default function MyProfile({ currentUser, archers, onUpdateArcher }) {
               </span>
             ) : <div />}
 
-            <button type="submit" className="btn-emerald" style={{ padding: '12px 28px', fontSize: '0.95rem' }}>
-              <Save size={18} /> Save Profile Changes
+            <button 
+              type="submit" 
+              disabled={!hasChanges}
+              className={hasChanges ? "btn-emerald" : "btn-ghost"} 
+              style={{ 
+                padding: '12px 28px', 
+                fontSize: '0.95rem',
+                cursor: hasChanges ? 'pointer' : 'not-allowed',
+                opacity: hasChanges ? 1 : 0.45,
+                filter: hasChanges ? 'none' : 'grayscale(60%)',
+                pointerEvents: hasChanges ? 'auto' : 'none',
+                border: hasChanges ? 'none' : '1px solid rgba(255, 255, 255, 0.15)',
+                background: hasChanges ? undefined : 'rgba(15, 23, 42, 0.6)',
+                color: hasChanges ? '#ffffff' : '#64748b',
+                transition: 'all 0.25s ease'
+              }}
+            >
+              <Save size={18} /> {hasChanges ? "Save Profile Changes" : "No Changes to Save"}
             </button>
           </div>
 
