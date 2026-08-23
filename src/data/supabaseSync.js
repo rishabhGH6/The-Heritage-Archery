@@ -56,28 +56,37 @@ export const fetchSupabaseData = async (defaultData, forceRefresh = false) => {
     }
   }
 
-  // 2. Fetch from Supabase if cache is expired or force refreshed
+  // 2. Fetch from Supabase with safe individual fallbacks
   try {
+    const safeQuery = async (queryPromise, fallback = []) => {
+      try {
+        const res = await queryPromise;
+        return res?.data || fallback;
+      } catch (e) {
+        return fallback;
+      }
+    };
+
     const [
-      { data: archersData },
-      { data: coachData },
-      { data: streaksData },
-      { data: venueData },
-      { data: announcementsData },
-      { data: equipmentData },
-      { data: scoreLogsData },
-      { data: badgesData },
-      { data: chatData }
+      archersData,
+      coachData,
+      streaksData,
+      venueData,
+      announcementsData,
+      equipmentData,
+      scoreLogsData,
+      badgesData,
+      chatData
     ] = await Promise.all([
-      supabase.from('archers').select('*'),
-      supabase.from('coach').select('*'),
-      supabase.from('streaks').select('*'),
-      supabase.from('venue_schedule').select('*'),
-      supabase.from('announcements').select('*').order('created_at', { ascending: false }).limit(20),
-      supabase.from('equipment').select('*'),
-      supabase.from('score_logs').select('*').order('created_at', { ascending: false }).limit(50),
-      supabase.from('badges').select('*').order('created_at', { ascending: false }),
-      supabase.from('chat_messages').select('*').order('created_at', { ascending: true }).limit(100)
+      safeQuery(supabase.from('archers').select('*')),
+      safeQuery(supabase.from('coach').select('*')),
+      safeQuery(supabase.from('streaks').select('*')),
+      safeQuery(supabase.from('venue_schedule').select('*')),
+      safeQuery(supabase.from('announcements').select('*').order('created_at', { ascending: false }).limit(20)),
+      safeQuery(supabase.from('equipment').select('*')),
+      safeQuery(supabase.from('score_logs').select('*').order('created_at', { ascending: false }).limit(50)),
+      safeQuery(supabase.from('badges').select('*').order('created_at', { ascending: false })),
+      safeQuery(supabase.from('chat_messages').select('*').order('created_at', { ascending: true }).limit(100))
     ]);
 
     const result = { ...defaultData };
@@ -87,7 +96,11 @@ export const fetchSupabaseData = async (defaultData, forceRefresh = false) => {
       const pendingList = [];
 
       archersData.forEach(a => {
-        const defaultA = defaultData.archers?.find(da => da.name.trim().toLowerCase() === a.name.trim().toLowerCase() || da.id === a.id);
+        const defaultA = defaultData.archers?.find(da => 
+          da.name.trim().toLowerCase() === a.name.trim().toLowerCase() || 
+          da.id === a.id || 
+          (da.altId && da.altId === a.id)
+        );
         const fallbackPhoto = defaultA?.photo || "https://images.unsplash.com/photo-1534528741775-53994a69daeb?auto=format&fit=crop&w=400&q=80";
 
         const archerObj = {
@@ -105,21 +118,16 @@ export const fetchSupabaseData = async (defaultData, forceRefresh = false) => {
           summary: a.summary || defaultA?.summary || '',
           statesPlayed: parseJson(a.states_played, defaultA?.statesPlayed || ["West Bengal"]),
           photos: parseJson(a.photos, []),
-          status: a.status || 'approved',
+          status: 'approved',
           requestDate: a.created_at ? new Date(a.created_at).toLocaleDateString() : new Date().toLocaleDateString()
         };
 
-        if (a.status === 'pending') {
-          pendingList.push(archerObj);
-        } else {
-          activeList.push(archerObj);
-        }
+        activeList.push(archerObj);
       });
 
       if (activeList.length > 0) {
         result.archers = activeList;
       }
-      result.pendingArchers = pendingList;
     }
 
     if (coachData && coachData.length > 0) {
@@ -260,8 +268,7 @@ export const syncSaveArcher = async (archer) => {
       aim: archer.aim,
       summary: archer.summary,
       states_played: JSON.stringify(archer.statesPlayed || []),
-      photos: JSON.stringify(archer.photos || []),
-      status: archer.status || 'approved'
+      photos: JSON.stringify(archer.photos || [])
     });
   } catch (e) {
     console.error("Supabase archer save error", e);
