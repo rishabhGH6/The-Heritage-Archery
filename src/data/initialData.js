@@ -226,7 +226,6 @@ export const saveAppData = (data) => {
   }
 };
 
-// Helper function to load data from LocalStorage or initialize default
 export const loadAppData = () => {
   const savedUser = getPersistentSession();
   const saved = localStorage.getItem("heritage_archery_clean_v6") || localStorage.getItem("heritage_archery_clean_v5");
@@ -235,6 +234,10 @@ export const loadAppData = () => {
       const parsed = JSON.parse(saved);
       return {
         ...parsed,
+        coach: {
+          ...(parsed.coach || defaultData.coach),
+          photo: ""
+        },
         archers: (parsed.archers && parsed.archers.length > 0) ? parsed.archers : defaultArchers,
         streaks: (parsed.streaks && Object.keys(parsed.streaks).length > 0) ? parsed.streaks : defaultStreaks,
         inquiries: (parsed.inquiries && Array.isArray(parsed.inquiries)) ? parsed.inquiries : defaultInquiries,

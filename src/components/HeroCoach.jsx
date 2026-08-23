@@ -154,33 +154,25 @@ export default function HeroCoach({ coach, venueSchedule, currentUser, archers =
         
         <div style={{ display: 'grid', gridTemplateColumns: 'auto 1fr', gap: '24px', alignItems: 'center' }} className="hero-responsive-grid">
           
-          {/* Coach Photo Frame */}
+          {/* Coach Emblem / Shield Badge */}
           <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center' }}>
             <div style={{
-              width: '130px',
-              height: '130px',
+              width: '120px',
+              height: '120px',
               borderRadius: '24px',
               overflow: 'hidden',
               border: '3px solid #d97706',
               boxShadow: '0 10px 30px rgba(217, 119, 6, 0.3)',
               position: 'relative',
-              background: 'rgba(15, 23, 42, 0.8)',
+              background: 'linear-gradient(135deg, rgba(15, 23, 42, 0.95), rgba(217, 119, 6, 0.15))',
               display: 'flex',
+              flexDirection: 'column',
               alignItems: 'center',
-              justifyContent: 'center'
+              justifyContent: 'center',
+              gap: '6px'
             }}>
-              {coach.photo ? (
-                <img 
-                  src={coach.photo} 
-                  alt={coach.name}
-                  style={{ width: '100%', height: '100%', objectFit: 'cover' }}
-                />
-              ) : (
-                <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '4px' }}>
-                  <Shield size={48} color="#fbbf24" />
-                  <span style={{ fontSize: '0.65rem', color: '#fbbf24', fontWeight: 700 }}>COACH</span>
-                </div>
-              )}
+              <Shield size={46} color="#fbbf24" />
+              <span style={{ fontSize: '0.72rem', color: '#fbbf24', fontWeight: 800, letterSpacing: '0.05em' }}>COACH</span>
             </div>
 
             <div style={{
@@ -457,64 +449,15 @@ export default function HeroCoach({ coach, venueSchedule, currentUser, archers =
           <div className="modal-content" onClick={e => e.stopPropagation()} style={{ maxWidth: '480px' }}>
             <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '20px' }}>
               <h3 style={{ fontSize: '1.25rem', fontWeight: 700, color: '#f8fafc', display: 'flex', alignItems: 'center', gap: '8px' }}>
-                <Edit3 size={20} color="#fbbf24" /> Edit Coach Jayanta's Profile & Photo
+                <Edit3 size={20} color="#fbbf24" /> Edit Coach Jayanta's Guidance & Tagline
               </h3>
               <button onClick={() => setShowEditModal(false)} className="btn-ghost" style={{ padding: '4px 8px' }}>✕</button>
             </div>
 
             <form onSubmit={handleSaveCoachInfo} style={{ display: 'flex', flexDirection: 'column', gap: '16px' }}>
               
-              {/* Photo Upload Section */}
-              <div style={{ background: 'rgba(15,23,42,0.5)', padding: '14px', borderRadius: '12px', border: '1px solid rgba(251,191,36,0.3)' }}>
-                <label style={{ fontSize: '0.85rem', color: '#fbbf24', fontWeight: 700, display: 'block', marginBottom: '8px' }}>
-                  Coach Profile Photo
-                </label>
-
-                <div style={{ display: 'flex', alignItems: 'center', gap: '14px', marginBottom: '10px' }}>
-                  <div style={{ width: '60px', height: '60px', borderRadius: '14px', overflow: 'hidden', border: '2px solid #d97706', background: 'rgba(15,23,42,0.8)', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
-                    {photoUrl ? (
-                      <img src={photoUrl} alt="Preview" style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
-                    ) : (
-                      <Shield size={28} color="#fbbf24" />
-                    )}
-                  </div>
-
-                  <div style={{ display: 'flex', flexDirection: 'column', gap: '6px' }}>
-                    <input
-                      type="file"
-                      accept="image/*"
-                      id="coach-photo-picker"
-                      style={{ display: 'none' }}
-                      onChange={handleCoachFilePicker}
-                    />
-                    <label htmlFor="coach-photo-picker" className="btn-gold" style={{ cursor: 'pointer', fontSize: '0.78rem', padding: '6px 12px', display: 'inline-flex', alignItems: 'center', gap: '6px' }}>
-                      <Upload size={14} /> Choose from Device
-                    </label>
-
-                    {photoUrl && (
-                      <button
-                        type="button"
-                        onClick={() => setPhotoUrl('')}
-                        style={{ background: 'none', border: 'none', color: '#ef4444', fontSize: '0.75rem', cursor: 'pointer', textAlign: 'left', display: 'flex', alignItems: 'center', gap: '4px' }}
-                      >
-                        <Trash2 size={12} /> Remove Current Photo
-                      </button>
-                    )}
-                  </div>
-                </div>
-
-                <label style={{ fontSize: '0.78rem', color: '#94a3b8', fontWeight: 600 }}>Or Paste Photo URL</label>
-                <input
-                  type="text"
-                  className="input-glass"
-                  placeholder="https://..."
-                  value={photoUrl}
-                  onChange={(e) => setPhotoUrl(e.target.value)}
-                />
-              </div>
-
               <div>
-                <label style={{ fontSize: '0.85rem', color: '#94a3b8', display: 'block', marginBottom: '6px', fontWeight: 600 }}>
+                <label style={{ fontSize: '0.85rem', color: '#fbbf24', display: 'block', marginBottom: '6px', fontWeight: 700 }}>
                   Team Tagline
                 </label>
                 <input
@@ -527,7 +470,7 @@ export default function HeroCoach({ coach, venueSchedule, currentUser, archers =
               </div>
 
               <div>
-                <label style={{ fontSize: '0.85rem', color: '#94a3b8', display: 'block', marginBottom: '6px', fontWeight: 600 }}>
+                <label style={{ fontSize: '0.85rem', color: '#fbbf24', display: 'block', marginBottom: '6px', fontWeight: 700 }}>
                   Motivating Quote / Message for Archers
                 </label>
                 <textarea

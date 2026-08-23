@@ -92,11 +92,7 @@ export default function AboutUs({ setActiveTab, coach }) {
               alignItems: 'center',
               justifyContent: 'center'
             }}>
-              {coach?.photo ? (
-                <img src={coach.photo} alt={coach.name} style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
-              ) : (
-                <Shield size={48} color="#fbbf24" />
-              )}
+              <Shield size={48} color="#fbbf24" />
             </div>
             <span style={{ marginTop: '8px', background: '#d97706', color: '#090d16', fontSize: '0.68rem', fontWeight: 800, padding: '3px 10px', borderRadius: '9999px', textTransform: 'uppercase' }}>
               Head Coach
