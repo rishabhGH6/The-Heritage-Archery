@@ -132,11 +132,10 @@ export const fetchSupabaseData = async (defaultData, forceRefresh = false) => {
 
     if (coachData && coachData.length > 0) {
       const c = coachData[0];
-      const defaultCoachPhoto = "https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?auto=format&fit=crop&w=400&q=80";
       result.coach = {
         name: c.name || defaultData.coach.name,
         role: c.role || defaultData.coach.role,
-        photo: (c.photo && c.photo.trim().length > 5) ? c.photo : (defaultData.coach.photo || defaultCoachPhoto),
+        photo: (c.photo && c.photo.trim().length > 5 && !c.photo.includes('unsplash.com')) ? c.photo : (defaultData.coach.photo || ""),
         tagline: c.tagline || defaultData.coach.tagline,
         motivatingLines: c.motivating_lines || defaultData.coach.motivatingLines,
         password: c.password || defaultData.coach.password
