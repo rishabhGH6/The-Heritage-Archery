@@ -177,18 +177,11 @@ export default function Navbar({ activeTab, setActiveTab, currentUser, archers, 
 
       const passTrimmed = (inputPassword || '').trim();
       const storedPass = (archer.password || '').trim();
-      const passClean = passTrimmed.toLowerCase();
-      const storedClean = storedPass.toLowerCase();
-      const cleanDigits = (s) => (s || '').replace(/[^a-z0-9]/g, '');
 
-      // Check all valid variations: exact match, case-insensitive, stripped special chars, or common variants
+      // Accounts can ONLY be accessed by the password specifically set for that account
       const isPasswordValid = storedPass.length > 0 && (
         passTrimmed === storedPass ||
-        passClean === storedClean ||
-        cleanDigits(passClean) === cleanDigits(storedClean) ||
-        (cleanDigits(passClean) && cleanDigits(storedClean).includes(cleanDigits(passClean))) ||
-        (archer.id === 'archer_1785297210984' && ['rishabh14102004', '14102004', '14/10/2004', '14-10-2004', '14.10.2004', 'rishabh1410', 'rishabh', 'archer'].includes(passClean)) ||
-        passClean === 'archer'
+        passTrimmed.toLowerCase() === storedPass.toLowerCase()
       );
 
       if (isPasswordValid) {
