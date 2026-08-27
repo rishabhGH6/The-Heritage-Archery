@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import { Shield, Award, Edit3, Flame, MapPin, Calendar, ArrowRight, Quote, CheckCircle2, Upload, Trash2, Trophy, BarChart2, CheckSquare } from 'lucide-react';
 import confetti from 'canvas-confetti';
+import ModalPortal from './ModalPortal';
 
 export default function HeroCoach({ coach, venueSchedule, currentUser, archers = [], streaks = {}, onCheckInStreak, userStreak, onUpdateCoach, onBroadcastStreakReminder }) {
   const [showEditModal, setShowEditModal] = useState(false);
@@ -445,54 +446,56 @@ export default function HeroCoach({ coach, venueSchedule, currentUser, archers =
 
       {/* Edit Coach Info Modal */}
       {showEditModal && (
-        <div className="modal-overlay" onClick={() => setShowEditModal(false)}>
-          <div className="modal-content" onClick={e => e.stopPropagation()} style={{ maxWidth: '480px' }}>
-            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '20px' }}>
-              <h3 style={{ fontSize: '1.25rem', fontWeight: 700, color: '#f8fafc', display: 'flex', alignItems: 'center', gap: '8px' }}>
-                <Edit3 size={20} color="#fbbf24" /> Edit Coach Jayanta's Guidance & Tagline
-              </h3>
-              <button onClick={() => setShowEditModal(false)} className="btn-ghost" style={{ padding: '4px 8px' }}>✕</button>
+        <ModalPortal isOpen={showEditModal} onClose={() => setShowEditModal(false)}>
+          <div className="modal-overlay" onClick={() => setShowEditModal(false)}>
+            <div className="modal-content" onClick={e => e.stopPropagation()} style={{ maxWidth: '480px' }}>
+              <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '20px' }}>
+                <h3 style={{ fontSize: '1.25rem', fontWeight: 700, color: '#f8fafc', display: 'flex', alignItems: 'center', gap: '8px' }}>
+                  <Edit3 size={20} color="#fbbf24" /> Edit Coach Jayanta's Guidance & Tagline
+                </h3>
+                <button onClick={() => setShowEditModal(false)} className="btn-ghost" style={{ padding: '4px 8px' }}>✕</button>
+              </div>
+
+              <form onSubmit={handleSaveCoachInfo} style={{ display: 'flex', flexDirection: 'column', gap: '16px' }}>
+                
+                <div>
+                  <label style={{ fontSize: '0.85rem', color: '#fbbf24', display: 'block', marginBottom: '6px', fontWeight: 700 }}>
+                    Team Tagline
+                  </label>
+                  <input
+                    type="text"
+                    className="input-glass"
+                    value={tagline}
+                    onChange={(e) => setTagline(e.target.value)}
+                    required
+                  />
+                </div>
+
+                <div>
+                  <label style={{ fontSize: '0.85rem', color: '#fbbf24', display: 'block', marginBottom: '6px', fontWeight: 700 }}>
+                    Motivating Quote / Message for Archers
+                  </label>
+                  <textarea
+                    className="input-glass"
+                    rows={4}
+                    value={motivatingLines}
+                    onChange={(e) => setMotivatingLines(e.target.value)}
+                    required
+                  />
+                </div>
+
+                <div style={{ display: 'flex', gap: '12px', justifyContent: 'flex-end', marginTop: '10px' }}>
+                  <button type="button" onClick={() => setShowEditModal(false)} className="btn-ghost">
+                    Cancel
+                  </button>
+                  <button type="submit" className="btn-gold">
+                    Save Coach Updates
+                  </button>
+                </div>
+              </form>
             </div>
-
-            <form onSubmit={handleSaveCoachInfo} style={{ display: 'flex', flexDirection: 'column', gap: '16px' }}>
-              
-              <div>
-                <label style={{ fontSize: '0.85rem', color: '#fbbf24', display: 'block', marginBottom: '6px', fontWeight: 700 }}>
-                  Team Tagline
-                </label>
-                <input
-                  type="text"
-                  className="input-glass"
-                  value={tagline}
-                  onChange={(e) => setTagline(e.target.value)}
-                  required
-                />
-              </div>
-
-              <div>
-                <label style={{ fontSize: '0.85rem', color: '#fbbf24', display: 'block', marginBottom: '6px', fontWeight: 700 }}>
-                  Motivating Quote / Message for Archers
-                </label>
-                <textarea
-                  className="input-glass"
-                  rows={4}
-                  value={motivatingLines}
-                  onChange={(e) => setMotivatingLines(e.target.value)}
-                  required
-                />
-              </div>
-
-              <div style={{ display: 'flex', gap: '12px', justifyContent: 'flex-end', marginTop: '10px' }}>
-                <button type="button" onClick={() => setShowEditModal(false)} className="btn-ghost">
-                  Cancel
-                </button>
-                <button type="submit" className="btn-gold">
-                  Save Coach Updates
-                </button>
-              </div>
-            </form>
           </div>
-        </div>
+        </ModalPortal>
       )}
 
     </section>

@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import { MapPin, Clock, Edit3, UserCheck, Calendar, Info, Check } from 'lucide-react';
 import RangeWhistleControl from './RangeWhistleControl';
+import ModalPortal from './ModalPortal';
 
 export default function VenueTracker({ venueSchedule, currentUser, onUpdateVenue }) {
   const [showModal, setShowModal] = useState(false);
@@ -110,79 +111,81 @@ export default function VenueTracker({ venueSchedule, currentUser, onUpdateVenue
 
       {/* Edit Venue & Timing Modal */}
       {showModal && (
-        <div className="modal-overlay" onClick={() => setShowModal(false)}>
-          <div className="modal-content" onClick={e => e.stopPropagation()}>
-            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '20px' }}>
-              <h3 style={{ fontSize: '1.2rem', fontWeight: 700, color: '#f8fafc', display: 'flex', alignItems: 'center', gap: '8px' }}>
-                <Edit3 size={20} color="#fbbf24" /> Update Practice Timing & Venue
-              </h3>
-              <button onClick={() => setShowModal(false)} className="btn-ghost" style={{ padding: '4px 8px' }}>✕</button>
+        <ModalPortal isOpen={showModal} onClose={() => setShowModal(false)}>
+          <div className="modal-overlay" onClick={() => setShowModal(false)}>
+            <div className="modal-content" onClick={e => e.stopPropagation()}>
+              <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '20px' }}>
+                <h3 style={{ fontSize: '1.2rem', fontWeight: 700, color: '#f8fafc', display: 'flex', alignItems: 'center', gap: '8px' }}>
+                  <Edit3 size={20} color="#fbbf24" /> Update Practice Timing & Venue
+                </h3>
+                <button onClick={() => setShowModal(false)} className="btn-ghost" style={{ padding: '4px 8px' }}>✕</button>
+              </div>
+
+              <form onSubmit={handleSaveVenue} style={{ display: 'flex', flexDirection: 'column', gap: '14px' }}>
+                <div>
+                  <label style={{ fontSize: '0.8rem', color: '#94a3b8', fontWeight: 600 }}>Venue Location</label>
+                  <input
+                    type="text"
+                    className="input-glass"
+                    value={venue}
+                    onChange={(e) => setVenue(e.target.value)}
+                    required
+                  />
+                </div>
+
+                <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '12px' }}>
+                  <div>
+                    <label style={{ fontSize: '0.8rem', color: '#94a3b8', fontWeight: 600 }}>Practice Date</label>
+                    <input
+                      type="text"
+                      className="input-glass"
+                      value={date}
+                      onChange={(e) => setDate(e.target.value)}
+                      required
+                    />
+                  </div>
+
+                  <div>
+                    <label style={{ fontSize: '0.8rem', color: '#94a3b8', fontWeight: 600 }}>Time Slot</label>
+                    <input
+                      type="text"
+                      className="input-glass"
+                      value={time}
+                      onChange={(e) => setTime(e.target.value)}
+                      required
+                    />
+                  </div>
+                </div>
+
+                <div>
+                  <label style={{ fontSize: '0.8rem', color: '#94a3b8', fontWeight: 600 }}>Target Distances</label>
+                  <input
+                    type="text"
+                    className="input-glass"
+                    value={distance}
+                    onChange={(e) => setDistance(e.target.value)}
+                    required
+                  />
+                </div>
+
+                <div>
+                  <label style={{ fontSize: '0.8rem', color: '#94a3b8', fontWeight: 600 }}>Equipment / Special Instructions</label>
+                  <textarea
+                    className="input-glass"
+                    rows={3}
+                    value={equipmentNotes}
+                    onChange={(e) => setEquipmentNotes(e.target.value)}
+                  />
+                </div>
+
+                <div style={{ display: 'flex', justifyContent: 'flex-end', gap: '10px', marginTop: '10px' }}>
+                  <button type="button" onClick={() => setShowModal(false)} className="btn-ghost">Cancel</button>
+                  <button type="submit" className="btn-gold">Publish Schedule Update</button>
+                </div>
+              </form>
             </div>
-
-            <form onSubmit={handleSaveVenue} style={{ display: 'flex', flexDirection: 'column', gap: '14px' }}>
-              <div>
-                <label style={{ fontSize: '0.8rem', color: '#94a3b8', fontWeight: 600 }}>Venue Location</label>
-                <input
-                  type="text"
-                  className="input-glass"
-                  value={venue}
-                  onChange={(e) => setVenue(e.target.value)}
-                  required
-                />
-              </div>
-
-              <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '12px' }}>
-                <div>
-                  <label style={{ fontSize: '0.8rem', color: '#94a3b8', fontWeight: 600 }}>Practice Date</label>
-                  <input
-                    type="text"
-                    className="input-glass"
-                    value={date}
-                    onChange={(e) => setDate(e.target.value)}
-                    required
-                  />
-                </div>
-
-                <div>
-                  <label style={{ fontSize: '0.8rem', color: '#94a3b8', fontWeight: 600 }}>Time Slot</label>
-                  <input
-                    type="text"
-                    className="input-glass"
-                    value={time}
-                    onChange={(e) => setTime(e.target.value)}
-                    required
-                  />
-                </div>
-              </div>
-
-              <div>
-                <label style={{ fontSize: '0.8rem', color: '#94a3b8', fontWeight: 600 }}>Target Distances</label>
-                <input
-                  type="text"
-                  className="input-glass"
-                  value={distance}
-                  onChange={(e) => setDistance(e.target.value)}
-                  required
-                />
-              </div>
-
-              <div>
-                <label style={{ fontSize: '0.8rem', color: '#94a3b8', fontWeight: 600 }}>Equipment / Special Instructions</label>
-                <textarea
-                  className="input-glass"
-                  rows={3}
-                  value={equipmentNotes}
-                  onChange={(e) => setEquipmentNotes(e.target.value)}
-                />
-              </div>
-
-              <div style={{ display: 'flex', justifyContent: 'flex-end', gap: '10px', marginTop: '10px' }}>
-                <button type="button" onClick={() => setShowModal(false)} className="btn-ghost">Cancel</button>
-                <button type="submit" className="btn-gold">Publish Schedule Update</button>
-              </div>
-            </form>
           </div>
-        </div>
+        </ModalPortal>
       )}
 
     </div>

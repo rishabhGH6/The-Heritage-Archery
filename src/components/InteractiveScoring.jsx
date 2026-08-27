@@ -3,6 +3,7 @@ import { Target, Save, Download, RefreshCw, CheckCircle, AlertCircle, FileText, 
 import jsPDF from 'jspdf';
 import html2canvas from 'html2canvas';
 import RangeWhistleControl from './RangeWhistleControl';
+import ModalPortal from './ModalPortal';
 
 export default function InteractiveScoring({ currentUser, archers = [], scoreLogs = [], onSaveScorecard, onDeleteScorecard }) {
   const [selectedArcherId, setSelectedArcherId] = useState(
@@ -860,120 +861,122 @@ export default function InteractiveScoring({ currentUser, archers = [], scoreLog
 
       {/* Arrow Bullet Tagging & Score Editor Modal */}
       {activeArrowIndex !== null && (
-        <div className="modal-overlay" onClick={() => setActiveArrowIndex(null)}>
-          <div className="modal-content" onClick={e => e.stopPropagation()} style={{ maxWidth: '440px' }}>
-            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '14px' }}>
-              <h3 style={{ fontSize: '1.15rem', fontWeight: 800, color: '#f8fafc', margin: 0 }}>
-                🎯 Arrow #{activeArrowIndex + 1} Editor & Bullet Tags
-              </h3>
-              <button
-                type="button"
-                onClick={() => handleDeleteArrowIndex(activeArrowIndex)}
-                style={{ background: 'rgba(239, 68, 68, 0.15)', border: '1px solid rgba(239, 68, 68, 0.3)', color: '#ef4444', padding: '4px 10px', borderRadius: '8px', fontSize: '0.75rem', fontWeight: 700, cursor: 'pointer' }}
-              >
-                Delete Arrow 🗑️
-              </button>
-            </div>
-
-            {/* Quick Score Editing Grid */}
-            <div style={{ background: 'rgba(15, 23, 42, 0.7)', padding: '12px', borderRadius: '12px', marginBottom: '16px', border: '1px solid rgba(251, 191, 36, 0.3)' }}>
-              <label style={{ fontSize: '0.78rem', color: '#fbbf24', fontWeight: 700, display: 'block', marginBottom: '8px', textTransform: 'uppercase' }}>
-                ✏️ Correct Recorded Score (if mistakenly clicked)
-              </label>
-              <div style={{ display: 'grid', gridTemplateColumns: 'repeat(4, 1fr)', gap: '6px' }}>
-                {[
-                  { label: 'X (10)', score: 10, isX: true },
-                  { label: '10', score: 10, isX: false },
-                  { label: '9', score: 9, isX: false },
-                  { label: '8', score: 8, isX: false },
-                  { label: '7', score: 7, isX: false },
-                  { label: '6', score: 6, isX: false },
-                  { label: '5', score: 5, isX: false },
-                  { label: '4', score: 4, isX: false },
-                  { label: '3', score: 3, isX: false },
-                  { label: '2', score: 2, isX: false },
-                  { label: '1', score: 1, isX: false },
-                  { label: 'M (0)', score: 0, isX: false }
-                ].map(item => {
-                  const currentArr = roundsData[currentRound - 1]?.arrows?.[activeArrowIndex];
-                  const isCurrent = tempScoreVal !== null 
-                    ? (tempScoreVal === item.score && tempIsX === item.isX)
-                    : (currentArr?.score === item.score && currentArr?.isX === item.isX);
-
-                  return (
-                    <button
-                      key={item.label}
-                      type="button"
-                      onClick={() => {
-                        setTempScoreVal(item.score);
-                        setTempIsX(item.isX);
-                      }}
-                      style={{
-                        padding: '7px 4px',
-                        borderRadius: '8px',
-                        fontSize: '0.8rem',
-                        fontWeight: 800,
-                        border: isCurrent ? '2px solid #fbbf24' : '1px solid rgba(255,255,255,0.1)',
-                        background: isCurrent ? 'rgba(217, 119, 6, 0.4)' : 'rgba(15, 23, 42, 0.8)',
-                        color: isCurrent ? '#ffffff' : '#94a3b8',
-                        cursor: 'pointer'
-                      }}
-                    >
-                      {item.label}
-                    </button>
-                  );
-                })}
-              </div>
-            </div>
-
-            <div style={{ display: 'flex', flexDirection: 'column', gap: '12px', marginBottom: '16px' }}>
-              <label style={{ fontSize: '0.82rem', color: '#94a3b8', fontWeight: 600 }}>Quick Bullet Tags</label>
-              <div style={{ display: 'flex', gap: '8px', flexWrap: 'wrap' }}>
-                {['Good shot', 'Bad release', 'New arrow', 'Wind drift', 'Clicker premature'].map(tag => {
-                  const isSelected = tempTags.includes(tag);
-                  return (
-                    <button
-                      key={tag}
-                      type="button"
-                      onClick={() => {
-                        if (isSelected) setTempTags(tempTags.filter(t => t !== tag));
-                        else setTempTags([...tempTags, tag]);
-                      }}
-                      style={{
-                        padding: '6px 12px',
-                        borderRadius: '9999px',
-                        fontSize: '0.78rem',
-                        fontWeight: 600,
-                        border: isSelected ? '1px solid #34d399' : '1px solid rgba(255,255,255,0.1)',
-                        background: isSelected ? 'rgba(5,150,105,0.25)' : 'rgba(15,23,42,0.6)',
-                        color: isSelected ? '#34d399' : '#94a3b8',
-                        cursor: 'pointer'
-                      }}
-                    >
-                      {tag} {isSelected && '✓'}
-                    </button>
-                  );
-                })}
+        <ModalPortal isOpen={activeArrowIndex !== null} onClose={() => setActiveArrowIndex(null)}>
+          <div className="modal-overlay" onClick={() => setActiveArrowIndex(null)}>
+            <div className="modal-content" onClick={e => e.stopPropagation()} style={{ maxWidth: '440px' }}>
+              <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '14px' }}>
+                <h3 style={{ fontSize: '1.15rem', fontWeight: 800, color: '#f8fafc', margin: 0 }}>
+                  🎯 Arrow #{activeArrowIndex + 1} Editor & Bullet Tags
+                </h3>
+                <button
+                  type="button"
+                  onClick={() => handleDeleteArrowIndex(activeArrowIndex)}
+                  style={{ background: 'rgba(239, 68, 68, 0.15)', border: '1px solid rgba(239, 68, 68, 0.3)', color: '#ef4444', padding: '4px 10px', borderRadius: '8px', fontSize: '0.75rem', fontWeight: 700, cursor: 'pointer' }}
+                >
+                  Delete Arrow 🗑️
+                </button>
               </div>
 
-              <label style={{ fontSize: '0.82rem', color: '#94a3b8', fontWeight: 600, marginTop: '4px' }}>
-                Comment / Note for this Arrow
-              </label>
-              <input
-                type="text"
-                className="input-glass"
-                placeholder="e.g., Felt smooth back tension release..."
-                value={tempComment}
-                onChange={(e) => setTempComment(e.target.value)}
-              />
-            </div>
+              {/* Quick Score Editing Grid */}
+              <div style={{ background: 'rgba(15, 23, 42, 0.7)', padding: '12px', borderRadius: '12px', marginBottom: '16px', border: '1px solid rgba(251, 191, 36, 0.3)' }}>
+                <label style={{ fontSize: '0.78rem', color: '#fbbf24', fontWeight: 700, display: 'block', marginBottom: '8px', textTransform: 'uppercase' }}>
+                  ✏️ Correct Recorded Score (if mistakenly clicked)
+                </label>
+                <div style={{ display: 'grid', gridTemplateColumns: 'repeat(4, 1fr)', gap: '6px' }}>
+                  {[
+                    { label: 'X (10)', score: 10, isX: true },
+                    { label: '10', score: 10, isX: false },
+                    { label: '9', score: 9, isX: false },
+                    { label: '8', score: 8, isX: false },
+                    { label: '7', score: 7, isX: false },
+                    { label: '6', score: 6, isX: false },
+                    { label: '5', score: 5, isX: false },
+                    { label: '4', score: 4, isX: false },
+                    { label: '3', score: 3, isX: false },
+                    { label: '2', score: 2, isX: false },
+                    { label: '1', score: 1, isX: false },
+                    { label: 'M (0)', score: 0, isX: false }
+                  ].map(item => {
+                    const currentArr = roundsData[currentRound - 1]?.arrows?.[activeArrowIndex];
+                    const isCurrent = tempScoreVal !== null 
+                      ? (tempScoreVal === item.score && tempIsX === item.isX)
+                      : (currentArr?.score === item.score && currentArr?.isX === item.isX);
 
-            <div style={{ display: 'flex', justifyContent: 'flex-end', gap: '10px' }}>
-              <button onClick={() => setActiveArrowIndex(null)} className="btn-ghost">Cancel</button>
-              <button onClick={handleSaveArrowDetails} className="btn-emerald">Save Changes</button>
+                    return (
+                      <button
+                        key={item.label}
+                        type="button"
+                        onClick={() => {
+                          setTempScoreVal(item.score);
+                          setTempIsX(item.isX);
+                        }}
+                        style={{
+                          padding: '7px 4px',
+                          borderRadius: '8px',
+                          fontSize: '0.8rem',
+                          fontWeight: 800,
+                          border: isCurrent ? '2px solid #fbbf24' : '1px solid rgba(255,255,255,0.1)',
+                          background: isCurrent ? 'rgba(217, 119, 6, 0.4)' : 'rgba(15, 23, 42, 0.8)',
+                          color: isCurrent ? '#ffffff' : '#94a3b8',
+                          cursor: 'pointer'
+                        }}
+                      >
+                        {item.label}
+                      </button>
+                    );
+                  })}
+                </div>
+              </div>
+
+              <div style={{ display: 'flex', flexDirection: 'column', gap: '12px', marginBottom: '16px' }}>
+                <label style={{ fontSize: '0.82rem', color: '#94a3b8', fontWeight: 600 }}>Quick Bullet Tags</label>
+                <div style={{ display: 'flex', gap: '8px', flexWrap: 'wrap' }}>
+                  {['Good shot', 'Bad release', 'New arrow', 'Wind drift', 'Clicker premature'].map(tag => {
+                    const isSelected = tempTags.includes(tag);
+                    return (
+                      <button
+                        key={tag}
+                        type="button"
+                        onClick={() => {
+                          if (isSelected) setTempTags(tempTags.filter(t => t !== tag));
+                          else setTempTags([...tempTags, tag]);
+                        }}
+                        style={{
+                          padding: '6px 12px',
+                          borderRadius: '9999px',
+                          fontSize: '0.78rem',
+                          fontWeight: 600,
+                          border: isSelected ? '1px solid #34d399' : '1px solid rgba(255,255,255,0.1)',
+                          background: isSelected ? 'rgba(5,150,105,0.25)' : 'rgba(15,23,42,0.6)',
+                          color: isSelected ? '#34d399' : '#94a3b8',
+                          cursor: 'pointer'
+                        }}
+                      >
+                        {tag} {isSelected && '✓'}
+                      </button>
+                    );
+                  })}
+                </div>
+
+                <label style={{ fontSize: '0.82rem', color: '#94a3b8', fontWeight: 600, marginTop: '4px' }}>
+                  Comment / Note for this Arrow
+                </label>
+                <input
+                  type="text"
+                  className="input-glass"
+                  placeholder="e.g., Felt smooth back tension release..."
+                  value={tempComment}
+                  onChange={(e) => setTempComment(e.target.value)}
+                />
+              </div>
+
+              <div style={{ display: 'flex', justifyContent: 'flex-end', gap: '10px' }}>
+                <button onClick={() => setActiveArrowIndex(null)} className="btn-ghost">Cancel</button>
+                <button onClick={handleSaveArrowDetails} className="btn-emerald">Save Changes</button>
+              </div>
             </div>
           </div>
-        </div>
+        </ModalPortal>
       )}
 
       {/* Historical Scorecard Log Table (Private to Archer & Head Coach Only) */}
@@ -1084,127 +1087,129 @@ export default function InteractiveScoring({ currentUser, archers = [], scoreLog
 
       {/* Saved Scorecard Detail Breakdown Modal */}
       {selectedScorecardDetail && (
-        <div className="modal-overlay" onClick={() => setSelectedScorecardDetail(null)}>
-          <div className="modal-content" onClick={e => e.stopPropagation()} style={{ maxWidth: '680px', width: '92%' }}>
-            
-            {/* Modal Header */}
-            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '16px', borderBottom: '1px solid rgba(255,255,255,0.1)', paddingBottom: '12px' }}>
-              <div>
-                <span className="badge-emerald" style={{ fontSize: '0.72rem' }}>Detailed Arrow-by-Arrow Scorecard</span>
-                <h3 style={{ fontSize: '1.35rem', fontWeight: 800, color: '#f8fafc', margin: '4px 0 0 0' }}>
-                  {selectedScorecardDetail.archerName} — {selectedScorecardDetail.distance}
-                </h3>
-                <div style={{ fontSize: '0.78rem', color: '#94a3b8' }}>
-                  Logged Date: {selectedScorecardDetail.date}
+        <ModalPortal isOpen={Boolean(selectedScorecardDetail)} onClose={() => setSelectedScorecardDetail(null)}>
+          <div className="modal-overlay" onClick={() => setSelectedScorecardDetail(null)}>
+            <div className="modal-content" onClick={e => e.stopPropagation()} style={{ maxWidth: '680px', width: '92%' }}>
+              
+              {/* Modal Header */}
+              <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '16px', borderBottom: '1px solid rgba(255,255,255,0.1)', paddingBottom: '12px' }}>
+                <div>
+                  <span className="badge-emerald" style={{ fontSize: '0.72rem' }}>Detailed Arrow-by-Arrow Scorecard</span>
+                  <h3 style={{ fontSize: '1.35rem', fontWeight: 800, color: '#f8fafc', margin: '4px 0 0 0' }}>
+                    {selectedScorecardDetail.archerName} — {selectedScorecardDetail.distance}
+                  </h3>
+                  <div style={{ fontSize: '0.78rem', color: '#94a3b8' }}>
+                    Logged Date: {selectedScorecardDetail.date}
+                  </div>
+                </div>
+
+                <div style={{ textAlign: 'right' }}>
+                  <div style={{ fontSize: '1.8rem', fontWeight: 800, color: '#fbbf24', lineHeight: 1 }}>
+                    {selectedScorecardDetail.totalScore} <span style={{ fontSize: '0.9rem', color: '#64748b' }}>/ 360</span>
+                  </div>
+                  <div style={{ fontSize: '0.72rem', color: '#34d399', fontWeight: 700 }}>
+                    {selectedScorecardDetail.groupingAnalysis?.tightness}
+                  </div>
                 </div>
               </div>
 
-              <div style={{ textAlign: 'right' }}>
-                <div style={{ fontSize: '1.8rem', fontWeight: 800, color: '#fbbf24', lineHeight: 1 }}>
-                  {selectedScorecardDetail.totalScore} <span style={{ fontSize: '0.9rem', color: '#64748b' }}>/ 360</span>
-                </div>
-                <div style={{ fontSize: '0.72rem', color: '#34d399', fontWeight: 700 }}>
-                  {selectedScorecardDetail.groupingAnalysis?.tightness}
-                </div>
-              </div>
-            </div>
-
-            {/* Round-by-Round & Arrow-by-Arrow Table */}
-            <div style={{ overflowX: 'auto', marginBottom: '16px' }}>
-              <table style={{ width: '100%', borderCollapse: 'collapse', fontSize: '0.84rem' }}>
-                <thead>
-                  <tr style={{ borderBottom: '1px solid rgba(255,255,255,0.1)', color: '#94a3b8', textAlign: 'left' }}>
-                    <th style={{ padding: '8px' }}>Round</th>
-                    <th style={{ padding: '8px' }}>Arrow Scores (6 Arrows)</th>
-                    <th style={{ padding: '8px' }}>Total</th>
-                    <th style={{ padding: '8px' }}>Round Notes</th>
-                  </tr>
-                </thead>
-                <tbody>
-                  {(selectedScorecardDetail.rounds || []).map((r, rIdx) => (
-                    <tr key={rIdx} style={{ borderBottom: '1px solid rgba(255,255,255,0.05)', color: '#f8fafc' }}>
-                      <td style={{ padding: '8px', fontWeight: 800, color: '#38bdf8' }}>
-                        Round {r.roundNumber || rIdx + 1}
-                      </td>
-                      <td style={{ padding: '8px' }}>
-                        <div style={{ display: 'flex', gap: '4px', flexWrap: 'wrap' }}>
-                          {(r.arrows || []).map((arr, aIdx) => (
-                            <span key={aIdx} style={{
-                              background: arr.isX ? '#d97706' : arr.score >= 9 ? '#059669' : arr.score >= 7 ? '#e4002b' : '#0072ce',
-                              color: '#fff',
-                              fontWeight: 800,
-                              fontSize: '0.78rem',
-                              padding: '2px 6px',
-                              borderRadius: '4px'
-                            }}>
-                              {arr.isX ? 'X' : arr.score}
-                            </span>
-                          ))}
-                        </div>
-                      </td>
-                      <td style={{ padding: '8px', fontWeight: 800, color: '#34d399' }}>
-                        {r.total} pts
-                      </td>
-                      <td style={{ padding: '8px', color: '#cbd5e1', fontSize: '0.78rem', fontStyle: r.note ? 'normal' : 'italic' }}>
-                        {r.note || (selectedScorecardDetail.roundNotes && selectedScorecardDetail.roundNotes[rIdx + 1]) || "No round note"}
-                      </td>
+              {/* Round-by-Round & Arrow-by-Arrow Table */}
+              <div style={{ overflowX: 'auto', marginBottom: '16px' }}>
+                <table style={{ width: '100%', borderCollapse: 'collapse', fontSize: '0.84rem' }}>
+                  <thead>
+                    <tr style={{ borderBottom: '1px solid rgba(255,255,255,0.1)', color: '#94a3b8', textAlign: 'left' }}>
+                      <th style={{ padding: '8px' }}>Round</th>
+                      <th style={{ padding: '8px' }}>Arrow Scores (6 Arrows)</th>
+                      <th style={{ padding: '8px' }}>Total</th>
+                      <th style={{ padding: '8px' }}>Round Notes</th>
                     </tr>
-                  ))}
-                </tbody>
-              </table>
-            </div>
-
-            {/* Overall Session Takeaways & Equipment Notes */}
-            {(() => {
-              const overallNoteText = selectedScorecardDetail.sessionNotes || selectedScorecardDetail.notes || selectedScorecardDetail.equipmentNotes || selectedScorecardDetail.takeaways;
-              return (
-                <div style={{ background: 'rgba(15, 23, 42, 0.7)', padding: '12px 14px', borderRadius: '10px', border: '1px solid rgba(251, 191, 36, 0.3)', marginBottom: '16px' }}>
-                  <div style={{ fontSize: '0.78rem', fontWeight: 800, color: '#fbbf24', textTransform: 'uppercase', marginBottom: '4px', display: 'flex', alignItems: 'center', gap: '6px' }}>
-                    📝 Overall Session Takeaways & Equipment Notes:
-                  </div>
-                  <div style={{ fontSize: '0.85rem', color: overallNoteText ? '#f8fafc' : '#94a3b8', lineHeight: 1.5, fontStyle: overallNoteText ? 'normal' : 'italic', whiteSpace: 'pre-wrap' }}>
-                    {overallNoteText || "No overall session notes were recorded for this practice session."}
-                  </div>
-                </div>
-              );
-            })()}
-
-            {/* Modal Actions */}
-            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', gap: '10px', flexWrap: 'wrap' }}>
-              <button
-                onClick={() => {
-                  if (window.confirm(`Are you sure you want to delete this scorecard log from ${selectedScorecardDetail.date}?`)) {
-                    if (onDeleteScorecard) onDeleteScorecard(selectedScorecardDetail.id);
-                    setSelectedScorecardDetail(null);
-                  }
-                }}
-                style={{
-                  background: 'rgba(239, 68, 68, 0.15)',
-                  border: '1px solid rgba(239, 68, 68, 0.4)',
-                  color: '#ef4444',
-                  padding: '8px 16px',
-                  borderRadius: '10px',
-                  fontSize: '0.84rem',
-                  fontWeight: 700,
-                  cursor: 'pointer',
-                  display: 'flex',
-                  alignItems: 'center',
-                  gap: '6px'
-                }}
-              >
-                <Trash2 size={15} /> Delete Scorecard
-              </button>
-
-              <div style={{ display: 'flex', gap: '10px' }}>
-                <button onClick={() => setSelectedScorecardDetail(null)} className="btn-ghost">Close</button>
-                <button onClick={() => handleExportPDF(selectedScorecardDetail)} className="btn-emerald">
-                  <Download size={14} /> Export PDF
-                </button>
+                  </thead>
+                  <tbody>
+                    {(selectedScorecardDetail.rounds || []).map((r, rIdx) => (
+                      <tr key={rIdx} style={{ borderBottom: '1px solid rgba(255,255,255,0.05)', color: '#f8fafc' }}>
+                        <td style={{ padding: '8px', fontWeight: 800, color: '#38bdf8' }}>
+                          Round {r.roundNumber || rIdx + 1}
+                        </td>
+                        <td style={{ padding: '8px' }}>
+                          <div style={{ display: 'flex', gap: '4px', flexWrap: 'wrap' }}>
+                            {(r.arrows || []).map((arr, aIdx) => (
+                              <span key={aIdx} style={{
+                                background: arr.isX ? '#d97706' : arr.score >= 9 ? '#059669' : arr.score >= 7 ? '#e4002b' : '#0072ce',
+                                color: '#fff',
+                                fontWeight: 800,
+                                fontSize: '0.78rem',
+                                padding: '2px 6px',
+                                borderRadius: '4px'
+                              }}>
+                                {arr.isX ? 'X' : arr.score}
+                              </span>
+                            ))}
+                          </div>
+                        </td>
+                        <td style={{ padding: '8px', fontWeight: 800, color: '#34d399' }}>
+                          {r.total} pts
+                        </td>
+                        <td style={{ padding: '8px', color: '#cbd5e1', fontSize: '0.78rem', fontStyle: r.note ? 'normal' : 'italic' }}>
+                          {r.note || (selectedScorecardDetail.roundNotes && selectedScorecardDetail.roundNotes[rIdx + 1]) || "No round note"}
+                        </td>
+                      </tr>
+                    ))}
+                  </tbody>
+                </table>
               </div>
-            </div>
 
+              {/* Overall Session Takeaways & Equipment Notes */}
+              {(() => {
+                const overallNoteText = selectedScorecardDetail.sessionNotes || selectedScorecardDetail.notes || selectedScorecardDetail.equipmentNotes || selectedScorecardDetail.takeaways;
+                return (
+                  <div style={{ background: 'rgba(15, 23, 42, 0.7)', padding: '12px 14px', borderRadius: '10px', border: '1px solid rgba(251, 191, 36, 0.3)', marginBottom: '16px' }}>
+                    <div style={{ fontSize: '0.78rem', fontWeight: 800, color: '#fbbf24', textTransform: 'uppercase', marginBottom: '4px', display: 'flex', alignItems: 'center', gap: '6px' }}>
+                      📝 Overall Session Takeaways & Equipment Notes:
+                    </div>
+                    <div style={{ fontSize: '0.85rem', color: overallNoteText ? '#f8fafc' : '#94a3b8', lineHeight: 1.5, fontStyle: overallNoteText ? 'normal' : 'italic', whiteSpace: 'pre-wrap' }}>
+                      {overallNoteText || "No overall session notes were recorded for this practice session."}
+                    </div>
+                  </div>
+                );
+              })()}
+
+              {/* Modal Actions */}
+              <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', gap: '10px', flexWrap: 'wrap' }}>
+                <button
+                  onClick={() => {
+                    if (window.confirm(`Are you sure you want to delete this scorecard log from ${selectedScorecardDetail.date}?`)) {
+                      if (onDeleteScorecard) onDeleteScorecard(selectedScorecardDetail.id);
+                      setSelectedScorecardDetail(null);
+                    }
+                  }}
+                  style={{
+                    background: 'rgba(239, 68, 68, 0.15)',
+                    border: '1px solid rgba(239, 68, 68, 0.4)',
+                    color: '#ef4444',
+                    padding: '8px 16px',
+                    borderRadius: '10px',
+                    fontSize: '0.84rem',
+                    fontWeight: 700,
+                    cursor: 'pointer',
+                    display: 'flex',
+                    alignItems: 'center',
+                    gap: '6px'
+                  }}
+                >
+                  <Trash2 size={15} /> Delete Scorecard
+                </button>
+
+                <div style={{ display: 'flex', gap: '10px' }}>
+                  <button onClick={() => setSelectedScorecardDetail(null)} className="btn-ghost">Close</button>
+                  <button onClick={() => handleExportPDF(selectedScorecardDetail)} className="btn-emerald">
+                    <Download size={14} /> Export PDF
+                  </button>
+                </div>
+              </div>
+
+            </div>
           </div>
-        </div>
+        </ModalPortal>
       )}
 
     </div>

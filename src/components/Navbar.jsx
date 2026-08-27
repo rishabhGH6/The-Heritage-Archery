@@ -2,6 +2,7 @@ import React, { useState } from 'react';
 import { Target, Award, Calendar, MessageSquare, Shield, User, MapPin, Camera, Wrench, LogIn, LogOut, ChevronDown, ChevronRight, UserPlus, Upload, HelpCircle, Key, CheckCircle2, Menu, X, Sparkles, Newspaper, Info, PhoneCall, Eye, EyeOff } from 'lucide-react';
 import { defaultArchers } from '../data/initialData';
 import HeritageLogo from './HeritageLogo';
+import ModalPortal from './ModalPortal';
 
 export default function Navbar({ activeTab, setActiveTab, currentUser, archers, pendingArchers = [], coach, onSwitchUser, onAddArcher, onRequestAddArcher, onUpdateArcher, onReplayIntro }) {
   const displayArchers = (archers && archers.length > 0) ? archers : defaultArchers;
@@ -663,7 +664,8 @@ export default function Navbar({ activeTab, setActiveTab, currentUser, archers, 
 
       {/* Role Switch / Login / Sign Up / Sign Out Modal */}
       {showRoleModal && (
-        <div className="modal-overlay" onClick={() => setShowRoleModal(false)}>
+        <ModalPortal isOpen={showRoleModal} onClose={() => setShowRoleModal(false)}>
+          <div className="modal-overlay" onClick={() => setShowRoleModal(false)}>
           <div className="modal-content" onClick={e => e.stopPropagation()} style={{ maxWidth: '460px' }}>
             <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '20px' }}>
               <h3 style={{ fontSize: '1.25rem', fontWeight: 700, color: '#f8fafc', display: 'flex', alignItems: 'center', gap: '8px' }}>
@@ -977,6 +979,7 @@ export default function Navbar({ activeTab, setActiveTab, currentUser, archers, 
             </form>
           </div>
         </div>
+        </ModalPortal>
       )}
     </>
   );

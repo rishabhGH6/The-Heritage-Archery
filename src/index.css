@@ -240,31 +240,56 @@ h1, h2, h3, h4, h5, h6 {
   border-color: var(--emerald-500);
 }
 
-/* Modal Overlay & Card */
+/* Modal Overlay & Card - Precision Viewport Centering */
 .modal-overlay {
-  position: fixed;
-  inset: 0;
-  background: rgba(6, 11, 19, 0.85);
-  backdrop-filter: blur(8px);
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  z-index: 9999;
-  padding: 16px;
-  overflow-y: auto;
+  position: fixed !important;
+  top: 0 !important;
+  left: 0 !important;
+  right: 0 !important;
+  bottom: 0 !important;
+  width: 100vw !important;
+  height: 100vh !important;
+  height: 100dvh !important;
+  background: rgba(6, 11, 19, 0.88) !important;
+  backdrop-filter: blur(10px) !important;
+  -webkit-backdrop-filter: blur(10px) !important;
+  display: flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+  z-index: 99999 !important;
+  padding: 16px !important;
+  box-sizing: border-box !important;
+  overflow-y: auto !important;
+  -webkit-overflow-scrolling: touch !important;
 }
 
 .modal-content {
-  background: #0f172a;
-  border: 1px solid var(--border-glass);
-  border-radius: var(--radius-lg);
-  padding: 24px;
-  width: 100%;
-  max-width: 540px;
-  box-shadow: var(--shadow-glass);
-  position: relative;
-  max-height: 90vh;
-  overflow-y: auto;
+  background: #0f172a !important;
+  border: 1px solid var(--border-glass) !important;
+  border-radius: var(--radius-lg) !important;
+  padding: 24px !important;
+  width: 100% !important;
+  max-width: 540px !important;
+  box-shadow: 0 25px 60px -15px rgba(0, 0, 0, 0.85) !important;
+  position: relative !important;
+  max-height: 88vh !important;
+  max-height: 88dvh !important;
+  overflow-y: auto !important;
+  -webkit-overflow-scrolling: touch !important;
+  margin: auto !important;
+  box-sizing: border-box !important;
+  animation: modalCenterEntrance 0.22s cubic-bezier(0.16, 1, 0.3, 1) forwards !important;
+}
+
+@keyframes modalCenterEntrance {
+  0% {
+    opacity: 0;
+    transform: scale(0.93) translateY(8px);
+  }
+  100% {
+    opacity: 1;
+    transform: scale(1) translateY(0);
+  }
 }
 
 /* Sticky App Header */

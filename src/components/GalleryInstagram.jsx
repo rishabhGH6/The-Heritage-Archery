@@ -1,5 +1,6 @@
 import React, { useState } from 'react';
 import { Camera, ExternalLink, Plus, Heart, Image as ImageIcon, Upload } from 'lucide-react';
+import ModalPortal from './ModalPortal';
 
 const InstagramIcon = ({ size = 20, color = "currentColor" }) => (
   <svg width={size} height={size} viewBox="0 0 24 24" fill="none" stroke={color} strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
@@ -195,97 +196,101 @@ export default function GalleryInstagram({ archers, currentUser, onAddPhoto }) {
         </div>
       )}
 
-      {/* FULLSCREEN PHOTO LIGHTBOX MODAL */}
+      {/* Maximized Photo Lightbox Modal */}
       {maximizedPhoto && (
-        <div className="modal-overlay" onClick={() => setMaximizedPhoto(null)} style={{ background: 'rgba(0, 0, 0, 0.88)', backdropFilter: 'blur(10px)' }}>
-          <div 
-            className="modal-content" 
-            onClick={e => e.stopPropagation()} 
-            style={{ maxWidth: '880px', width: '94%', padding: '20px', background: '#090d16', border: '1px solid rgba(255,255,255,0.15)', borderRadius: '24px', display: 'flex', flexDirection: 'column', alignItems: 'center' }}
-          >
-            <div style={{ display: 'flex', justifyContent: 'space-between', width: '100%', alignItems: 'center', marginBottom: '14px' }}>
-              <div>
-                <span style={{ fontSize: '1rem', fontWeight: 800, color: '#f8fafc' }}>
-                  📷 Photo by {maximizedPhoto.uploader}
-                </span>
-                <span style={{ fontSize: '0.78rem', color: '#34d399', fontWeight: 600, marginLeft: '8px' }}>
-                  ({maximizedPhoto.uploaderCategory} Archer)
-                </span>
+        <ModalPortal isOpen={Boolean(maximizedPhoto)} onClose={() => setMaximizedPhoto(null)}>
+          <div className="modal-overlay" onClick={() => setMaximizedPhoto(null)} style={{ background: 'rgba(0, 0, 0, 0.88)', backdropFilter: 'blur(10px)' }}>
+            <div 
+              className="modal-content" 
+              onClick={e => e.stopPropagation()} 
+              style={{ maxWidth: '880px', width: '94%', padding: '20px', background: '#090d16', border: '1px solid rgba(255,255,255,0.15)', borderRadius: '24px', display: 'flex', flexDirection: 'column', alignItems: 'center' }}
+            >
+              <div style={{ display: 'flex', justifyContent: 'space-between', width: '100%', alignItems: 'center', marginBottom: '14px' }}>
+                <div>
+                  <span style={{ fontSize: '1rem', fontWeight: 800, color: '#f8fafc' }}>
+                    📷 Photo by {maximizedPhoto.uploader}
+                  </span>
+                  <span style={{ fontSize: '0.78rem', color: '#34d399', fontWeight: 600, marginLeft: '8px' }}>
+                    ({maximizedPhoto.uploaderCategory} Archer)
+                  </span>
+                </div>
+                <button onClick={() => setMaximizedPhoto(null)} className="btn-ghost" style={{ padding: '6px 12px', fontSize: '1.2rem', color: '#f8fafc' }}>✕</button>
               </div>
-              <button onClick={() => setMaximizedPhoto(null)} className="btn-ghost" style={{ padding: '6px 12px', fontSize: '1.2rem', color: '#f8fafc' }}>✕</button>
-            </div>
 
-            <img 
-              src={maximizedPhoto.url} 
-              alt="Maximized Heritage Gallery" 
-              style={{ maxWidth: '100%', maxHeight: '78vh', borderRadius: '16px', objectFit: 'contain', boxShadow: '0 25px 60px rgba(0,0,0,0.9)' }}
-            />
+              <img 
+                src={maximizedPhoto.url} 
+                alt="Maximized Heritage Gallery" 
+                style={{ maxWidth: '100%', maxHeight: '78vh', borderRadius: '16px', objectFit: 'contain', boxShadow: '0 25px 60px rgba(0,0,0,0.9)' }}
+              />
+            </div>
           </div>
-        </div>
+        </ModalPortal>
       )}
 
       {/* Upload Photo Modal */}
       {showUploadModal && (
-        <div className="modal-overlay" onClick={() => setShowUploadModal(false)}>
-          <div className="modal-content" onClick={e => e.stopPropagation()} style={{ maxWidth: '440px' }}>
-            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '20px' }}>
-              <h3 style={{ fontSize: '1.2rem', fontWeight: 700, color: '#f8fafc', display: 'flex', alignItems: 'center', gap: '8px' }}>
-                <Camera size={20} color="#34d399" /> Upload Photo to Team Gallery
-              </h3>
-              <button onClick={() => setShowUploadModal(false)} className="btn-ghost" style={{ padding: '4px 8px' }}>✕</button>
-            </div>
+        <ModalPortal isOpen={showUploadModal} onClose={() => setShowUploadModal(false)}>
+          <div className="modal-overlay" onClick={() => setShowUploadModal(false)}>
+            <div className="modal-content" onClick={e => e.stopPropagation()} style={{ maxWidth: '440px' }}>
+              <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '20px' }}>
+                <h3 style={{ fontSize: '1.2rem', fontWeight: 700, color: '#f8fafc', display: 'flex', alignItems: 'center', gap: '8px' }}>
+                  <Camera size={20} color="#34d399" /> Upload Photo to Team Gallery
+                </h3>
+                <button onClick={() => setShowUploadModal(false)} className="btn-ghost" style={{ padding: '4px 8px' }}>✕</button>
+              </div>
 
-            <form onSubmit={handleUploadSubmit} style={{ display: 'flex', flexDirection: 'column', gap: '14px' }}>
-              
-              <div>
-                <label style={{ fontSize: '0.8rem', color: '#94a3b8', fontWeight: 600, display: 'block', marginBottom: '6px' }}>Select Photo from Device</label>
-                <input
-                  type="file"
-                  accept="image/*"
-                  id="gallery-modal-picker"
-                  style={{ display: 'none' }}
-                  onChange={async (e) => {
-                    const file = e.target.files[0];
-                    if (file) {
-                      try {
-                        const compressed = await compressImage(file, 800, 800, 0.8);
-                        if (compressed) setPhotoUrl(compressed);
-                      } catch (err) {
-                        console.warn("Gallery photo compress error:", err);
+              <form onSubmit={handleUploadSubmit} style={{ display: 'flex', flexDirection: 'column', gap: '14px' }}>
+                
+                <div>
+                  <label style={{ fontSize: '0.8rem', color: '#94a3b8', fontWeight: 600, display: 'block', marginBottom: '6px' }}>Select Photo from Device</label>
+                  <input
+                    type="file"
+                    accept="image/*"
+                    id="gallery-modal-picker"
+                    style={{ display: 'none' }}
+                    onChange={async (e) => {
+                      const file = e.target.files[0];
+                      if (file) {
+                        try {
+                          const compressed = await compressImage(file, 800, 800, 0.8);
+                          if (compressed) setPhotoUrl(compressed);
+                        } catch (err) {
+                          console.warn("Gallery photo compress error:", err);
+                        }
                       }
-                    }
-                  }}
-                />
-                <label htmlFor="gallery-modal-picker" className="btn-emerald" style={{ cursor: 'pointer', display: 'inline-flex', alignItems: 'center', gap: '8px', padding: '10px 16px' }}>
-                  <Upload size={16} /> Choose Photo from Device
-                </label>
-              </div>
-
-              <div>
-                <label style={{ fontSize: '0.8rem', color: '#94a3b8', fontWeight: 600 }}>Or Paste Image URL</label>
-                <input
-                  type="text"
-                  className="input-glass"
-                  placeholder="https://..."
-                  value={photoUrl}
-                  onChange={(e) => setPhotoUrl(e.target.value)}
-                />
-              </div>
-
-              {photoUrl && (
-                <div style={{ marginTop: '6px' }}>
-                  <span style={{ fontSize: '0.75rem', color: '#34d399', fontWeight: 600 }}>Preview:</span>
-                  <img src={photoUrl} alt="Preview" style={{ width: '100%', height: '140px', objectFit: 'cover', borderRadius: '10px', marginTop: '4px' }} />
+                    }}
+                  />
+                  <label htmlFor="gallery-modal-picker" className="btn-emerald" style={{ cursor: 'pointer', display: 'inline-flex', alignItems: 'center', gap: '8px', padding: '10px 16px' }}>
+                    <Upload size={16} /> Choose Photo from Device
+                  </label>
                 </div>
-              )}
 
-              <div style={{ display: 'flex', justifyContent: 'flex-end', gap: '10px', marginTop: '10px' }}>
-                <button type="button" onClick={() => setShowUploadModal(false)} className="btn-ghost">Cancel</button>
-                <button type="submit" className="btn-emerald">Add to Gallery</button>
-              </div>
-            </form>
+                <div>
+                  <label style={{ fontSize: '0.8rem', color: '#94a3b8', fontWeight: 600 }}>Or Paste Image URL</label>
+                  <input
+                    type="text"
+                    className="input-glass"
+                    placeholder="https://..."
+                    value={photoUrl}
+                    onChange={(e) => setPhotoUrl(e.target.value)}
+                  />
+                </div>
+
+                {photoUrl && (
+                  <div style={{ marginTop: '6px' }}>
+                    <span style={{ fontSize: '0.75rem', color: '#34d399', fontWeight: 600 }}>Preview:</span>
+                    <img src={photoUrl} alt="Preview" style={{ width: '100%', height: '140px', objectFit: 'cover', borderRadius: '10px', marginTop: '4px' }} />
+                  </div>
+                )}
+
+                <div style={{ display: 'flex', justifyContent: 'flex-end', gap: '10px', marginTop: '10px' }}>
+                  <button type="button" onClick={() => setShowUploadModal(false)} className="btn-ghost">Cancel</button>
+                  <button type="submit" className="btn-emerald">Add to Gallery</button>
+                </div>
+              </form>
+            </div>
           </div>
-        </div>
+        </ModalPortal>
       )}
 
     </div>
